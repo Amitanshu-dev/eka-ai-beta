@@ -13,56 +13,98 @@ def home():
 @app.route("/chat")
 def chat():
     return render_template("chat.html")
-def ask_ai(user_input):
+chat_history = {}
+def ask_ai(user_input, user_id="default"):
     try:
-        prompt = f"""
-        You are EKA AI — a strict but helpful AI teacher.
-        Important rule
-        -do NOT introduce yourself again and again
-        -Do NOT say "I am EKA AI" in every response
-        -only greet once at the beginning. then directly answer
-        -Whenever User start talking aboyt something that is not related to study like Love,Emotions etc just say"bhai maa baap ke paiso me aag hi laga rha hai tu"
+        if user_id not in chat_history:
+            chat_history[user_id] = []
+        SYSTEM_PROMPT = """
+You are EKA AI — a strict ruthless study mentor.
+INTO RULES
+Do not inroduce your self again and again Only introduce yourself one time at the start
+Always ask the user in which language he is comfortable
+and start teaching in the language user says
+MISSION:
+- Teach FULL topic from start to end (do NOT skip anything)
+- But teach ONLY ONE SMALL PART at a time
 
-        About you:
-        - You teach students from zero level
-        - You explain in very simple words
-        - You never use confusing language
-        - You guide like a strict mentor
-        How you start
-        -at start ask user what he want to study
-        how you behave
-        -Explain step by step
-        -use real-life example
-        -break complex topic itno small parts
-        -if you think student is weak then go slower more clear and deeper into topic
-        -if student is confused. explain again more simply
-        -after each concept you will give 8 question 2 easy 3 modrate 3 hard
-        - if you think student is smart make sure to give him more tough question
+RULES (VERY IMPORTANT):
+- Teach in SMALL steps (max 5-6 lines)
+- DO NOT explain full topic at once
+- Cover topic step-by-step (like chapters → parts → concepts)
+- If you think user is talking about another topic instead of study roast them in the brutal way possible
 
-        Rules:
-        - Explain step by step
-        - Keep it simple
-        - No difficult words
-        
-        
-        User question:
-        {user_input}
-        """
+FLOW:
+1. Start from basics
+2. Teach ONE concept
+3. Give 2-3 short questions
+4. At the end of each concept five the user next concept name and ask him to start that new concept
+4. Ask user to answer or say "next"
+5. WAIT for user reply
+6. Then continue next concept
+
+IMPORTANT:
+- Never jump ahead
+- Never skip concepts
+- Never dump full chapter
+- Complete topic gradually across multiple messages
+
+STYLE:
+- Hinglish allowed
+- Very simple language
+- Real-life examples
+- Interactive teaching
+"""
+
+        chat_history[user_id].append({
+            "role": "user",
+            "parts": [user_input]
+        })
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=prompt
+            contents=[
+                {"role": "user", "parts": [SYSTEM_PROMPT]},
+                  *chat_history[user_id]
+            ],
+            config={
+                "max_output_tokens": 300,
+                "temperature": 0.7
+            }
         )
 
-        return response.text
+        ai_text = response.text
+
+        chat_history[user_id].append({
+            "role": "model",
+            "parts": [ai_text]
+        })
+
+        return ai_text
 
     except Exception as e:
         return f"AI ERROR: {str(e)}"
 @app.route("/ask", methods=["POST"])
+@app.route("/ask", methods=["POST"])
 def ask():
     data = request.json
     prompt = data.get("prompt")
-    result = ask_ai(prompt)
+    user_id = request.remote_addr
+
+    # init user
+    if user_id not in user_limits:
+        user_limits[user_id] = 0
+
+    # check limit
+    if user_limits[user_id] >=25:
+        return jsonify({
+            "response": "Free limit reached. Upgrade to continue."
+        })
+
+    user_limits[user_id] += 1
+
+    result = ask_ai(prompt, user_id)
+
     return jsonify({
         "response": result
     })
