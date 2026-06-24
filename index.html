@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EKA AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #1a0026, #000000);
+  color: white;
+  padding: 20px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  text-align: center;
+}
+
+.logo {
+  width: 70px;
+  filter: drop-shadow(0 0 10px rgba(183,76,255,0.8));
+}
+
+.brand {
+  margin-top: 8px;
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+.domain {
+  font-size: 13px;
+  color: #aaa;
+}
+
+h1 {
+  font-size: 34px;
+  margin-top: 20px;
+}
+
+.subtitle {
+  color: #bbb;
+  margin-bottom: 30px;
+}
+
+.btn {
+  padding: 14px 30px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #7b2ff7, #f107a3);
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.card {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: left;
+}
+
+.floating-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 5px;
+}
+
+textarea {
+  height: 80px;
+}
+
+.beta {
+  margin-top: 15px;
+  color: #ff9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+
+<div class="brand">EKA AI</div>
+<div class="domain">Beta</div>
+<div class="domain">ekaai.co.in</div>
+
+<h1>Stop struggling. Start understanding.</h1>
+
+<p class="subtitle">
+Your personal AI teacher that explains anything — simply, clearly, instantly.
+</p>
+
+<!-- ✅ MAIN BUTTON -->
+<button onclick="goToChat()" class="btn">Start Learning</button>
+<script>
+function goToChat() {
+  window.location.href = "/chat";
+}
+</script>
+
+<p class="beta">⚡ Beta Version Live — Try it & Give Feedback</p>
+
+<!-- INFO -->
+<div class="card">
+<h3>What is EKA AI?</h3>
+<p>
+EKA AI teaches you from zero. No confusion. No pressure.
+Just clear explanations and real understanding.
+</p>
+</div>
+
+<div class="card">
+<h3>Who is it for?</h3>
+<p>
+Students who feel stuck, confused, or left behind.
+</p>
+</div>
+
+<div class="card">
+<h3>How it works</h3>
+<p>
+Ask → Understand → Improve.
+</p>
+</div>
+
+<!-- FORM -->
+<div class="card" id="formSection">
+<h3>Give Your Feedback</h3>
+
+<form>
+<input type="text" placeholder="Your Name"><br><br>
+<input type="email" placeholder="Your Email"><br><br>
+
+<textarea placeholder="Biggest problem while studying?"></textarea><br><br>
+<textarea placeholder="What scares you in studies?"></textarea><br><br>
+<textarea placeholder="Why do you struggle to understand concepts?"></textarea><br><br>
+
+<select>
+<option>Ignore</option>
+<option>YouTube</option>
+<option>Friends</option>
+<option>Teacher</option>
+</select><br><br>
+
+<select>
+<option>Mobile</option>
+<option>Social Media</option>
+<option>Overthinking</option>
+<option>Boredom</option>
+</select><br><br>
+
+<button class="btn">Submit</button>
+</form>
+</div>
+
+</div>
+
+<!-- FLOAT BUTTON -->
+<button class="btn floating-btn"
+onclick="document.getElementById('formSection').scrollIntoView({behavior:'smooth'})">
+Feedback
+</button>
+
+</body>
+</html>

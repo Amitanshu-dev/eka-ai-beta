@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EKA AI Chat</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #0f0f0f;
+  color: white;
+}
+
+/* LAYOUT */
+.main {
+  display: flex;
+  height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 250px;
+  background: #1a1a1a;
+  padding: 20px;
+  border-right: 1px solid #333;
+}
+
+.sidebar h2 {
+  font-size: 18px;
+}
+
+.chat-history {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+/* CHAT AREA */
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* CHAT BOX */
+#chat {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* MESSAGES */
+.message {
+  max-width: 60%;
+  padding: 10px 15px;
+  margin: 8px 0;
+  border-radius: 15px;
+  line-height: 1.4;
+}
+
+.user {
+  background: #4a8cff;
+  align-self: flex-end;
+}
+
+.ai {
+  background: #2a2a2a;
+  align-self: flex-start;
+}
+
+/* INPUT */
+.input-box {
+  display: flex;
+  padding: 15px;
+  border-top: 1px solid #333;
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+}
+
+button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background: #4a8cff;
+  color: white;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>EKA AI</h2>
+    <div class="chat-history">
+      No chats yet...
+    </div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area">
+
+    <div id="chat"></div>
+
+    <div class="input-box">
+      <input type="text" id="prompt" placeholder="Ask anything...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+async function sendMessage() {
+  let input = document.getElementById("prompt");
+  let message = input.value;
+
+  if (!message) return;
+
+  let chat = document.getElementById("chat");
+
+  // USER MESSAGE
+  let userMsg = document.createElement("div");
+  userMsg.className = "message user";
+  userMsg.innerText = message;
+  chat.appendChild(userMsg);
+
+  input.value = "";
+
+  // SCROLL DOWN
+  chat.scrollTop = chat.scrollHeight;
+
+  // EKA TYPING
+  let typing = document.createElement("div");
+  typing.className = "message ai";
+  typing.innerText = "EKA is typing...";
+  chat.appendChild(typing);
+
+  chat.scrollTop = chat.scrollHeight;
+
+  let res = await fetch("/ask", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ prompt: message })
+  });
+
+  let data = await res.json();
+
+  // REMOVE TYPING
+  typing.remove();
+
+  // AI MESSAGE
+  let aiMsg = document.createElement("div");
+  aiMsg.className = "message ai";
+  aiMsg.innerText = data.response;
+  chat.appendChild(aiMsg);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
