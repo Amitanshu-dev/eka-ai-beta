@@ -1,189 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>EKA AI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EKA AI - Smart Learning</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
+  <style>
+    :root {
+      --primary: #7b2cff;
+      --bg: #000;
+      --card: #111;
+      --text: #fff;
+      --muted: #aaa;
+    }
 
-body {
-  background: radial-gradient(circle at top, #1a0026, #000000);
-  color: white;
-  padding: 20px;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
 
-.container {
-  max-width: 700px;
-  margin: auto;
-  text-align: center;
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
 
-.logo {
-  width: 70px;
-  filter: drop-shadow(0 0 10px rgba(183,76,255,0.8));
-}
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
 
-.brand {
-  margin-top: 8px;
-  font-size: 22px;
-  letter-spacing: 2px;
-}
+    /* Header */
+    .logo {
+      width: 70px;
+      margin-bottom: 10px;
+    }
 
-.domain {
-  font-size: 13px;
-  color: #aaa;
-}
+    .brand {
+      font-size: 24px;
+      font-weight: 600;
+    }
 
-h1 {
-  font-size: 34px;
-  margin-top: 20px;
-}
+    .domain {
+      font-size: 13px;
+      color: var(--muted);
+    }
 
-.subtitle {
-  color: #bbb;
-  margin-bottom: 30px;
-}
+    h1 {
+      font-size: 32px;
+      margin: 20px 0 10px;
+    }
 
-.btn {
-  padding: 14px 30px;
-  border-radius: 30px;
-  border: none;
-  background: linear-gradient(135deg, #7b2ff7, #f107a3);
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-}
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
 
-.card {
-  margin-top: 30px;
-  padding: 20px;
-  border-radius: 15px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
-  text-align: left;
-}
+    /* Button */
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 30px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
 
-.floating-btn {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-}
+    .btn:hover {
+      opacity: 0.85;
+      transform: translateY(-2px);
+    }
 
-input, textarea, select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin-top: 5px;
-}
+    /* Cards */
+    .card {
+      background: var(--card);
+      padding: 20px;
+      margin-top: 25px;
+      border-radius: 12px;
+      text-align: left;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+    }
 
-textarea {
-  height: 80px;
-}
+    .card h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
 
-.beta {
-  margin-top: 15px;
-  color: #ff9;
-}
-</style>
+    .card p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Form */
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+      background: #1a1a1a;
+      color: white;
+    }
+
+    textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    form button {
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    /* Floating Button */
+    .floating-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 18px;
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-<img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+    <!-- Header -->
+    <header>
+      <img src="/static/logo.png" alt="EKA AI Logo" class="logo">
+      <div class="brand">EKA AI</div>
+      <div class="domain">Beta</div>
+    </header>
 
-<div class="brand">EKA AI</div>
-<div class="domain">Beta</div>
-<div class="domain">ekaai.co.in</div>
+    <!-- Hero -->
+    <section>
+      <h1>Stop struggling. Start understanding.</h1>
+      <p class="subtitle">
+        Your AI teacher that explains everything simply.
+      </p>
 
-<h1>Stop struggling. Start understanding.</h1>
+      <button onclick="goToChat()" class="btn">
+        Start Learning
+      </button>
+    </section>
 
-<p class="subtitle">
-Your personal AI teacher that explains anything — simply, clearly, instantly.
-</p>
+    <!-- About -->
+    <section class="card">
+      <h3>What is EKA AI?</h3>
+      <p>
+        EKA AI is a focused study assistant designed only for learning.
+        It teaches from zero level with simple explanations, adapts to your understanding,
+        and works like a real personal teacher.
+      </p>
+    </section>
 
-<!-- ✅ MAIN BUTTON -->
-<button onclick="goToChat()" class="btn">Start Learning</button>
-<script>
-function goToChat() {
-  window.location.href = "/chat";
-}
-</script>
+    <!-- Why -->
+    <section class="card">
+      <h3>Why EKA AI?</h3>
+      <p>
+        Unlike other AI tools, EKA AI focuses purely on teaching.
+        It behaves like a strict mentor, builds real understanding,
+        and helps you stay disciplined.
+      </p>
+    </section>
 
-<p class="beta">⚡ Beta Version Live — Try it & Give Feedback</p>
+    <!-- Features -->
+    <section class="card">
+      <h3>Features</h3>
+      <p>🚀 Coming Soon...</p>
+    </section>
 
-<!-- INFO -->
-<div class="card">
-<h3>What is EKA AI?</h3>
-<p>
-EKA AI teaches you from zero. No confusion. No pressure.
-Just clear explanations and real understanding.
-</p>
-</div>
+    <!-- Feedback -->
+    <section class="card" id="formSection">
+      <h3>Feedback</h3>
 
-<div class="card">
-<h3>Who is it for?</h3>
-<p>
-Students who feel stuck, confused, or left behind.
-</p>
-</div>
+      <form>
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Your Email" required>
 
-<div class="card">
-<h3>How it works</h3>
-<p>
-Ask → Understand → Improve.
-</p>
-</div>
+        <textarea placeholder="Biggest problem while studying?" required></textarea>
+        <textarea placeholder="Report a problem / bug"></textarea>
 
-<!-- FORM -->
-<div class="card" id="formSection">
-<h3>Give Your Feedback</h3>
+        <button type="submit" class="btn">Submit Feedback</button>
+      </form>
+    </section>
 
-<form>
-<input type="text" placeholder="Your Name"><br><br>
-<input type="email" placeholder="Your Email"><br><br>
+  </div>
 
-<textarea placeholder="Biggest problem while studying?"></textarea><br><br>
-<textarea placeholder="What scares you in studies?"></textarea><br><br>
-<textarea placeholder="Why do you struggle to understand concepts?"></textarea><br><br>
+  <!-- Floating Button -->
+  <button class="btn floating-btn"
+    onclick="document.getElementById('formSection').scrollIntoView({behavior:'smooth'})">
+    Feedback
+  </button>
 
-<select>
-<option>Ignore</option>
-<option>YouTube</option>
-<option>Friends</option>
-<option>Teacher</option>
-</select><br><br>
-
-<select>
-<option>Mobile</option>
-<option>Social Media</option>
-<option>Overthinking</option>
-<option>Boredom</option>
-</select><br><br>
-
-<button class="btn">Submit</button>
-</form>
-</div>
-
-</div>
-
-<!-- FLOAT BUTTON -->
-<button class="btn floating-btn"
-onclick="document.getElementById('formSection').scrollIntoView({behavior:'smooth'})">
-Feedback
-</button>
+  <script>
+    function goToChat() {
+      window.location.href = "/chat";
+    }
+  </script>
 
 </body>
 </html>
