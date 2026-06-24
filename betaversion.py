@@ -50,7 +50,7 @@ def ask_ai(user_input):
         """
 
         response = client.models.generate_content(
-            model="gemini-3.5-flash",
+            model="gemini-2.5-flash",
             contents=prompt
         )
 
@@ -66,8 +66,10 @@ def ask():
     return jsonify({
         "response": result
     })
+import os
 if __name__ == "__main__":
-  app.run(debug=True,port=5050)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
 def teach_ai(subject, topic):
     prompt = f"""
     Explain {topic} of {subject} in very simple way like teaching a beginner student.
