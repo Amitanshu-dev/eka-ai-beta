@@ -15,21 +15,29 @@ def chat():
     return render_template("chat.html")
 user_limits = {}
 MAX_DAILY_MESSAGES = 25
+chat_history={}
 def ask_ai(user_input, user_id="default"):
     try:
+        if user_id not in chat_history:
+         chat_history[user_id] = {
+    "messages": [],
+    "summary": "",
+    "subject": "",
+    "chapter": "",
+    "current_concept": "",
+    "language": "",
+    "started": False
+}
         SYSTEM_PROMPT = """
 You are EKA AI — a strict ruthless study mentor.
-INTO RULES
+INTRODUCTION RULES
 Do not inroduce your self again and again Only introduce yourself one time at the start
 Always ask the user in which language he is comfortable
 and start teaching in the language user says
-MISSION:
-- Teach FULL topic from start to end (do NOT skip anything)
-- But teach ONLY ONE SMALL PART at a time
 
 RULES (VERY IMPORTANT):
 - Teach in SMALL steps (max 5-6 lines)
-- DO NOT explain full topic at once
+- If a user asks to study a chapter, NEVER explain the full chapter at ones
 - Cover topic step-by-step (like chapters → parts → concepts)
 - If you think user is talking about another topic instead of study roast them in the brutal way possible
 
@@ -53,21 +61,50 @@ STYLE:
 - Very simple language
 - Real-life examples
 - Interactive teaching
+LESSON MEMORY RULES
+- Remember the current subject.
+- Remember the current chapter.
+- Remember the current concept.
+- If user says "next", continue from current_concept.
+- Never restart the chapter unless the user asks.
+- If user asks a doubt, answer it and then continue from the same concept.
+- If the chapter finishes, automatically start revision and then MCQs.
 """
+        chat_history[user_id]["messages"].append({
+         "role": "user",
+           "text": user_input
+})
+        conversation = ""
+
+        for msg in chat_history[user_id]["messages"]:
+          conversation += f"{msg['role'].upper()}: {msg['text']}\n"
 
         response = client.models.generate_content(
             model="gemini-2.5-flash-lite",
             contents=f"""
-                User:
-                {user_input}
-              """,
-            config={
-                "max_output_tokens": 1000,
-                "temperature": 0.7
-            }
-        )
-        return response.text
+        {SYSTEM_PROMPT}
+        Previous Summary:
+        {chat_history[user_id]["summary"]}
+        Current Lesson:
+Subject: {chat_history[user_id]["subject"]}
+Chapter: {chat_history[user_id]["chapter"]}
+Current Concept: {chat_history[user_id]["current_concept"]}
+Language: {chat_history[user_id]["language"]}
+         Conversation:
+         {conversation}
+     Reply to only the latest user message.
+    """,
 
+        config={
+            "max_output_tokens": 300,
+           "temperature": 0.7
+            }
+    )
+        chat_history[user_id]["messages"].append({
+    "role": "assistant",
+    "text": response.text
+})
+        return response.text
     except Exception as e:
         return f"AI ERROR: {str(e)}"
 @app.route("/ask", methods=["POST"])
