@@ -14,6 +14,8 @@ def home():
 def chat():
     return render_template("chat.html")
 chat_history = {}
+user_limits = {}
+MAX_DAILY_MESSAGES = 25
 def ask_ai(user_input, user_id="default"):
     try:
         if user_id not in chat_history:
@@ -85,7 +87,6 @@ STYLE:
     except Exception as e:
         return f"AI ERROR: {str(e)}"
 @app.route("/ask", methods=["POST"])
-@app.route("/ask", methods=["POST"])
 def ask():
     data = request.json
     prompt = data.get("prompt")
@@ -96,7 +97,7 @@ def ask():
         user_limits[user_id] = 0
 
     # check limit
-    if user_limits[user_id] >=25:
+    if user_limits[user_id] >=MAX_DAILY_MESSAGES:
         return jsonify({
             "response": "Free limit reached. Upgrade to continue."
         })
