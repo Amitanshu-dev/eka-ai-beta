@@ -56,13 +56,13 @@ STYLE:
 """
 
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-lite",
             contents=f"""
                 User:
                 {user_input}
               """,
             config={
-                "max_output_tokens": 300,
+                "max_output_tokens": 1000,
                 "temperature": 0.7
             }
         )
