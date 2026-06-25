@@ -13,7 +13,6 @@ def home():
 @app.route("/chat")
 def chat():
     return render_template("chat.html")
-chat_history = {}
 user_limits = {}
 MAX_DAILY_MESSAGES = 25
 def ask_ai(user_input, user_id="default"):
@@ -55,11 +54,6 @@ STYLE:
 - Real-life examples
 - Interactive teaching
 """
-
-        chat_history[user_id].append({
-            "role": "user",
-            "parts": [user_input]
-        })
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
