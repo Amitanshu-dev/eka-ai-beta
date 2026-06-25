@@ -35,10 +35,20 @@ body {
 }
 
 /* TOP */
-.topbar {
-  padding: 15px;
-  border-bottom: 1px solid #333;
+.topbar{
+  height:65px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  border-bottom:1px solid #333;
 }
+
+.top-logo{
+  width:42px;
+  height:42px;
+  object-fit:contain;
+}
+
 
 /* CHAT */
 #chat {
@@ -64,8 +74,11 @@ body {
 }
 
 .ai {
-  background: #222;
-  align-self: flex-start;
+background:#222;
+align-self:flex-start;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 
 /* INPUT */
@@ -97,10 +110,39 @@ button {
   color: white;
 }
 
-/* TYPING */
-.typing {
-  display: flex;
-  gap: 5px;
+.typing-logo{
+  width:38px;
+  height:38px;
+  animation:heartbeat 1.3s infinite;
+}
+
+@keyframes heartbeat{
+
+0%{
+transform:scale(1);
+filter:drop-shadow(0 0 0px #6c5cff);
+}
+
+25%{
+transform:scale(1.1);
+filter:drop-shadow(0 0 8px #6c5cff);
+}
+
+50%{
+transform:scale(1);
+filter:drop-shadow(0 0 16px #6c5cff);
+}
+
+75%{
+transform:scale(1.1);
+filter:drop-shadow(0 0 8px #6c5cff);
+}
+
+100%{
+transform:scale(1);
+filter:drop-shadow(0 0 0px #6c5cff);
+}
+
 }
 
 .typing span {
@@ -137,7 +179,9 @@ button {
 
   <div class="chat-area">
 
-    <div class="topbar">EKA AI Assistant</div>
+<div class="topbar">
+    <img src="/static/logo.png" class="top-logo">
+</div>
 
     <div id="chat"></div>
 
@@ -168,7 +212,9 @@ async function sendMessage() {
 
   let typing = document.createElement("div");
   typing.className = "message ai";
-  typing.innerHTML = "<div class='typing'><span></span><span></span><span></span></div>";
+  typing.innerHTML = `
+<img src="/static/logo.png" class="typing-logo">
+`;
   chat.appendChild(typing);
 
   chat.scrollTop = chat.scrollHeight;
