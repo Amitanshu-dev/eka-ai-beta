@@ -18,8 +18,6 @@ user_limits = {}
 MAX_DAILY_MESSAGES = 25
 def ask_ai(user_input, user_id="default"):
     try:
-        if user_id not in chat_history:
-            chat_history[user_id] = []
         SYSTEM_PROMPT = """
 You are EKA AI — a strict ruthless study mentor.
 INTO RULES
@@ -65,24 +63,17 @@ STYLE:
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=[
-                {"role": "user", "parts": [SYSTEM_PROMPT]},
-                  *chat_history[user_id]
+            contents=["""
+                User:
+                {user_input}
+              """
             ],
             config={
                 "max_output_tokens": 300,
                 "temperature": 0.7
             }
         )
-
-        ai_text = response.text
-
-        chat_history[user_id].append({
-            "role": "model",
-            "parts": [ai_text]
-        })
-
-        return ai_text
+        return response.text
 
     except Exception as e:
         return f"AI ERROR: {str(e)}"
