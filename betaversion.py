@@ -246,8 +246,11 @@ def ask_ai(prompt,chat_id,user_id="default"):
     "current_concept": "",
     "language": "",
     "started": False,
-    "chat_id": None
+    "chat_id": chat_id
 }
+        else:
+           chat_history[user_id]["chat_id"]=chat_id
+
         SYSTEM_PROMPT = """
 You are EKA AI — a strict ruthless study mentor.
 INTRODUCTION RULES
@@ -366,9 +369,20 @@ def ask():
     data = request.json
     prompt = data.get("prompt")
     chat_id = data.get("chat_id")
-    user_id = session["user"]["email"]
-    chat_history[user_id]["chat_id"] = chat_id
-   
+    user_id=session["user"]["email"]
+    if user_id not in chat_history:
+        chat_history[user_id] = {
+    "summary": "",
+    "subject": "",
+    "chapter": "",
+    "current_concept": "",
+    "language": "",
+    "started": False,
+    "chat_id": chat_id
+}
+    chat_history[user_id]["chat_id"]=chat_id
+    
+  
 # Save user message
     conn = get_db()
     cur = conn.cursor()
@@ -412,6 +426,8 @@ WHERE id=?
     row = cur.fetchone()
     if row and row["title"] == "New Chat":
       title = generate_chat_title(prompt)
+    else:
+       title=row["title"]
 
     cur.execute("""
     UPDATE chats
