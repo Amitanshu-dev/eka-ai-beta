@@ -1,32 +1,252 @@
 # launching this project
 import os
+import sqlite3
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify,render_template
+from flask import session, redirect, url_for
 from google import genai
+from authlib.integrations.flask_client import OAuth
 app=Flask(__name__)
 load_dotenv()
+app.secret_key=os.getenv("GOOGLE_CLIENT_SECRET")
 api_key=os.getenv("GEMINI_API_KEY")
 client=genai.Client(api_key=api_key)
+def get_db():
+   conn=sqlite3.connect("eka_ai.db")
+   conn.row_factory=sqlite3.Row
+   return conn
+def init_db():
+   conn=get_db()
+   cur=conn.cursor()
+   cur.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         email TEXT UNIQUE,
+         name TEXT,
+         picture TEXT
+         )
+    """)
+   cur.execute("""
+CREATE TABLE IF NOT EXISTS chats(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT,
+    title TEXT,
+    summary TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+   cur.execute("""
+CREATE TABLE IF NOT EXISTS messages(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chat_id INTEGER,
+    role TEXT,
+    message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+   conn.commit()
+   conn.close()
+oauth = OAuth(app) 
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={
+        "scope": "openid email profile"
+    }
+)
+init_db()
+@app.route("/login")
+def login():
+   redirect_uri=url_for("callback",_external=True)
+   return oauth.google.authorize_redirect(redirect_uri)
+@app.route("/login/callback")
+def callback():
+   token=oauth.google.authorize_access_token()
+   user=token["userinfo"]
+   session["user"]={
+      "name":user["name"],
+      "email":user["email"],
+      "picture":user["picture"]      
+   }
+   conn=get_db()
+   cur=conn.cursor()
+   cur.execute("""
+       INSERT OR IGNORE INTO users(email,name,picture)
+        VALUES(?,?,?)
+        """,(
+           user["email"],
+           user["name"],
+           user["picture"]
+        ))
+   conn.commit()
+   conn.close()
+   return redirect("/new_chat")
+@app.route("/logout")
+def logout():
+   session.clear()
+   return redirect("/") 
 @app.route("/")
 def home():
    return render_template("index.html")
-@app.route("/chat")
-def chat():
-    return render_template("chat.html")
+@app.route("/new_chat")
+def new_chat():
+    if "user" not in session:
+        return redirect("/login")
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO chats(user_email, title)
+        VALUES(?, ?)
+    """, (
+        session["user"]["email"],
+        "New Chat"
+    ))
+    conn.commit()
+    chat_id = cur.lastrowid
+    conn.close()
+    return redirect(f"/chat/{chat_id}")
+@app.route("/chat/<int:chat_id>")
+def chat(chat_id):
+    if "user" not in session:
+        return redirect("/login")
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT * FROM chats
+        WHERE id=? AND user_email=?
+    """, (
+        chat_id,
+        session["user"]["email"]
+    ))
+
+    chat = cur.fetchone()
+
+    if chat is None:
+        conn.close()
+        return "Chat not found", 404
+
+    cur.execute("""
+        SELECT role, message
+        FROM messages
+        WHERE chat_id=?
+        ORDER BY id
+    """, (chat_id,))
+    messages = cur.fetchall()
+    cur.execute("""
+SELECT id, title
+FROM chats
+WHERE user_email=?
+ORDER BY created_at DESC
+""", (
+    session["user"]["email"],
+))
+    all_chats = cur.fetchall()
+    conn.close()
+
+    return render_template(
+        "chat.html",
+        chat_id=chat_id,
+        messages=messages,
+        all_chats=all_chats
+    )
+@app.route("/rename_chat", methods=["POST"])
+def rename_chat():
+
+    if "user" not in session:
+        return jsonify({"success": False})
+
+    data = request.json
+
+    chat_id = data["chat_id"]
+
+    new_title = data["title"]
+
+    conn = get_db()
+
+    cur = conn.cursor()
+
+    cur.execute("""
+    UPDATE chats
+    SET title=?
+    WHERE id=? AND user_email=?
+    """, (
+        new_title,
+        chat_id,
+        session["user"]["email"]
+    ))
+
+    conn.commit()
+
+    conn.close()
+
+    return jsonify({"success": True})
+@app.route("/delete_chat", methods=["POST"])
+def delete_chat():
+
+    if "user" not in session:
+        return jsonify({"success": False})
+
+    data = request.json
+    chat_id = data["chat_id"]
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    # Delete messages first
+    cur.execute("""
+    DELETE FROM messages
+    WHERE chat_id=?
+    """, (chat_id,))
+
+    # Delete chat
+    cur.execute("""
+    DELETE FROM chats
+    WHERE id=? AND user_email=?
+    """, (
+        chat_id,
+        session["user"]["email"]
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True})
 user_limits = {}
 MAX_DAILY_MESSAGES = 25
 chat_history={}
-def ask_ai(user_input, user_id="default"):
+def generate_chat_title(first_message):
+    prompt = f"""
+Generate a short chat title.
+
+Rules:
+- Maximum 5 words
+- Do not use quotes
+- No punctuation at the end
+- Use user's first message
+
+User:
+{first_message}
+"""
+    response = client.models.generate_content(
+    model="gemini-2.5-flash-lite",
+    contents=prompt
+)
+
+    return response.text.strip()
+def ask_ai(prompt,chat_id,user_id="default"):
     try:
         if user_id not in chat_history:
          chat_history[user_id] = {
-    "messages": [],
     "summary": "",
     "subject": "",
     "chapter": "",
     "current_concept": "",
     "language": "",
-    "started": False
+    "started": False,
+    "chat_id": None
 }
         SYSTEM_PROMPT = """
 You are EKA AI — a strict ruthless study mentor.
@@ -84,21 +304,45 @@ LESSON MEMORY RULES
 - If user asks a doubt, answer it and then continue from the same concept.
 - If the chapter finishes, automatically start revision and then MCQs.
 """
-        chat_history[user_id]["messages"].append({
-         "role": "user",
-           "text": user_input
-})
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("""
+SELECT summary
+FROM chats
+WHERE id=?
+""",(chat_id,))
+
+        row = cur.fetchone()
+
+        summary = ""
+
+        if row and row["summary"]:
+         summary = row["summary"]
+
+        cur.execute("""
+SELECT role, message
+FROM messages
+WHERE chat_id=?
+ORDER BY id DESC
+LIMIT 30
+""", (chat_id,))
+
+        rows = cur.fetchall()
+
+        conn.close()
+
+        rows = list(reversed(rows))
+
         conversation = ""
 
-        for msg in chat_history[user_id]["messages"]:
-          conversation += f"{msg['role'].upper()}: {msg['text']}\n"
-
+        for row in rows:
+         conversation += f"{row['role'].upper()}: {row['message']}\n"
         response = client.models.generate_content(
             model="gemini-2.5-flash-lite",
             contents=f"""
         {SYSTEM_PROMPT}
         Previous Summary:
-        {chat_history[user_id]["summary"]}
+        {summary}
         Current Lesson:
 Subject: {chat_history[user_id]["subject"]}
 Chapter: {chat_history[user_id]["chapter"]}
@@ -114,10 +358,6 @@ Language: {chat_history[user_id]["language"]}
            "temperature": 0.7
             }
     )
-        chat_history[user_id]["messages"].append({
-    "role": "assistant",
-    "text": response.text
-})
         return response.text
     except Exception as e:
         return f"AI ERROR: {str(e)}"
@@ -125,7 +365,28 @@ Language: {chat_history[user_id]["language"]}
 def ask():
     data = request.json
     prompt = data.get("prompt")
-    user_id = request.remote_addr
+    chat_id = data.get("chat_id")
+    user_id = session["user"]["email"]
+    chat_history[user_id]["chat_id"] = chat_id
+   
+# Save user message
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+INSERT INTO messages(chat_id, role, message)
+VALUES(?, ?, ?)
+""", (
+    chat_id,
+    "user",
+    prompt
+))
+
+    conn.commit()
+    conn.close()
+# AI Response
+
+
 
     # init user
     if user_id not in user_limits:
@@ -139,7 +400,38 @@ def ask():
 
     user_limits[user_id] += 1
 
-    result = ask_ai(prompt, user_id)
+    result = ask_ai(prompt,chat_id,user_id)
+    conn=get_db()
+    cur=conn.cursor()
+    cur.execute("""
+SELECT title
+FROM chats
+WHERE id=?
+""", (chat_id,))
+
+    row = cur.fetchone()
+    if row and row["title"] == "New Chat":
+      title = generate_chat_title(prompt)
+
+    cur.execute("""
+    UPDATE chats
+    SET title=?
+    WHERE id=?
+    """, (
+        title,
+        chat_id
+    ))
+    cur.execute("""
+INSERT INTO messages(chat_id, role, message)
+VALUES(?, ?, ?)
+""", (
+    chat_id,
+    "assistant",
+    result
+))
+
+    conn.commit()
+    conn.close()
 
     return jsonify({
         "response": result
