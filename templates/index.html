@@ -1,223 +1,948 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EKA AI - Smart Learning</title>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+  <title>EKA AI | Beta</title>
   <style>
     :root {
-      --primary: #7b2cff;
-      --bg: #000;
-      --card: #111;
-      --text: #fff;
-      --muted: #aaa;
+      --bg: #050506;
+      --bg-2: #0b0b10;
+      --card: rgba(255, 255, 255, 0.06);
+      --card-strong: rgba(255, 255, 255, 0.09);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.68);
+      --soft: rgba(255, 255, 255, 0.48);
+      --primary: #7b5cff;
+      --accent: #a98bff;
+      --glow: rgba(123, 92, 255, 0.36);
+      --radius: 28px;
+      --max: 1160px;
     }
 
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
+      margin: 0;
+      min-height: 100vh;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+      letter-spacing: 0;
     }
 
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      text-align: center;
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      pointer-events: none;
+      z-index: -2;
+      border-radius: 999px;
+      filter: blur(70px);
+      opacity: 0.7;
+      animation: floatGlow 12s ease-in-out infinite alternate;
     }
 
-    /* Header */
-    .logo {
-      width: 70px;
-      margin-bottom: 10px;
+    body::before {
+      width: 520px;
+      height: 520px;
+      top: -150px;
+      left: -120px;
+      background: rgba(123, 92, 255, 0.32);
+    }
+
+    body::after {
+      width: 620px;
+      height: 620px;
+      right: -180px;
+      top: 28vh;
+      background: rgba(169, 139, 255, 0.18);
+      animation-delay: -4s;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .page {
+      position: relative;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(123, 92, 255, 0.24), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,0.025), transparent 24%);
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(5, 5, 6, 0.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
     }
 
     .brand {
-      font-size: 24px;
-      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
     }
 
-    .domain {
-      font-size: 13px;
+    .brand img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      border-radius: 50%;
+      box-shadow: 0 0 28px var(--glow);
+    }
+
+    .brand-name {
+      display: grid;
+      gap: 1px;
+    }
+
+    .brand-name strong {
+      font-size: 15px;
+      font-weight: 760;
+    }
+
+    .brand-name span {
+      color: var(--soft);
+      font-size: 12px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
       color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-links a {
+      transition: color 180ms ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: 0 14px 34px rgba(123, 92, 255, 0.28);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 42px rgba(123, 92, 255, 0.38);
+    }
+
+    section {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 96px 22px;
+    }
+
+    .hero {
+      min-height: calc(100vh - 75px);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding-top: 76px;
+      padding-bottom: 76px;
+    }
+
+    .hero-content {
+      width: min(860px, 100%);
+      display: grid;
+      justify-items: center;
+    }
+
+    .hero-logo-wrap {
+      width: 144px;
+      height: 144px;
+      border-radius: 38px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 34px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      border: 1px solid var(--border);
+      box-shadow: 0 0 70px rgba(123, 92, 255, 0.42);
+      animation: logoLift 5s ease-in-out infinite;
+    }
+
+    .hero-logo-wrap img {
+      width: 108px;
+      height: 108px;
+      object-fit: contain;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 22px rgba(169, 139, 255, 0.4));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 14px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.055);
+      color: var(--muted);
+      backdrop-filter: blur(18px);
+      font-size: 13px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
     }
 
     h1 {
-      font-size: 32px;
-      margin: 20px 0 10px;
+      max-width: 850px;
+      font-size: clamp(46px, 8vw, 86px);
+      line-height: 0.98;
+      font-weight: 820;
+      letter-spacing: -0.04em;
     }
 
-    .subtitle {
+    .hero-subtitle {
+      max-width: 700px;
+      margin-top: 24px;
       color: var(--muted);
-      margin-bottom: 20px;
+      font-size: clamp(17px, 2.4vw, 22px);
+      line-height: 1.65;
     }
 
-    /* Button */
-    .btn {
-      display: inline-block;
-      padding: 12px 28px;
-      border-radius: 30px;
-      background: var(--primary);
-      color: white;
-      border: none;
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 36px;
+    }
+
+    .button {
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
       cursor: pointer;
-      font-size: 14px;
-      transition: 0.3s;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
     }
 
-    .btn:hover {
-      opacity: 0.85;
+    .button.primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      box-shadow: 0 18px 44px rgba(123, 92, 255, 0.34);
+      border-color: rgba(255,255,255,0.16);
+      font-weight: 700;
+    }
+
+    .button.secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      backdrop-filter: blur(16px);
+    }
+
+    .button:hover {
       transform: translateY(-2px);
     }
 
-    /* Cards */
+    .button.primary:hover {
+      box-shadow: 0 22px 54px rgba(123, 92, 255, 0.44);
+    }
+
+    .button.secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(169, 139, 255, 0.42);
+    }
+
+    .section-head {
+      max-width: 740px;
+      margin-bottom: 34px;
+    }
+
+    .section-kicker {
+      color: var(--accent);
+      font-weight: 750;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.04;
+      letter-spacing: -0.035em;
+      font-weight: 800;
+    }
+
+    .section-copy {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .glass-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+      backdrop-filter: blur(18px);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+    }
+
     .card {
-      background: var(--card);
-      padding: 20px;
-      margin-top: 25px;
-      border-radius: 12px;
-      text-align: left;
-      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+      padding: 26px;
+      transition: transform 200ms ease, border-color 200ms ease, background 200ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(169, 139, 255, 0.34);
+      background: linear-gradient(180deg, rgba(123,92,255,0.13), rgba(255,255,255,0.04));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 22px;
+      border-radius: 16px;
+      background: rgba(123, 92, 255, 0.16);
+      color: var(--accent);
+      border: 1px solid rgba(169, 139, 255, 0.22);
     }
 
     .card h3 {
-      margin-bottom: 10px;
-      font-size: 18px;
+      font-size: 20px;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
     }
 
     .card p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .feature-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .check {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      margin-top: 1px;
+      border-radius: 50%;
+      background: rgba(123, 92, 255, 0.16);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .coming-card {
+      position: relative;
+      min-height: 168px;
+    }
+
+    .badge {
+      display: inline-flex;
+      min-height: 28px;
+      align-items: center;
+      padding: 0 10px;
+      margin-bottom: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(169, 139, 255, 0.28);
+      color: var(--accent);
+      background: rgba(123, 92, 255, 0.12);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .beta-card {
+      padding: clamp(26px, 5vw, 44px);
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 26px;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .beta-card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -80px;
+      top: -80px;
+      border-radius: 999px;
+      background: rgba(123, 92, 255, 0.18);
+      filter: blur(28px);
+    }
+
+    .beta-card p {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .beta-mark {
+      position: relative;
+      z-index: 1;
+      justify-self: end;
+      width: 140px;
+      height: 140px;
+      display: grid;
+      place-items: center;
+      border-radius: 34px;
+      border: 1px solid rgba(169, 139, 255, 0.3);
+      background: rgba(123, 92, 255, 0.12);
+      box-shadow: 0 0 52px rgba(123, 92, 255, 0.24);
+    }
+
+    .beta-mark img {
+      width: 94px;
+      height: 94px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .feedback-card {
+      padding: clamp(24px, 5vw, 40px);
+    }
+
+    .feedback-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
       color: var(--muted);
       font-size: 14px;
     }
 
-    /* Form */
-    input, textarea {
+    input,
+    textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border-radius: 6px;
-      border: none;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.055);
+      color: var(--text);
       outline: none;
-      background: #1a1a1a;
-      color: white;
+      padding: 14px 16px;
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
     }
 
     textarea {
-      resize: none;
-      height: 80px;
+      min-height: 132px;
+      resize: vertical;
     }
 
-    form button {
-      margin-top: 15px;
-      width: 100%;
+    input:focus,
+    textarea:focus {
+      border-color: rgba(169, 139, 255, 0.58);
+      box-shadow: 0 0 0 4px rgba(123, 92, 255, 0.16);
+      background: rgba(255,255,255,0.075);
     }
 
-    /* Floating Button */
-    .floating-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 18px;
+    .feedback-note {
+      color: var(--soft);
       font-size: 13px;
+      line-height: 1.6;
     }
 
-    /* Responsive */
-    @media (max-width: 600px) {
+    .footer {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 34px 22px;
+      background: rgba(5,5,6,0.72);
+    }
+
+    .footer-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer-brand img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(123, 92, 255, 0.28);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes floatGlow {
+      from {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      to {
+        transform: translate3d(30px, 24px, 0) scale(1.08);
+      }
+    }
+
+    @keyframes logoLift {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .nav-links {
+        display: none;
+      }
+
+      section {
+        padding: 74px 18px;
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 70px;
+      }
+
+      .grid.two,
+      .grid.three,
+      .field-grid,
+      .beta-card {
+        grid-template-columns: 1fr;
+      }
+
+      .beta-mark {
+        justify-self: start;
+      }
+
+      .hero-logo-wrap {
+        width: 118px;
+        height: 118px;
+        border-radius: 30px;
+      }
+
+      .hero-logo-wrap img {
+        width: 88px;
+        height: 88px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .nav-inner {
+        padding: 14px 16px;
+      }
+
+      .brand-name span {
+        display: none;
+      }
+
       h1 {
-        font-size: 26px;
+        font-size: 44px;
+      }
+
+      .hero-actions,
+      .button {
+        width: 100%;
+      }
+
+      .hero-actions {
+        gap: 10px;
+      }
+
+      .card,
+      .feedback-card {
+        padding: 22px;
+        border-radius: 22px;
+      }
+
+      .footer-inner,
+      .footer-links {
+        align-items: flex-start;
+        flex-direction: column;
       }
     }
   </style>
 </head>
 
 <body>
+  <div class="page">
+    <nav class="nav" aria-label="Primary navigation">
+      <div class="nav-inner">
+        <a class="brand" href="/" aria-label="EKA AI home">
+          <img src="/static/logo.png" alt="EKA AI logo" />
+          <span class="brand-name">
+            <strong>EKA AI</strong>
+            <span>AI Study Mentor</span>
+          </span>
+        </a>
 
-  <div class="container">
+        <div class="nav-links">
+          <a href="#about">About</a>
+          <a href="#features">Features</a>
+          <a href="#coming-soon">Coming Soon</a>
+          <a href="#feedback">Feedback</a>
+          <a class="nav-cta" href="/login">Start Learning</a>
+        </div>
+      </div>
+    </nav>
 
-    <!-- Header -->
-    <header>
-      <img src="/static/logo.png" alt="EKA AI Logo" class="logo">
-      <div class="brand">EKA AI</div>
-      <div class="domain">Beta</div>
-    </header>
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-content reveal">
+          <div class="hero-logo-wrap">
+            <img src="/static/logo.png" alt="EKA AI logo" />
+          </div>
 
-    <!-- Hero -->
-    <section>
-      <h1>Stop struggling. Start understanding.</h1>
-      <p class="subtitle">
-        Your AI teacher that explains everything simply.
-      </p>
+          <div class="eyebrow">EKA AI Beta</div>
 
-      <button onclick="goToChat()" class="btn">
-        Continue with Google
-      </button>
-    </section>
+          <h1 id="hero-title">Master Any Subject.<br />One Concept At A Time.</h1>
 
-    <!-- About -->
-    <section class="card">
-      <h3>What is EKA AI?</h3>
-      <p>
-        EKA AI is a focused study assistant designed only for learning.
-        It teaches from zero level with simple explanations, adapts to your understanding,
-        and works like a real personal teacher.
-      </p>
-    </section>
+          <p class="hero-subtitle">
+            EKA AI is an AI-powered study assistant focused on helping students learn concepts step by step in simple language.
+          </p>
 
-    <!-- Why -->
-    <section class="card">
-      <h3>Why EKA AI?</h3>
-      <p>
-        Unlike other AI tools, EKA AI focuses purely on teaching.
-        It behaves like a strict mentor, builds real understanding,
-        and helps you stay disciplined.
-      </p>
-    </section>
+          <div class="hero-actions">
+            <a class="button primary" href="/login">Start Learning</a>
+            <a class="button secondary" href="#about">Learn More</a>
+          </div>
+        </div>
+      </section>
 
-    <!-- Features -->
-    <section class="card">
-      <h3>Features</h3>
-      <p>🚀 Coming Soon...</p>
-    </section>
+      <section id="about" aria-labelledby="about-title">
+        <div class="section-head reveal">
+          <div class="section-kicker">About</div>
+          <h2 id="about-title">A calm place to understand what you are learning.</h2>
+          <p class="section-copy">
+            EKA AI is designed as a focused study companion for students. It helps explain concepts in simple language through chat, while keeping the experience clean and distraction-free.
+          </p>
+          <p class="section-copy">
+            EKA AI is currently in Beta and the project is actively being improved.
+          </p>
+        </div>
 
-    <!-- Feedback -->
-    <section class="card" id="formSection">
-      <h3>Feedback</h3>
+        <div class="grid two">
+          <div class="glass-card card reveal">
+            <div class="card-icon">01</div>
+            <h3>Focused on understanding</h3>
+            <p>Instead of overwhelming students, EKA AI is shaped around step-by-step explanations and clear conversations.</p>
+          </div>
 
-      <form>
-        <input type="text" placeholder="Your Name" required>
-        <input type="email" placeholder="Your Email" required>
+          <div class="glass-card card reveal">
+            <div class="card-icon">02</div>
+            <h3>Built honestly in public</h3>
+            <p>The product is early, useful, and improving. New capabilities will be added carefully as they become ready.</p>
+          </div>
+        </div>
+      </section>
 
-        <textarea placeholder="Biggest problem while studying?" required></textarea>
-        <textarea placeholder="Report a problem / bug"></textarea>
+      <section id="features" aria-labelledby="features-title">
+        <div class="section-head reveal">
+          <div class="section-kicker">Current Features</div>
+          <h2 id="features-title">Available now in EKA AI.</h2>
+          <p class="section-copy">
+            These are the core features currently available in the product.
+          </p>
+        </div>
 
-        <button type="submit" class="btn">Submit Feedback</button>
-      </form>
-    </section>
+        <div class="grid three">
+          <div class="glass-card card reveal">
+            <div class="card-icon">✓</div>
+            <h3>Google Sign In</h3>
+            <p>Students can sign in using Google to access their learning space.</p>
+          </div>
 
+          <div class="glass-card card reveal">
+            <div class="card-icon">✓</div>
+            <h3>AI Powered Learning</h3>
+            <p>Ask questions and receive AI-generated explanations through a simple chat experience.</p>
+          </div>
+
+          <div class="glass-card card reveal">
+            <div class="card-icon">✓</div>
+            <h3>Chat History</h3>
+            <p>Previous conversations can be saved and revisited from the chat interface.</p>
+          </div>
+
+          <div class="glass-card card reveal">
+            <div class="card-icon">✓</div>
+            <h3>Multiple Conversations</h3>
+            <p>Create separate chats for different subjects, concepts, or learning sessions.</p>
+          </div>
+
+          <div class="glass-card card reveal">
+            <div class="card-icon">✓</div>
+            <h3>Step-by-Step Explanations</h3>
+            <p>EKA AI is focused on helping students understand concepts in simple language.</p>
+          </div>
+
+          <div class="glass-card card reveal">
+            <div class="card-icon">✓</div>
+            <h3>Clean Study Interface</h3>
+            <p>The experience is minimal and designed to keep attention on learning.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="coming-soon" aria-labelledby="coming-title">
+        <div class="section-head reveal">
+          <div class="section-kicker">Coming Soon</div>
+          <h2 id="coming-title">Planned improvements for the learning experience.</h2>
+          <p class="section-copy">
+            These ideas are not described as available yet. They are areas planned for future development.
+          </p>
+        </div>
+
+        <div class="grid three">
+          <div class="glass-card card coming-card reveal">
+            <span class="badge">Coming Soon</span>
+            <h3>Study Progress Tracking</h3>
+          </div>
+
+          <div class="glass-card card coming-card reveal">
+            <span class="badge">Coming Soon</span>
+            <h3>Personalized Learning</h3>
+          </div>
+
+          <div class="glass-card card coming-card reveal">
+            <span class="badge">Coming Soon</span>
+            <h3>PDF Support</h3>
+          </div>
+
+          <div class="glass-card card coming-card reveal">
+            <span class="badge">Coming Soon</span>
+            <h3>Voice Conversations</h3>
+          </div>
+
+          <div class="glass-card card coming-card reveal">
+            <span class="badge">Coming Soon</span>
+            <h3>More Study Tools</h3>
+          </div>
+        </div>
+      </section>
+
+      <section id="why" aria-labelledby="why-title">
+        <div class="section-head reveal">
+          <div class="section-kicker">Why EKA AI</div>
+          <h2 id="why-title">Designed for focused learning.</h2>
+        </div>
+
+        <div class="glass-card card reveal">
+          <div class="feature-list">
+            <div class="feature-row"><span class="check">✓</span><span>Built for focused learning</span></div>
+            <div class="feature-row"><span class="check">✓</span><span>Simple explanations</span></div>
+            <div class="feature-row"><span class="check">✓</span><span>Clean interface</span></div>
+            <div class="feature-row"><span class="check">✓</span><span>Google Sign In</span></div>
+            <div class="feature-row"><span class="check">✓</span><span>Currently in active development</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="beta-title">
+        <div class="glass-card beta-card reveal">
+          <div>
+            <div class="section-kicker">Beta Notice</div>
+            <h2 id="beta-title">EKA AI is currently in Beta.</h2>
+            <p>
+              Some features are still under development. Your feedback helps shape the future of the product.
+            </p>
+          </div>
+
+          <div class="beta-mark">
+            <img src="/static/logo.png" alt="EKA AI logo" />
+          </div>
+        </div>
+      </section>
+
+      <section id="feedback" aria-labelledby="feedback-title">
+        <div class="glass-card feedback-card reveal">
+          <div class="section-head">
+            <div class="section-kicker">Feedback</div>
+            <h2 id="feedback-title">Help improve EKA AI.</h2>
+            <p class="section-copy">
+              Share what feels useful, confusing, or important for your learning experience.
+            </p>
+          </div>
+
+          <form class="feedback-form" method="post" action="/feedback">
+            <div class="field-grid">
+              <label>
+                Name
+                <input type="text" name="name" autocomplete="name" placeholder="Your name" />
+              </label>
+
+              <label>
+                Email
+                <input type="email" name="email" autocomplete="email" placeholder="you@example.com" />
+              </label>
+            </div>
+
+            <label>
+              Feedback
+              <textarea name="feedback" required placeholder="Tell us what would make EKA AI better for studying."></textarea>
+            </label>
+
+            <p class="feedback-note">
+              If your existing Flask project uses a different feedback endpoint, keep the same design and update only the form action to match your current route.
+            </p>
+
+            <button class="button primary" type="submit">Send Feedback</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="/static/logo.png" alt="EKA AI logo" />
+          <span>EKA AI Beta</span>
+          <span>Made with ❤️ in India</span>
+        </div>
+
+        <div class="footer-links">
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/contact">Contact</a>
+        </div>
+      </div>
+    </footer>
   </div>
 
-  <!-- Floating Button -->
-  <button class="btn floating-btn"
-    onclick="document.getElementById('formSection').scrollIntoView({behavior:'smooth'})">
-    Feedback
-  </button>
-
   <script>
-    function goToChat() {
-      window.location.href = "/login";
-    }
-  </script>
+    const revealItems = document.querySelectorAll(".reveal");
 
+    const revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.12
+    });
+
+    revealItems.forEach(function (item) {
+      revealObserver.observe(item);
+    });
+  </script>
 </body>
 </html>
+```
