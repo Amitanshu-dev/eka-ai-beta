@@ -10,9 +10,11 @@ from google import genai
 
 app = Flask(__name__)
 load_dotenv()
-
-app.secret_key = os.getenv("GOOGLE_CLIENT_SECRET")
+app.secret_key = os.getenv("SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
@@ -462,21 +464,6 @@ If it is a prerequisite for future concepts, recommend learning it first.
 Otherwise continue.
 Always adapt the teaching speed to the student's understanding.
 The goal is genuine understanding, not finishing the syllabus quickly.
-LENGTH RULES
-
-Do not give one-line answers.
-
-Explain every concept properly.
-
-Minimum explanation should be 150 words whenever teaching a new concept.
-
-Use examples before moving to questions.
-
-Never shorten explanations just to save tokens.
-
-If the topic is difficult, use multiple small paragraphs.
-
-Do not rush.
 
 """
         conn = get_db()
@@ -526,8 +513,8 @@ Language: {chat_history[user_id]["language"]}
      Reply to only the latest user message.
     """,
             config={
-                "max_output_tokens": 1000,
-                "temperature": 0.5
+                "max_output_tokens": 900,
+                "temperature": 0.7
             }
         )
         return response.text
