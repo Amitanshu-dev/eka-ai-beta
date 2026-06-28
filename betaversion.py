@@ -231,7 +231,7 @@ User:
 {first_message}
 """
     response = client.models.generate_content(
-    model="gemini-2.5-flash-lite",
+    model="gemini-2.5-flash",
     contents=prompt
 )
 
@@ -341,7 +341,7 @@ LIMIT 30
         for row in rows:
          conversation += f"{row['role'].upper()}: {row['message']}\n"
         response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
+            model="gemini-2.5-flash",
             contents=f"""
         {SYSTEM_PROMPT}
         Previous Summary:
