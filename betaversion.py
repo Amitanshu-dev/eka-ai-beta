@@ -1,6 +1,7 @@
-# launching this project
+# adding login continuation and various feature
 import os
 import sqlite3
+from datetime import timedelta
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify,render_template
 from flask import session, redirect, url_for
@@ -9,6 +10,7 @@ from authlib.integrations.flask_client import OAuth
 app=Flask(__name__)
 load_dotenv()
 app.secret_key=os.getenv("GOOGLE_CLIENT_SECRET")
+app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(days=30)
 api_key=os.getenv("GEMINI_API_KEY")
 client=genai.Client(api_key=api_key)
 def get_db():
@@ -65,11 +67,12 @@ def login():
 def callback():
    token=oauth.google.authorize_access_token()
    user=token["userinfo"]
-   session["user"]={
-      "name":user["name"],
-      "email":user["email"],
-      "picture":user["picture"]      
-   }
+   session.permanent = True
+   session["user"] = {
+    "name": user["name"],
+    "email": user["email"],
+    "picture": user["picture"]
+}
    conn=get_db()
    cur=conn.cursor()
    cur.execute("""
@@ -306,6 +309,35 @@ LESSON MEMORY RULES
 - Never restart the chapter unless the user asks.
 - If user asks a doubt, answer it and then continue from the same concept.
 - If the chapter finishes, automatically start revision and then MCQs.
+OUTPUT FORMATTING RULES (VERY IMPORTANT)
+- Never use Markdown.
+- Never use **bold**
+- Never use *italic*
+- Never use #
+- Never use >
+- Never use bullet markdown like -
+- Never use ``` code blocks.
+- Never use LaTeX ($...$, \frac, \int, \sqrt etc.)
+
+Instead use plain text.
+
+For maths use Unicode.
+
+Examples
+
+∫2x dx = x² + C
+
+√16 = 4
+
+π ≈ 3.14159
+
+Use short paragraphs.
+
+Maximum 4 lines per paragraph.
+
+Leave one blank line between paragraphs.
+
+Output should be beautiful on mobile.
 """
         conn = get_db()
         cur = conn.cursor()
@@ -452,6 +484,57 @@ VALUES(?, ?, ?)
     return jsonify({
         "response": result
     })
+@app.route("/question_mode", methods=["POST"])
+def question_mode():
+
+    if "user" not in session:
+        return jsonify({"response": "Login Required"})
+
+    data = request.json
+
+    subject = data.get("subject")
+    topic = data.get("topic")
+    difficulty = data.get("difficulty")
+
+    prompt = f"""
+You are EKA AI.
+
+Create exactly 8 questions.
+
+Subject: {subject}
+
+Topic: {topic}
+
+Difficulty: {difficulty}
+
+Rules
+
+- Only questions.
+- No answers.
+- No explanation.
+- Number every question.
+- Wait for student answers.
+
+Difficulty Guide
+
+Easy = Basic
+
+Intermediate = Conceptual
+
+Hard = Numerical + Application
+
+Brutal = Toughest conceptual questions like IIT and UPSC and SSC
+"""
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+
+    return jsonify({
+        "response": response.text
+    })
+   
 import os
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
