@@ -10,7 +10,6 @@
       --bg: #050505;
       --bg-soft: #0D0D0D;
       --card: #111111;
-      --card-hover: #17111f;
       --purple: #7B2CFF;
       --purple-glow: #A855F7;
       --purple-dark: #6D28FF;
@@ -22,13 +21,10 @@
       --muted-soft: rgba(189,189,189,.7);
       --danger: #ef4444;
       --sidebar-width: 310px;
-      --radius: 18px;
       --shadow-purple: 0 0 34px rgba(168,85,247,.22);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html,
     body {
@@ -54,40 +50,16 @@
 
     button,
     input,
-    textarea {
-      font: inherit;
-    }
+    textarea,
+    select { font: inherit; }
 
-    button {
-      color: inherit;
-    }
+    button { color: inherit; }
+    a { color: inherit; text-decoration: none; }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    ::selection {
-      background: rgba(123,44,255,.42);
-    }
-
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(123,44,255,.75);
-      border-radius: 999px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--purple-glow);
-    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(123,44,255,.75); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--purple-glow); }
 
     .app-shell {
       position: relative;
@@ -109,9 +81,7 @@
       transition: opacity 180ms ease;
     }
 
-    .sidebar-overlay.is-visible {
-      opacity: 1;
-    }
+    .sidebar-overlay.is-visible { opacity: 1; }
 
     .sidebar {
       width: var(--sidebar-width);
@@ -168,28 +138,20 @@
       display: block;
     }
 
-    .brand-text {
-      min-width: 0;
+    .brand-text { min-width: 0; }
+    .brand-name { font-size: 16px; font-weight: 750; line-height: 1.2; }
+    .brand-subtitle { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    .sidebar-actions {
+      display: grid;
+      gap: 10px;
     }
 
-    .brand-name {
-      font-size: 16px;
-      font-weight: 750;
-      line-height: 1.2;
-    }
-
-    .brand-subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 2px;
-    }
-
-    .new-chat-link {
+    .new-chat-link,
+    .question-mode-button {
       height: 44px;
       width: 100%;
-      border: 1px solid rgba(168,85,247,.35);
       border-radius: 16px;
-      background: linear-gradient(180deg, var(--purple-light), var(--purple-dark));
       color: var(--text);
       display: flex;
       align-items: center;
@@ -197,18 +159,29 @@
       gap: 9px;
       font-size: 14px;
       font-weight: 700;
-      box-shadow: 0 10px 30px rgba(123,44,255,.2);
-      transition: transform 160ms ease, box-shadow 160ms ease;
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .new-chat-link:hover {
+    .new-chat-link {
+      border: 1px solid rgba(168,85,247,.35);
+      background: linear-gradient(180deg, var(--purple-light), var(--purple-dark));
+      box-shadow: 0 10px 30px rgba(123,44,255,.2);
+    }
+
+    .question-mode-button {
+      border: 1px solid rgba(168,85,247,.26);
+      background: rgba(123,44,255,.10);
+      cursor: pointer;
+    }
+
+    .new-chat-link:hover,
+    .question-mode-button:hover {
       transform: scale(1.02);
       box-shadow: 0 14px 40px rgba(168,85,247,.34);
+      border-color: rgba(168,85,247,.55);
     }
 
-    .sidebar-tools {
-      padding: 14px 18px 8px;
-    }
+    .sidebar-tools { padding: 14px 18px 8px; }
 
     .sidebar-search {
       height: 42px;
@@ -222,9 +195,7 @@
       transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
     }
 
-    .sidebar-search::placeholder {
-      color: var(--muted-soft);
-    }
+    .sidebar-search::placeholder { color: var(--muted-soft); }
 
     .sidebar-search:focus {
       border-color: var(--purple);
@@ -247,10 +218,7 @@
       padding: 8px 12px 14px;
     }
 
-    .chat-group {
-      display: grid;
-      gap: 5px;
-    }
+    .chat-group { display: grid; gap: 5px; }
 
     .chat-item {
       min-height: 42px;
@@ -314,23 +282,9 @@
       font-weight: 750;
     }
 
-    .profile-meta {
-      min-width: 0;
-    }
-
-    .profile-name {
-      font-size: 14px;
-      font-weight: 700;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .profile-status {
-      color: var(--muted-soft);
-      font-size: 12px;
-      margin-top: 1px;
-    }
+    .profile-meta { min-width: 0; }
+    .profile-name { font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .profile-status { color: var(--muted-soft); font-size: 12px; margin-top: 1px; }
 
     .logout-link {
       min-height: 34px;
@@ -383,9 +337,7 @@
       height: 42px;
     }
 
-    .chat-heading {
-      min-width: 0;
-    }
+    .chat-heading { min-width: 0; }
 
     .chat-heading-title {
       max-width: min(54vw, 680px);
@@ -412,7 +364,9 @@
     .icon-button,
     .menu-button,
     .button,
-    .send-button {
+    .send-button,
+    .timer-button,
+    .difficulty-option {
       transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease, opacity 160ms ease;
     }
 
@@ -436,11 +390,7 @@
       box-shadow: var(--shadow-purple);
     }
 
-    .icon-button:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .icon-button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 
     .menu {
       position: absolute;
@@ -477,14 +427,8 @@
       font-size: 14px;
     }
 
-    .menu-button:hover {
-      background: var(--hover);
-      transform: scale(1.02);
-    }
-
-    .menu-button.danger {
-      color: #fecaca;
-    }
+    .menu-button:hover { background: var(--hover); transform: scale(1.02); }
+    .menu-button.danger { color: #fecaca; }
 
     .messages {
       flex: 1;
@@ -581,15 +525,8 @@
       box-shadow: var(--shadow-purple);
     }
 
-    .quick-icon {
-      font-size: 21px;
-      line-height: 1;
-    }
-
-    .quick-text {
-      font-size: 14px;
-      font-weight: 700;
-    }
+    .quick-icon { font-size: 21px; line-height: 1; }
+    .quick-text { font-size: 14px; font-weight: 700; }
 
     .message-row {
       display: flex;
@@ -598,9 +535,7 @@
       animation: messageIn 200ms ease both;
     }
 
-    .message-row.user {
-      justify-content: flex-end;
-    }
+    .message-row.user { justify-content: flex-end; }
 
     .message-row.assistant {
       justify-content: flex-start;
@@ -666,13 +601,8 @@
       animation: dotPulse 1s ease-in-out infinite;
     }
 
-    .typing-dots span:nth-child(2) {
-      animation-delay: 120ms;
-    }
-
-    .typing-dots span:nth-child(3) {
-      animation-delay: 240ms;
-    }
+    .typing-dots span:nth-child(2) { animation-delay: 120ms; }
+    .typing-dots span:nth-child(3) { animation-delay: 240ms; }
 
     .composer-wrap {
       padding: 15px 20px 22px;
@@ -714,9 +644,7 @@
       line-height: 1.45;
     }
 
-    .composer textarea::placeholder {
-      color: rgba(189,189,189,.68);
-    }
+    .composer textarea::placeholder { color: rgba(189,189,189,.68); }
 
     .send-button {
       width: 46px;
@@ -762,9 +690,7 @@
       background: rgba(0,0,0,.72);
     }
 
-    .modal-backdrop.is-open {
-      display: flex;
-    }
+    .modal-backdrop.is-open { display: flex; }
 
     .modal {
       width: min(440px, 100%);
@@ -776,10 +702,30 @@
       animation: fadeUp 160ms ease both;
     }
 
+    .question-modal {
+      width: min(560px, 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question-modal::before {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -90px;
+      top: -90px;
+      border-radius: 999px;
+      background: rgba(123,44,255,.22);
+      filter: blur(34px);
+      pointer-events: none;
+    }
+
     .modal h2 {
       margin: 0 0 8px;
       font-size: 18px;
       letter-spacing: 0;
+      position: relative;
     }
 
     .modal p {
@@ -787,9 +733,29 @@
       color: var(--muted);
       font-size: 14px;
       line-height: 1.45;
+      position: relative;
     }
 
-    .modal input {
+    .modal-form {
+      position: relative;
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .modal-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .modal-field label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .modal input,
+    .modal select {
       width: 100%;
       height: 44px;
       border: 1px solid var(--border);
@@ -800,9 +766,40 @@
       outline: none;
     }
 
-    .modal input:focus {
+    .modal select {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .modal input:focus,
+    .modal select:focus {
       border-color: var(--purple);
       box-shadow: 0 0 0 4px rgba(123,44,255,.14);
+    }
+
+    .difficulty-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .difficulty-option {
+      min-height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .difficulty-option:hover,
+    .difficulty-option.is-active {
+      color: var(--text);
+      border-color: rgba(168,85,247,.55);
+      background: rgba(123,44,255,.18);
+      box-shadow: 0 0 22px rgba(168,85,247,.14);
     }
 
     .modal-actions {
@@ -810,6 +807,7 @@
       justify-content: flex-end;
       gap: 10px;
       margin-top: 16px;
+      position: relative;
     }
 
     .button {
@@ -822,10 +820,7 @@
       cursor: pointer;
     }
 
-    .button:hover {
-      background: var(--hover);
-      transform: scale(1.02);
-    }
+    .button:hover { background: var(--hover); transform: scale(1.02); }
 
     .button.primary {
       background: linear-gradient(180deg, var(--purple-light), var(--purple-dark));
@@ -836,6 +831,98 @@
       background: rgba(239,68,68,.14);
       border-color: rgba(239,68,68,.34);
       color: #fecaca;
+    }
+
+    .study-timer {
+      position: fixed;
+      right: 22px;
+      bottom: 92px;
+      z-index: 45;
+      width: 226px;
+      border: 1px solid rgba(168,85,247,.25);
+      border-radius: 22px;
+      background: rgba(13,13,13,.74);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.38), 0 0 34px rgba(123,44,255,.14);
+      padding: 12px;
+      user-select: none;
+      touch-action: none;
+      animation: timerIn 260ms ease both;
+    }
+
+    .timer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: grab;
+      padding-bottom: 8px;
+    }
+
+    .timer-top:active { cursor: grabbing; }
+
+    .timer-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .timer-indicator {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #ef4444;
+      box-shadow: 0 0 12px rgba(239,68,68,.75);
+    }
+
+    .timer-indicator.running {
+      background: #22c55e;
+      box-shadow: 0 0 14px rgba(34,197,94,.85);
+    }
+
+    .timer-indicator.paused {
+      background: #facc15;
+      box-shadow: 0 0 14px rgba(250,204,21,.85);
+    }
+
+    .timer-time {
+      font-variant-numeric: tabular-nums;
+      font-size: 28px;
+      font-weight: 850;
+      letter-spacing: .02em;
+      padding: 4px 0 10px;
+      text-align: center;
+    }
+
+    .timer-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+    }
+
+    .timer-button {
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .timer-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(168,85,247,.45);
+      background: rgba(123,44,255,.16);
+    }
+
+    .timer-button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .sr-only {
@@ -851,66 +938,43 @@
     }
 
     @keyframes logoPulse {
-      0%, 100% {
-        box-shadow: 0 0 20px rgba(168,85,247,.18);
-      }
-      50% {
-        box-shadow: 0 0 34px rgba(168,85,247,.36);
-      }
+      0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,.18); }
+      50% { box-shadow: 0 0 34px rgba(168,85,247,.36); }
     }
 
     @keyframes dotPulse {
-      0%, 100% {
-        transform: translateY(0);
-        opacity: .45;
-      }
-      50% {
-        transform: translateY(-4px);
-        opacity: 1;
-      }
+      0%, 100% { transform: translateY(0); opacity: .45; }
+      50% { transform: translateY(-4px); opacity: 1; }
     }
 
     @keyframes messageIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(8px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes timerIn {
+      from { opacity: 0; transform: translateY(12px) scale(.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     @media (max-width: 920px) {
-      .quick-actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+      .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     @media (max-width: 820px) {
-      .app-shell {
-        display: block;
-      }
+      .app-shell { display: block; }
 
       .sidebar-overlay {
         display: block;
         pointer-events: none;
       }
 
-      .sidebar-overlay.is-visible {
-        pointer-events: auto;
-      }
+      .sidebar-overlay.is-visible { pointer-events: auto; }
 
       .sidebar {
         position: fixed;
@@ -920,80 +984,43 @@
         box-shadow: 18px 0 50px rgba(0,0,0,.48);
       }
 
-      .sidebar.is-open {
-        transform: translateX(0);
-      }
+      .sidebar.is-open { transform: translateX(0); }
 
-      .chat-area {
-        width: 100%;
-      }
+      .chat-area { width: 100%; }
+      .mobile-logo-button { display: inline-flex; }
+      .chat-header { padding: 10px 13px; }
+      .chat-heading-title { max-width: 44vw; }
+      .messages { padding: 22px 12px; }
+      .message-bubble { max-width: 86%; }
+      .composer-wrap { padding: 11px 12px 15px; }
 
-      .mobile-logo-button {
-        display: inline-flex;
-      }
-
-      .chat-header {
-        padding: 10px 13px;
-      }
-
-      .chat-heading-title {
-        max-width: 44vw;
-      }
-
-      .messages {
-        padding: 22px 12px;
-      }
-
-      .message-bubble {
-        max-width: 86%;
-      }
-
-      .composer-wrap {
-        padding: 11px 12px 15px;
+      .study-timer {
+        right: 12px;
+        bottom: 88px;
+        width: 212px;
       }
     }
 
     @media (max-width: 520px) {
-      :root {
-        --sidebar-width: min(88vw, 310px);
+      :root { --sidebar-width: min(88vw, 310px); }
+
+      .chat-heading-subtitle { display: none; }
+      .empty-state { align-items: flex-start; padding-top: 38px; }
+      .empty-logo { width: 68px; height: 68px; }
+      .quick-actions { grid-template-columns: 1fr; margin-top: 22px; }
+      .quick-action { min-height: 72px; }
+      .message-bubble { max-width: 91%; font-size: 14px; }
+      .assistant-avatar { width: 26px; height: 26px; }
+      .composer { border-radius: 20px; }
+      .difficulty-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .study-timer {
+        width: min(212px, calc(100vw - 24px));
+        right: 12px;
+        bottom: 82px;
       }
 
-      .chat-heading-subtitle {
-        display: none;
-      }
-
-      .empty-state {
-        align-items: flex-start;
-        padding-top: 38px;
-      }
-
-      .empty-logo {
-        width: 68px;
-        height: 68px;
-      }
-
-      .quick-actions {
-        grid-template-columns: 1fr;
-        margin-top: 22px;
-      }
-
-      .quick-action {
-        min-height: 72px;
-      }
-
-      .message-bubble {
-        max-width: 91%;
-        font-size: 14px;
-      }
-
-      .assistant-avatar {
-        width: 26px;
-        height: 26px;
-      }
-
-      .composer {
-        border-radius: 20px;
-      }
+      .timer-time { font-size: 25px; }
     }
   </style>
 </head>
@@ -1025,10 +1052,17 @@
           </div>
         </div>
 
-        <a class="new-chat-link" href="/new_chat">
-          <span aria-hidden="true">+</span>
-          <span>New Chat</span>
-        </a>
+        <div class="sidebar-actions">
+          <a class="new-chat-link" href="/new_chat">
+            <span aria-hidden="true">+</span>
+            <span>New Chat</span>
+          </a>
+
+          <button class="question-mode-button" type="button" id="questionModeButton">
+            <span aria-hidden="true">?</span>
+            <span>Question Mode</span>
+          </button>
+        </div>
       </div>
 
       <div class="sidebar-tools">
@@ -1191,6 +1225,58 @@
     </main>
   </div>
 
+  <div class="study-timer" id="studyTimer" aria-label="Study timer">
+    <div class="timer-top" id="timerDragHandle">
+      <div class="timer-title">
+        <span class="timer-indicator" id="timerIndicator"></span>
+        <span>Study Timer</span>
+      </div>
+    </div>
+
+    <div class="timer-time" id="timerDisplay">00:00:00</div>
+
+    <div class="timer-buttons">
+      <button class="timer-button" type="button" id="timerStartButton" aria-label="Start timer">▶</button>
+      <button class="timer-button" type="button" id="timerPauseButton" aria-label="Pause timer">⏸</button>
+      <button class="timer-button" type="button" id="timerStopButton" aria-label="Stop timer">■</button>
+      <button class="timer-button" type="button" id="timerResetButton" aria-label="Reset timer">↻</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="questionModeModal" role="dialog" aria-modal="true" aria-labelledby="questionModeTitle">
+    <div class="modal question-modal">
+      <h2 id="questionModeTitle">Question Mode</h2>
+      <p>Generate focused practice questions for a subject and topic.</p>
+
+      <form class="modal-form" id="questionModeForm">
+        <div class="modal-field">
+          <label for="questionSubject">Subject</label>
+          <input id="questionSubject" type="text" autocomplete="off" required placeholder="Example: Physics" />
+        </div>
+
+        <div class="modal-field">
+          <label for="questionTopic">Topic</label>
+          <input id="questionTopic" type="text" autocomplete="off" required placeholder="Example: Newton's Laws" />
+        </div>
+
+        <div class="modal-field">
+          <label>Difficulty</label>
+          <div class="difficulty-grid" id="difficultyGrid">
+            <button class="difficulty-option is-active" type="button" data-difficulty="Easy">Easy</button>
+            <button class="difficulty-option" type="button" data-difficulty="Intermediate">Intermediate</button>
+            <button class="difficulty-option" type="button" data-difficulty="Hard">Hard</button>
+            <button class="difficulty-option" type="button" data-difficulty="Brutal">Brutal</button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="button" type="button" id="cancelQuestionModeButton">Cancel</button>
+          <button class="button primary" type="submit" id="startQuestionModeButton">Start</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="renameModal" role="dialog" aria-modal="true" aria-labelledby="renameTitle">
     <div class="modal">
       <h2 id="renameTitle">Rename Chat</h2>
@@ -1233,7 +1319,6 @@
     const messages = document.getElementById("messages");
     const messagesInner = document.getElementById("messagesInner");
     const statusLine = document.getElementById("statusLine");
-    const emptyState = document.getElementById("emptyState");
     const currentChatTitle = document.getElementById("currentChatTitle");
     const chatSearch = document.getElementById("chatSearch");
 
@@ -1251,7 +1336,32 @@
     const shareMenuItem = document.getElementById("shareMenuItem");
     const quickActions = document.querySelectorAll(".quick-action");
 
+    const questionModeButton = document.getElementById("questionModeButton");
+    const questionModeModal = document.getElementById("questionModeModal");
+    const questionModeForm = document.getElementById("questionModeForm");
+    const questionSubject = document.getElementById("questionSubject");
+    const questionTopic = document.getElementById("questionTopic");
+    const cancelQuestionModeButton = document.getElementById("cancelQuestionModeButton");
+    const startQuestionModeButton = document.getElementById("startQuestionModeButton");
+    const difficultyOptions = document.querySelectorAll(".difficulty-option");
+
+    const studyTimer = document.getElementById("studyTimer");
+    const timerDragHandle = document.getElementById("timerDragHandle");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const timerIndicator = document.getElementById("timerIndicator");
+    const timerStartButton = document.getElementById("timerStartButton");
+    const timerPauseButton = document.getElementById("timerPauseButton");
+    const timerStopButton = document.getElementById("timerStopButton");
+    const timerResetButton = document.getElementById("timerResetButton");
+
     let isSending = false;
+    let selectedDifficulty = "Easy";
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let timerState = "stopped";
+    let isDraggingTimer = false;
+    let timerDragOffsetX = 0;
+    let timerDragOffsetY = 0;
 
     function openSidebar() {
       sidebar.classList.add("is-open");
@@ -1431,6 +1541,83 @@
       }
     }
 
+    function extractQuestionMessage(payload) {
+      if (typeof payload === "string") {
+        return payload;
+      }
+
+      if (Array.isArray(payload)) {
+        return payload.join("\n\n");
+      }
+
+      if (Array.isArray(payload.questions)) {
+        return payload.questions.map(function (question, index) {
+          if (typeof question === "string") {
+            return `${index + 1}. ${question}`;
+          }
+
+          return `${index + 1}. ${question.question || question.text || JSON.stringify(question)}`;
+        }).join("\n\n");
+      }
+
+      return payload.questions || payload.response || payload.answer || payload.message || payload.text || "";
+    }
+
+    async function startQuestionMode() {
+      const subject = questionSubject.value.trim();
+      const topic = questionTopic.value.trim();
+
+      if (!subject || !topic) {
+        setStatus("Enter subject and topic for Question Mode.", true);
+        return;
+      }
+
+      startQuestionModeButton.disabled = true;
+      setStatus("Generating questions...");
+
+      closeModal(questionModeModal);
+      const typingRow = appendTyping();
+
+      try {
+        const response = await fetch("/question_mode", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            subject: subject,
+            topic: topic,
+            difficulty: selectedDifficulty
+          })
+        });
+
+        const payload = await parseResponse(response);
+
+        if (!response.ok) {
+          const errorMessage = typeof payload === "string"
+            ? payload
+            : payload.error || payload.message || "Question Mode failed.";
+          throw new Error(errorMessage);
+        }
+
+        const questionMessage = extractQuestionMessage(payload);
+
+        if (!questionMessage) {
+          throw new Error("The server response did not include questions.");
+        }
+
+        typingRow.remove();
+        appendMessage("assistant", questionMessage);
+        setStatus("");
+      } catch (error) {
+        typingRow.remove();
+        appendMessage("assistant", "I could not generate questions right now. Please try again.");
+        setStatus(error.message || "Question Mode failed.", true);
+      } finally {
+        startQuestionModeButton.disabled = false;
+      }
+    }
+
     async function renameChat() {
       const title = renameInput.value.trim();
 
@@ -1534,6 +1721,114 @@
       }
     }
 
+    function formatTimer(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+
+      return [hours, minutes, secs].map(function (value) {
+        return String(value).padStart(2, "0");
+      }).join(":");
+    }
+
+    function renderTimer() {
+      timerDisplay.textContent = formatTimer(timerSeconds);
+      timerIndicator.classList.toggle("running", timerState === "running");
+      timerIndicator.classList.toggle("paused", timerState === "paused");
+    }
+
+    function startTimer() {
+      if (timerInterval) {
+        return;
+      }
+
+      timerState = "running";
+      renderTimer();
+
+      timerInterval = window.setInterval(function () {
+        timerSeconds += 1;
+        renderTimer();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (timerInterval) {
+        window.clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      timerState = "paused";
+      renderTimer();
+    }
+
+    async function stopTimer() {
+      if (timerInterval) {
+        window.clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      timerState = "stopped";
+      renderTimer();
+
+      try {
+        await fetch("/save_timer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            seconds: timerSeconds
+          })
+        });
+      } catch (error) {
+        setStatus("Study timer could not be saved.", true);
+      }
+    }
+
+    function resetTimer() {
+      if (timerInterval) {
+        window.clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      timerSeconds = 0;
+      timerState = "stopped";
+      renderTimer();
+    }
+
+    function beginTimerDrag(event) {
+      const pointer = event.touches ? event.touches[0] : event;
+      const rect = studyTimer.getBoundingClientRect();
+
+      isDraggingTimer = true;
+      timerDragOffsetX = pointer.clientX - rect.left;
+      timerDragOffsetY = pointer.clientY - rect.top;
+
+      studyTimer.style.left = `${rect.left}px`;
+      studyTimer.style.top = `${rect.top}px`;
+      studyTimer.style.right = "auto";
+      studyTimer.style.bottom = "auto";
+    }
+
+    function moveTimer(event) {
+      if (!isDraggingTimer) {
+        return;
+      }
+
+      const pointer = event.touches ? event.touches[0] : event;
+      const maxLeft = window.innerWidth - studyTimer.offsetWidth - 8;
+      const maxTop = window.innerHeight - studyTimer.offsetHeight - 8;
+      const nextLeft = Math.max(8, Math.min(maxLeft, pointer.clientX - timerDragOffsetX));
+      const nextTop = Math.max(8, Math.min(maxTop, pointer.clientY - timerDragOffsetY));
+
+      studyTimer.style.left = `${nextLeft}px`;
+      studyTimer.style.top = `${nextTop}px`;
+    }
+
+    function endTimerDrag() {
+      isDraggingTimer = false;
+    }
+
     mobileMenuButton.addEventListener("click", toggleSidebar);
     desktopBrandButton.addEventListener("click", function () {
       if (window.innerWidth <= 820) {
@@ -1559,6 +1854,7 @@
         closeSidebar();
         closeModal(renameModal);
         closeModal(deleteModal);
+        closeModal(questionModeModal);
       }
     });
 
@@ -1594,6 +1890,34 @@
         autoResizeTextarea();
         promptInput.focus();
       });
+    });
+
+    questionModeButton.addEventListener("click", function () {
+      closeSidebar();
+      openModal(questionModeModal);
+      setTimeout(function () {
+        questionSubject.focus();
+      }, 0);
+    });
+
+    cancelQuestionModeButton.addEventListener("click", function () {
+      closeModal(questionModeModal);
+      setStatus("");
+    });
+
+    difficultyOptions.forEach(function (button) {
+      button.addEventListener("click", function () {
+        selectedDifficulty = button.dataset.difficulty;
+        difficultyOptions.forEach(function (option) {
+          option.classList.remove("is-active");
+        });
+        button.classList.add("is-active");
+      });
+    });
+
+    questionModeForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      startQuestionMode();
     });
 
     renameMenuItem.addEventListener("click", function () {
@@ -1643,6 +1967,19 @@
       });
     });
 
+    timerStartButton.addEventListener("click", startTimer);
+    timerPauseButton.addEventListener("click", pauseTimer);
+    timerStopButton.addEventListener("click", stopTimer);
+    timerResetButton.addEventListener("click", resetTimer);
+
+    timerDragHandle.addEventListener("mousedown", beginTimerDrag);
+    document.addEventListener("mousemove", moveTimer);
+    document.addEventListener("mouseup", endTimerDrag);
+
+    timerDragHandle.addEventListener("touchstart", beginTimerDrag, { passive: true });
+    document.addEventListener("touchmove", moveTimer, { passive: true });
+    document.addEventListener("touchend", endTimerDrag);
+
     window.addEventListener("resize", function () {
       if (window.innerWidth > 820) {
         closeSidebar();
@@ -1651,7 +1988,7 @@
 
     scrollToBottom();
     autoResizeTextarea();
+    renderTimer();
   </script>
 </body>
 </html>
-```
