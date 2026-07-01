@@ -89,6 +89,7 @@ def callback():
         "email": user["email"],
         "picture": user["picture"]
     }
+    session.modified=True
 
     conn = get_db()
     cur = conn.cursor()
