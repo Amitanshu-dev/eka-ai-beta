@@ -24,6 +24,59 @@ def get_db():
     conn = sqlite3.connect("eka_ai.db")
     conn.row_factory = sqlite3.Row
     return conn
+def load_memory(user_email):
+    conn=get_db()
+    cur=conn.cursor()
+    cur.execute("""
+    SELECT *
+    FROM lesson_memory
+    WHERE user_email=?
+    """,(user_email,))
+    memory=cur.fetchone()
+    conn.close()
+    return memory
+def save_memory(user_email, subject, chapter, concept, language,difficulty,mentor_personality):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+    INSERT INTO lesson_memory
+    (
+        user_email,
+        subject,
+        chapter,
+        current_concept,
+        language,
+        difficulty,
+        mentor_personality
+    )
+
+    VALUES(?,?,?,?,?,?,?)
+
+    ON CONFLICT(user_email)
+    DO UPDATE SET
+
+    subject=excluded.subject,
+    chapter=excluded.chapter,
+    current_concept=excluded.current_concept,
+    language=excluded.language,
+    difficulty=excluded.difficulty,
+    mentor_personality=excluded.mentor_personality,
+    updated_at=CURRENT_TIMESTAMP
+    """,
+    (
+        user_email,
+        subject,
+        chapter,
+        concept,
+        language,
+        difficulty,
+        mentor_personality
+    ))
+
+
+    conn.commit()
+    conn.close()
 
 
 def init_db():
@@ -55,6 +108,25 @@ CREATE TABLE IF NOT EXISTS messages(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS lesson_memory(
+    user_email TEXT PRIMARY KEY,
+    subject TEXT,
+    chapter TEXT,
+    current_concept TEXT,
+    language TEXT,
+    difficulty TEXT DEFAULT 'beginner',
+    mentor_personality TEXT DEFAULT 'Kai Sensei',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    try:
+     cur.execute("""
+    ALTER TABLE lesson_memory
+    ADD COLUMN mentor_personality TEXT DEFAULT 'Kai Sensei'
+    """)
+    except:
+     pass
     conn.commit()
     conn.close()
 
@@ -264,10 +336,112 @@ User:
     )
 
     return response.text.strip()
+def extract_memory(user_message, ai_response):
+    prompt = f"""
+Extract lesson information.
+
+Return ONLY valid JSON.
+
+If any field is unknown, keep previous value by returning "".
+
+JSON format:
+
+{{
+"subject":"",
+"chapter":"",
+"concept":"",
+"language":""
+}}
+
+User:
+{user_message}
+
+AI:
+{ai_response}
+"""
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+
+    import json
+
+    try:
+        text = response.text.strip()
+
+        if text.startswith("```"):
+            text = text.replace("```json", "").replace("```", "").strip()
+
+        return json.loads(text)
+
+    except:
+        return None
+def get_personality_prompt(personality):
+  personalities = {
+
+    "Kai Sensei": """
+You are Kai Sensei.
+Teach in a disciplined, clear and concept-first way.
+Push the student to think.
+Never spoon-feed immediately.
+""",
+
+    "Friendly Teacher": """
+Be warm, patient and encouraging.
+Assume the student is a beginner.
+Praise genuine progress.
+""",
+
+    "Exam Coach": """
+Focus only on exams.
+Teach high-weightage topics.
+Give PYQ-style questions.
+Keep explanations short.
+""",
+
+    "Professor": """
+Teach deeply.
+Explain every concept thoroughly.
+Use real-life examples.
+Connect concepts together.
+""",
+
+    "Socratic Teacher": """
+Do not directly give answers.
+Ask guiding questions.
+Help the student discover the answer.
+""",
+
+    "Ruthless Mentor": """
+Be strict.
+Demand discipline.
+Do not waste time.
+Never insult or abuse the student.
+Stay professional.
+"""
+}
+  return personalities.get(
+      personality,
+      personalities["Kai Sensei"])
 
 
 def ask_ai(prompt, chat_id, user_id="default"):
     try:
+        memory=load_memory(user_id)
+        saved_subject=""
+        saved_chapter=""
+        saved_concept=""
+        saved_language=""
+        saved_difficulty="beginner"
+        saved_personality="Kai Sensei"
+        if memory:
+           saved_subject = memory["subject"] or ""
+           saved_chapter = memory["chapter"] or ""
+           saved_concept = memory["current_concept"] or ""
+           saved_language = memory["language"] or ""
+           saved_difficulty = memory["difficulty"] or "Beginner"
+           saved_personality = memory["mentor_personality"] or "Kai Sensei"
         if user_id not in chat_history:
             chat_history[user_id] = {
                 "summary": "",
@@ -280,6 +454,11 @@ def ask_ai(prompt, chat_id, user_id="default"):
             }
         else:
             chat_history[user_id]["chat_id"] = chat_id
+        saved_personality = "Kai Sensei"
+
+        if memory:
+          saved_personality = memory["mentor_personality"] or "Kai Sensei"
+          personality_prompt = get_personality_prompt(saved_personality)
 
         SYSTEM_PROMPT = """
 You are EKA AI.
@@ -502,6 +681,14 @@ LIMIT 30
             model="gemini-2.5-flash",
             contents=f"""
         {SYSTEM_PROMPT}
+        Current Personality
+        {personality_prompt}
+Subject: {saved_subject}
+Chapter: {saved_chapter}
+Current Concept: {saved_concept}
+Language: {saved_language}
+Difficulty: {saved_difficulty}
+Mentor Personality: {saved_personality}
         Previous Summary:
         {summary}
         Current Lesson:
@@ -567,6 +754,17 @@ VALUES(?, ?, ?)
     user_limits[user_id] += 1
 
     result = ask_ai(prompt, chat_id, user_id)
+    memory = extract_memory(prompt, result)
+    if memory:
+      old = load_memory(user_id)
+
+    save_memory(
+        user_id,
+        memory["subject"] if memory["subject"] else (old["subject"] if old else ""),
+        memory["chapter"] if memory["chapter"] else (old["chapter"] if old else ""),
+        memory["concept"] if memory["concept"] else (old["current_concept"] if old else ""),
+        memory["language"] if memory["language"] else (old["language"] if old else "")
+    )
 
     conn = get_db()
     cur = conn.cursor()
@@ -606,7 +804,31 @@ VALUES(?, ?, ?)
         "response": result
     })
 
+@app.route("/change_personality", methods=["POST"])
+def change_personality():
 
+    if "user" not in session:
+        return jsonify({"success": False})
+
+    data = request.json
+    personality = data.get("personality", "Kai Sensei")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+    UPDATE lesson_memory
+    SET mentor_personality=?
+    WHERE user_email=?
+    """, (
+        personality,
+        session["user"]["email"]
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True})
 @app.route("/question_mode", methods=["POST"])
 def question_mode():
     if "user" not in session:
@@ -656,6 +878,277 @@ Brutal = Toughest conceptual questions like IIT and UPSC and SSC
     return jsonify({
         "response": response.text
     })
+@app.route("/exam_mode", methods=["POST"])
+def exam_mode():
+    if "user" not in session:
+        return jsonify({"response": "Login Required"})
+    
+    data = request.json
+
+    exam = data.get("exam")
+
+    subject = data.get("subject")
+
+    chapter = data.get("chapter")
+
+    difficulty = data.get("difficulty")
+
+    question_type = data.get("question_type")
+
+    time_available = data.get("time")
+    prompt = f"""
+You are EKA AI.
+
+Current Mode:
+Exam Mode
+
+Your only goal is to maximize the student's exam score.
+
+Exam:
+{exam}
+
+Subject:
+{subject}
+
+Chapter:
+{chapter}
+
+Difficulty:
+{difficulty}
+
+Question Type:
+{question_type}
+
+Available Time:
+{time_available}
+
+RULES
+
+Behave like an experienced exam mentor.
+
+Do not behave like a normal AI chatbot.
+
+Never explain the entire syllabus.
+
+Always keep the student's exam in mind.
+
+Never assume missing information.
+
+If Subject is missing, ask for it and wait.
+
+Chapter is OPTIONAL.
+
+If Chapter is provided:
+
+Focus only on that chapter.
+
+If Chapter is empty:
+
+Identify the highest-weightage chapters, most repeated concepts and frequently asked topics for the selected exam and subject.
+
+Prepare the student accordingly.
+
+FIRST RESPONSE
+
+First explain your strategy in 2-3 short paragraphs.
+
+Tell the student:
+
+Which topics deserve the highest priority.
+
+Which concepts are repeatedly asked.
+
+Which mistakes students usually make.
+
+Mention approximately which topics deserve more study time.
+
+RAPID REVISION
+
+Give a quick revision before asking questions.
+
+Maximum 10 short points.
+
+Only include important exam-oriented concepts.
+
+MATHEMATICS
+
+Do not waste time on unnecessary theory.
+
+Teach using:
+
+Formula
+
+Meaning
+
+Short solving method
+
+Common mistakes
+
+Shortcut if applicable
+
+Readable mathematical symbols only.
+
+Never use LaTeX.
+
+Examples:
+
+√16 = 4
+
+x² + 5x + 6
+
+∫2x dx = x² + C
+
+dy/dx
+
+π ≈ 3.14159
+
+PHYSICS
+
+Explain:
+
+Formula
+
+Meaning
+
+Units
+
+Real-life example if useful
+
+Common exam mistakes
+
+CHEMISTRY
+
+Explain:
+
+Important reactions
+
+Concepts
+
+Exceptions
+
+Frequently confused points
+
+QUESTION GENERATION
+
+Generate questions according to Question Type.
+
+MCQ
+
+Generate exactly 10 MCQs.
+
+Subjective
+
+Generate exactly 8 descriptive questions.
+
+Numerical
+
+Generate exactly 8 numerical questions.
+
+Mixed
+
+Generate a balanced mixture of MCQs, Numerical and Subjective questions.
+
+QUESTIONS MUST
+
+Be exam-oriented.
+
+Be based on commonly tested concepts.
+
+Increase difficulty gradually.
+
+Do not reveal answers.
+
+TIMER
+
+Before questions say:
+
+Start your Study Timer.
+
+Try to complete this within {time_available}.
+
+Attempt every question without seeing notes.
+
+After finishing, tell me how many minutes you took.
+
+EVALUATION
+
+Wait for the student's answers.
+
+Never reveal answers before the student attempts.
+
+For every wrong answer:
+
+Explain why it is wrong.
+
+Explain the correct concept.
+
+Show the correct solving method.
+
+Give one easier practice question if necessary.
+
+FINAL ANALYSIS
+
+After evaluation provide:
+
+Total Score
+
+Accuracy Percentage
+
+Strong Concepts
+
+Weak Concepts
+
+Common Mistakes
+
+Revision Priority
+
+Recommended Next Topic
+
+Motivate the student to continue.
+
+FORMATTING
+
+Never use Markdown.
+
+Never use LaTeX.
+
+Never use hashtags.
+
+Never use code blocks.
+
+Never use unnecessary symbols.
+
+Keep paragraphs short.
+
+Maximum four lines per paragraph.
+
+Leave one blank line between sections.
+
+Output must look clean and readable on both desktop and mobile.
+
+If the selected exam has Previous Year Question trends available in your knowledge, prioritize concepts that have been repeatedly asked over low-priority concepts.
+
+Always teach high-return topics before low-return topics.
+"""
+    response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt,
+    config={
+        "max_output_tokens": 1200,
+        "temperature": 0.6
+    }
+)
+    if not exam:
+     return jsonify({"response": "Please select an exam."})
+
+    if not subject:
+     return jsonify({"response": "Please select a subject."})
+
+    return jsonify({
+     "response": response.text
+})
+
+    
 
 
 if __name__ == "__main__":
