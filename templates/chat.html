@@ -148,38 +148,119 @@
     }
 
     .new-chat-link,
-    .question-mode-button {
-      height: 44px;
+    .sidebar-nav-link,
+    .question-mode-button,
+    .exam-mode-button,
+    .sidebar-collapse-toggle {
+      min-height: 44px;
       width: 100%;
       border-radius: 16px;
       color: var(--text);
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 9px;
+      gap: 10px;
       font-size: 14px;
       font-weight: 700;
-      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease, opacity 180ms ease;
     }
 
     .new-chat-link {
+      justify-content: center;
       border: 1px solid rgba(168,85,247,.35);
       background: linear-gradient(180deg, var(--purple-light), var(--purple-dark));
       box-shadow: 0 10px 30px rgba(123,44,255,.2);
     }
 
-    .question-mode-button {
-      border: 1px solid rgba(168,85,247,.26);
-      background: rgba(123,44,255,.10);
-      cursor: pointer;
+    .sidebar-nav {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    .new-chat-link:hover,
-    .question-mode-button:hover {
-      transform: scale(1.02);
-      box-shadow: 0 14px 40px rgba(168,85,247,.34);
-      border-color: rgba(168,85,247,.55);
+    .sidebar-nav-link,
+    .question-mode-button,
+    .exam-mode-button,
+    .sidebar-collapse-toggle {
+      justify-content: flex-start;
+      border: 1px solid rgba(168,85,247,.18);
+      background: rgba(255,255,255,.035);
+      padding: 0 13px;
+      cursor: pointer;
+      text-align: left;
     }
+
+    .sidebar-nav-icon {
+      width: 22px;
+      text-align: center;
+      opacity: .92;
+    }
+
+    .sidebar-nav-link:hover,
+    .question-mode-button:hover,
+    .exam-mode-button:hover,
+    .sidebar-collapse-toggle:hover,
+    .new-chat-link:hover {
+      transform: translateY(-1px) scale(1.015);
+      box-shadow: 0 14px 40px rgba(168,85,247,.24);
+      border-color: rgba(168,85,247,.55);
+      background: rgba(123,44,255,.14);
+    }
+
+    .new-chat-link:hover { background: linear-gradient(180deg, var(--purple-light), var(--purple-dark)); }
+
+    .sidebar-nav-link.is-active,
+    .question-mode-button.is-active,
+    .exam-mode-button.is-active {
+      color: var(--text);
+      border-color: rgba(168,85,247,.6);
+      background: linear-gradient(135deg, rgba(123,44,255,.28), rgba(255,255,255,.045));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 28px rgba(168,85,247,.25);
+    }
+
+    .sidebar.is-collapsed {
+      width: 92px;
+      min-width: 92px;
+    }
+
+    .sidebar,
+    .brand-text,
+    .sidebar-nav-label,
+    .new-chat-link span:last-child,
+    .question-mode-button span:last-child,
+    .exam-mode-button span:last-child,
+    .sidebar-search,
+    .future-section-label,
+    .chat-title,
+    .profile-meta,
+    .logout-link {
+      transition: width 240ms ease, min-width 240ms ease, opacity 180ms ease, transform 180ms ease;
+    }
+
+    .sidebar.is-collapsed .brand-text,
+    .sidebar.is-collapsed .sidebar-nav-label,
+    .sidebar.is-collapsed .new-chat-link span:last-child,
+    .sidebar.is-collapsed .question-mode-button span:last-child,
+    .sidebar.is-collapsed .exam-mode-button span:last-child,
+    .sidebar.is-collapsed .sidebar-search,
+    .sidebar.is-collapsed .future-section-label,
+    .sidebar.is-collapsed .chat-title,
+    .sidebar.is-collapsed .profile-meta,
+    .sidebar.is-collapsed .logout-link {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-6px);
+    }
+
+    .sidebar.is-collapsed .brand-row,
+    .sidebar.is-collapsed .profile { justify-content: center; }
+    .sidebar.is-collapsed .sidebar-top,
+    .sidebar.is-collapsed .sidebar-tools,
+    .sidebar.is-collapsed .sidebar-bottom { padding-left: 12px; padding-right: 12px; }
+    .sidebar.is-collapsed .chat-item,
+    .sidebar.is-collapsed .sidebar-nav-link,
+    .sidebar.is-collapsed .question-mode-button,
+    .sidebar.is-collapsed .exam-mode-button,
+    .sidebar.is-collapsed .sidebar-collapse-toggle { justify-content: center; padding-left: 0; padding-right: 0; }
 
     .sidebar-tools { padding: 14px 18px 8px; }
 
@@ -495,38 +576,93 @@
       line-height: 1.6;
     }
 
-    .quick-actions {
+    .mentor-selection {
       width: 100%;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
       margin-top: 30px;
+      text-align: left;
     }
 
-    .quick-action {
-      min-height: 92px;
+    .mentor-section-title {
+      margin: 0 0 6px;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .mentor-section-subtitle {
+      margin: 0 0 16px;
+      color: var(--muted-soft);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .mentor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mentor-card {
+      min-height: 132px;
       border: 1px solid var(--border);
       border-radius: 18px;
-      background: rgba(17,17,17,.82);
+      background: linear-gradient(145deg, rgba(17,17,17,.88), rgba(123,44,255,.08));
       color: var(--text);
-      padding: 16px;
+      padding: 14px;
       cursor: pointer;
       text-align: left;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+      display: grid;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 190ms ease, border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
     }
 
-    .quick-action:hover {
-      transform: translateY(-3px) scale(1.02);
-      border-color: rgba(168,85,247,.42);
-      background: rgba(123,44,255,.12);
+    .mentor-card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background: radial-gradient(circle at 28% 8%, rgba(168,85,247,.26), transparent 34%);
+      opacity: 0;
+      transition: opacity 190ms ease;
+      pointer-events: none;
+    }
+
+    .mentor-card:hover {
+      transform: translateY(-4px) scale(1.015);
+      border-color: rgba(168,85,247,.48);
       box-shadow: var(--shadow-purple);
     }
 
-    .quick-icon { font-size: 21px; line-height: 1; }
-    .quick-text { font-size: 14px; font-weight: 700; }
+    .mentor-card:hover::before,
+    .mentor-card.is-selected::before { opacity: 1; }
+
+    .mentor-card.is-selected {
+      border-color: rgba(168,85,247,.72);
+      background: linear-gradient(145deg, rgba(123,44,255,.22), rgba(17,17,17,.9));
+      box-shadow: 0 0 0 1px rgba(168,85,247,.18), 0 0 34px rgba(168,85,247,.32);
+    }
+
+    .mentor-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(168,85,247,.32);
+      background: rgba(123,44,255,.14);
+      box-shadow: 0 0 24px rgba(168,85,247,.18);
+      font-size: 22px;
+      position: relative;
+      z-index: 1;
+      animation: mentorFloat 4.5s ease-in-out infinite;
+    }
+
+    .mentor-name,
+    .mentor-description { position: relative; z-index: 1; }
+    .mentor-name { font-size: 14px; font-weight: 800; }
+    .mentor-description { color: var(--muted); font-size: 12px; line-height: 1.35; }
 
     .message-row {
       display: flex;
@@ -833,97 +969,123 @@
       color: #fecaca;
     }
 
-    .study-timer {
+    .focus-capsule {
       position: fixed;
-      right: 22px;
-      bottom: 92px;
-      z-index: 45;
-      width: 226px;
-      border: 1px solid rgba(168,85,247,.25);
-      border-radius: 22px;
-      background: rgba(13,13,13,.74);
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 46;
+      border: 1px solid rgba(168,85,247,.3);
+      border-radius: 999px;
+      background: rgba(13,13,13,.72);
       backdrop-filter: blur(18px);
-      box-shadow: 0 18px 50px rgba(0,0,0,.38), 0 0 34px rgba(123,44,255,.14);
-      padding: 12px;
+      box-shadow: 0 18px 48px rgba(0,0,0,.32), 0 0 34px rgba(123,44,255,.18);
+      color: var(--text);
       user-select: none;
-      touch-action: none;
+      overflow: hidden;
       animation: timerIn 260ms ease both;
+      transition: width 240ms ease, border-radius 240ms ease, box-shadow 240ms ease, opacity 180ms ease, transform 240ms ease;
     }
 
-    .timer-top {
+    .focus-capsule.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -12px) scale(.96);
+    }
+
+    .focus-capsule.is-collapsed { width: 184px; }
+    .focus-capsule.is-expanded { width: min(430px, calc(100vw - 28px)); border-radius: 24px; }
+
+    .focus-capsule-summary {
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .focus-capsule-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(123,44,255,.16);
+      box-shadow: 0 0 20px rgba(168,85,247,.22);
+    }
+
+    .focus-capsule-copy { display: grid; gap: 1px; text-align: left; }
+    .focus-capsule-label { color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .focus-capsule-value { font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 850; }
+
+    .focus-capsule-panel {
+      display: none;
+      padding: 0 14px 14px;
+      animation: fadeUp 180ms ease both;
+    }
+
+    .focus-capsule.is-expanded .focus-capsule-panel { display: block; }
+
+    .focus-capsule-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      cursor: grab;
-      padding-bottom: 8px;
+      gap: 12px;
+      padding: 4px 2px 12px;
     }
 
-    .timer-top:active { cursor: grabbing; }
+    .focus-capsule-title { font-size: 15px; font-weight: 850; }
+    .focus-capsule-subtitle { margin-top: 2px; color: var(--muted-soft); font-size: 12px; }
 
-    .timer-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .timer-indicator {
-      width: 9px;
-      height: 9px;
+    .focus-capsule-status {
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
       background: #ef4444;
       box-shadow: 0 0 12px rgba(239,68,68,.75);
     }
 
-    .timer-indicator.running {
-      background: #22c55e;
-      box-shadow: 0 0 14px rgba(34,197,94,.85);
-    }
+    .focus-capsule-status.running { background: #22c55e; box-shadow: 0 0 14px rgba(34,197,94,.85); }
+    .focus-capsule-status.paused { background: #facc15; box-shadow: 0 0 14px rgba(250,204,21,.85); }
 
-    .timer-indicator.paused {
-      background: #facc15;
-      box-shadow: 0 0 14px rgba(250,204,21,.85);
-    }
-
-    .timer-time {
+    .focus-capsule-time {
       font-variant-numeric: tabular-nums;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 850;
-      letter-spacing: .02em;
-      padding: 4px 0 10px;
       text-align: center;
+      padding: 4px 0 12px;
     }
 
-    .timer-buttons {
+    .focus-capsule-actions {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 7px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
     }
 
-    .timer-button {
-      height: 34px;
+    .focus-capsule-button {
+      min-height: 36px;
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 13px;
       background: rgba(255,255,255,.05);
       color: var(--text);
       cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease;
     }
 
-    .timer-button:hover {
+    .focus-capsule-button:hover {
       transform: translateY(-1px);
       border-color: rgba(168,85,247,.45);
       background: rgba(123,44,255,.16);
+      box-shadow: 0 0 20px rgba(168,85,247,.14);
     }
 
-    .timer-button:disabled {
-      opacity: .45;
-      cursor: not-allowed;
-      transform: none;
-    }
 
     .sr-only {
       position: absolute;
@@ -958,12 +1120,17 @@
     }
 
     @keyframes timerIn {
-      from { opacity: 0; transform: translateY(12px) scale(.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from { opacity: 0; transform: translate(-50%, -10px) scale(.96); }
+      to { opacity: 1; transform: translateX(-50%) scale(1); }
+    }
+
+    @keyframes mentorFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
     }
 
     @media (max-width: 920px) {
-      .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mentor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     @media (max-width: 820px) {
@@ -994,11 +1161,7 @@
       .message-bubble { max-width: 86%; }
       .composer-wrap { padding: 11px 12px 15px; }
 
-      .study-timer {
-        right: 12px;
-        bottom: 88px;
-        width: 212px;
-      }
+      .focus-capsule { top: 10px; }
     }
 
     @media (max-width: 520px) {
@@ -1007,20 +1170,18 @@
       .chat-heading-subtitle { display: none; }
       .empty-state { align-items: flex-start; padding-top: 38px; }
       .empty-logo { width: 68px; height: 68px; }
-      .quick-actions { grid-template-columns: 1fr; margin-top: 22px; }
-      .quick-action { min-height: 72px; }
+      .mentor-selection { margin-top: 22px; }
+      .mentor-grid { grid-template-columns: 1fr; }
+      .mentor-card { min-height: 104px; }
       .message-bubble { max-width: 91%; font-size: 14px; }
       .assistant-avatar { width: 26px; height: 26px; }
       .composer { border-radius: 20px; }
       .difficulty-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-      .study-timer {
-        width: min(212px, calc(100vw - 24px));
-        right: 12px;
-        bottom: 82px;
-      }
+      .focus-capsule { top: 10px; }
 
-      .timer-time { font-size: 25px; }
+      .focus-capsule-time { font-size: 27px; }
+      .focus-capsule-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
@@ -1058,10 +1219,40 @@
             <span>New Chat</span>
           </a>
 
-          <button class="question-mode-button" type="button" id="questionModeButton">
-            <span aria-hidden="true">?</span>
-            <span>Question Mode</span>
-          </button>
+          <nav class="sidebar-nav" aria-label="Primary study navigation">
+            <a class="sidebar-nav-link is-active" href="/" data-nav-item="home">
+              <span class="sidebar-nav-icon" aria-hidden="true">⌂</span>
+              <span class="sidebar-nav-label">Home</span>
+            </a>
+            <a class="sidebar-nav-link" href="#chatList" data-nav-item="chats">
+              <span class="sidebar-nav-icon" aria-hidden="true">◐</span>
+              <span class="sidebar-nav-label">Chats</span>
+            </a>
+            <button class="exam-mode-button" type="button" id="examModeButton" data-nav-item="exam">
+              <span class="sidebar-nav-icon" aria-hidden="true">✦</span>
+              <span>Exam Mode</span>
+            </button>
+            <button class="question-mode-button" type="button" id="questionModeButton" data-nav-item="questions">
+              <span class="sidebar-nav-icon" aria-hidden="true">?</span>
+              <span>Question Mode</span>
+            </button>
+            <a class="sidebar-nav-link" href="#" data-nav-item="planner">
+              <span class="sidebar-nav-icon" aria-hidden="true">▣</span>
+              <span class="sidebar-nav-label">Study Planner</span>
+            </a>
+            <button class="sidebar-nav-link" type="button" id="showFocusCapsuleButton" data-nav-item="timer">
+              <span class="sidebar-nav-icon" aria-hidden="true">◷</span>
+              <span class="sidebar-nav-label">Study Timer</span>
+            </button>
+            <a class="sidebar-nav-link" href="#" data-nav-item="settings">
+              <span class="sidebar-nav-icon" aria-hidden="true">⚙</span>
+              <span class="sidebar-nav-label">Settings</span>
+            </a>
+            <button class="sidebar-collapse-toggle" type="button" id="sidebarCollapseButton" aria-label="Collapse sidebar" aria-expanded="true">
+              <span class="sidebar-nav-icon" aria-hidden="true">‹</span>
+              <span class="sidebar-nav-label">Collapse</span>
+            </button>
+          </nav>
         </div>
       </div>
 
@@ -1176,24 +1367,43 @@
                 <p class="welcome-line">Welcome back,<br>{{ user_name }}</p>
                 <p class="empty-copy">Let's build real understanding,<br>one concept at a time.</p>
 
-                <div class="quick-actions" aria-label="Study prompts">
-                  <button class="quick-action" type="button" data-prompt="Learn a new concept">
-                    <span class="quick-icon" aria-hidden="true">📘</span>
-                    <span class="quick-text">Learn a new concept</span>
-                  </button>
-                  <button class="quick-action" type="button" data-prompt="Prepare for exam">
-                    <span class="quick-icon" aria-hidden="true">📝</span>
-                    <span class="quick-text">Prepare for exam</span>
-                  </button>
-                  <button class="quick-action" type="button" data-prompt="Solve my doubts">
-                    <span class="quick-icon" aria-hidden="true">🧠</span>
-                    <span class="quick-text">Solve my doubts</span>
-                  </button>
-                  <button class="quick-action" type="button" data-prompt="Build study plan">
-                    <span class="quick-icon" aria-hidden="true">📈</span>
-                    <span class="quick-text">Build study plan</span>
-                  </button>
-                </div>
+                <section class="mentor-selection" aria-label="Choose your mentor">
+                  <h2 class="mentor-section-title">Choose your mentor</h2>
+                  <p class="mentor-section-subtitle">One guide, one learning style, one focused session.</p>
+
+                  <div class="mentor-grid">
+                    <button class="mentor-card is-selected" type="button" data-mentor="kai-sensei">
+                      <span class="mentor-avatar" aria-hidden="true">K</span>
+                      <span class="mentor-name">Kai Sensei</span>
+                      <span class="mentor-description">Strict • Concept First</span>
+                    </button>
+                    <button class="mentor-card" type="button" data-mentor="friendly-teacher">
+                      <span class="mentor-avatar" aria-hidden="true">F</span>
+                      <span class="mentor-name">Friendly Teacher</span>
+                      <span class="mentor-description">Patient • Beginner Friendly</span>
+                    </button>
+                    <button class="mentor-card" type="button" data-mentor="professor">
+                      <span class="mentor-avatar" aria-hidden="true">P</span>
+                      <span class="mentor-name">Professor</span>
+                      <span class="mentor-description">Deep Explanations</span>
+                    </button>
+                    <button class="mentor-card" type="button" data-mentor="exam-coach">
+                      <span class="mentor-avatar" aria-hidden="true">E</span>
+                      <span class="mentor-name">Exam Coach</span>
+                      <span class="mentor-description">High Weightage Focus</span>
+                    </button>
+                    <button class="mentor-card" type="button" data-mentor="socratic-teacher">
+                      <span class="mentor-avatar" aria-hidden="true">S</span>
+                      <span class="mentor-name">Socratic Teacher</span>
+                      <span class="mentor-description">Guides through Questions</span>
+                    </button>
+                    <button class="mentor-card" type="button" data-mentor="ruthless-mentor">
+                      <span class="mentor-avatar" aria-hidden="true">R</span>
+                      <span class="mentor-name">Ruthless Mentor</span>
+                      <span class="mentor-description">Discipline • Execution</span>
+                    </button>
+                  </div>
+                </section>
               </div>
             </div>
           {% endif %}
@@ -1225,21 +1435,32 @@
     </main>
   </div>
 
-  <div class="study-timer" id="studyTimer" aria-label="Study timer">
-    <div class="timer-top" id="timerDragHandle">
-      <div class="timer-title">
-        <span class="timer-indicator" id="timerIndicator"></span>
-        <span>Study Timer</span>
+  <div class="focus-capsule is-collapsed" id="focusCapsule" data-state="timer" aria-label="Focus Capsule">
+    <button class="focus-capsule-summary" type="button" id="focusCapsuleToggle" aria-expanded="false">
+      <span class="focus-capsule-icon" id="focusCapsuleIcon" aria-hidden="true">⏱</span>
+      <span class="focus-capsule-copy">
+        <span class="focus-capsule-label" id="focusCapsuleLabel">Timer</span>
+        <span class="focus-capsule-value" id="focusCapsuleValue">00:00:00</span>
+      </span>
+    </button>
+
+    <div class="focus-capsule-panel" id="focusCapsulePanel">
+      <div class="focus-capsule-head">
+        <div>
+          <div class="focus-capsule-title" id="focusCapsuleTitle">Study Timer</div>
+          <div class="focus-capsule-subtitle" id="focusCapsuleSubtitle">Elapsed Time</div>
+        </div>
+        <span class="focus-capsule-status" id="timerIndicator" aria-hidden="true"></span>
       </div>
-    </div>
 
-    <div class="timer-time" id="timerDisplay">00:00:00</div>
+      <div class="focus-capsule-time" id="timerDisplay">00:00:00</div>
 
-    <div class="timer-buttons">
-      <button class="timer-button" type="button" id="timerStartButton" aria-label="Start timer">▶</button>
-      <button class="timer-button" type="button" id="timerPauseButton" aria-label="Pause timer">⏸</button>
-      <button class="timer-button" type="button" id="timerStopButton" aria-label="Stop timer">■</button>
-      <button class="timer-button" type="button" id="timerResetButton" aria-label="Reset timer">↻</button>
+      <div class="focus-capsule-actions">
+        <button class="focus-capsule-button" type="button" id="timerPauseButton">Pause</button>
+        <button class="focus-capsule-button" type="button" id="timerStartButton">Resume</button>
+        <button class="focus-capsule-button" type="button" id="timerStopButton">Stop</button>
+        <button class="focus-capsule-button" type="button" id="focusCapsuleHideButton">Hide</button>
+      </div>
     </div>
   </div>
 
@@ -1272,6 +1493,62 @@
         <div class="modal-actions">
           <button class="button" type="button" id="cancelQuestionModeButton">Cancel</button>
           <button class="button primary" type="submit" id="startQuestionModeButton">Start</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <div class="modal-backdrop" id="examModeModal" role="dialog" aria-modal="true" aria-labelledby="examModeTitle">
+    <div class="modal question-modal">
+      <h2 id="examModeTitle">Exam Mode</h2>
+      <p>Start a timed, exam-focused practice session.</p>
+
+      <form class="modal-form" id="examModeForm">
+        <div class="modal-field">
+          <label for="examName">Exam</label>
+          <input id="examName" type="text" autocomplete="off" required placeholder="Example: JEE Main" />
+        </div>
+
+        <div class="modal-field">
+          <label for="examSubject">Subject</label>
+          <input id="examSubject" type="text" autocomplete="off" required placeholder="Example: Physics" />
+        </div>
+
+        <div class="modal-field">
+          <label for="examChapter">Chapter (Optional)</label>
+          <input id="examChapter" type="text" autocomplete="off" placeholder="Example: Rotational Motion" />
+        </div>
+
+        <div class="modal-field">
+          <label>Difficulty</label>
+          <div class="difficulty-grid" id="examDifficultyGrid">
+            <button class="difficulty-option is-active" type="button" data-difficulty="Easy">Easy</button>
+            <button class="difficulty-option" type="button" data-difficulty="Intermediate">Intermediate</button>
+            <button class="difficulty-option" type="button" data-difficulty="Hard">Hard</button>
+            <button class="difficulty-option" type="button" data-difficulty="Brutal">Brutal</button>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label for="examQuestionType">Question Type</label>
+          <select id="examQuestionType" required>
+            <option value="MCQ">MCQ</option>
+            <option value="Short Answer">Short Answer</option>
+            <option value="Numerical">Numerical</option>
+            <option value="Mixed">Mixed</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="examAvailableTime">Available Time</label>
+          <input id="examAvailableTime" type="text" autocomplete="off" required placeholder="Example: 45 minutes" />
+        </div>
+
+        <div class="modal-actions">
+          <button class="button" type="button" id="cancelExamModeButton">Cancel</button>
+          <button class="button primary" type="submit" id="startExamModeButton">Start Exam Mode</button>
         </div>
       </form>
     </div>
@@ -1334,7 +1611,9 @@
     const confirmDeleteButton = document.getElementById("confirmDeleteButton");
 
     const shareMenuItem = document.getElementById("shareMenuItem");
-    const quickActions = document.querySelectorAll(".quick-action");
+    const mentorCards = document.querySelectorAll(".mentor-card");
+    const sidebarCollapseButton = document.getElementById("sidebarCollapseButton");
+    const showFocusCapsuleButton = document.getElementById("showFocusCapsuleButton");
 
     const questionModeButton = document.getElementById("questionModeButton");
     const questionModeModal = document.getElementById("questionModeModal");
@@ -1343,25 +1622,50 @@
     const questionTopic = document.getElementById("questionTopic");
     const cancelQuestionModeButton = document.getElementById("cancelQuestionModeButton");
     const startQuestionModeButton = document.getElementById("startQuestionModeButton");
-    const difficultyOptions = document.querySelectorAll(".difficulty-option");
+    const difficultyOptions = document.querySelectorAll("#difficultyGrid .difficulty-option");
 
-    const studyTimer = document.getElementById("studyTimer");
-    const timerDragHandle = document.getElementById("timerDragHandle");
+    const examModeButton = document.getElementById("examModeButton");
+    const examModeModal = document.getElementById("examModeModal");
+    const examModeForm = document.getElementById("examModeForm");
+    const examName = document.getElementById("examName");
+    const examSubject = document.getElementById("examSubject");
+    const examChapter = document.getElementById("examChapter");
+    const examQuestionType = document.getElementById("examQuestionType");
+    const examAvailableTime = document.getElementById("examAvailableTime");
+    const cancelExamModeButton = document.getElementById("cancelExamModeButton");
+    const startExamModeButton = document.getElementById("startExamModeButton");
+    const examDifficultyOptions = document.querySelectorAll("#examDifficultyGrid .difficulty-option");
+
+    const focusCapsule = document.getElementById("focusCapsule");
+    const focusCapsuleToggle = document.getElementById("focusCapsuleToggle");
+    const focusCapsuleLabel = document.getElementById("focusCapsuleLabel");
+    const focusCapsuleValue = document.getElementById("focusCapsuleValue");
+    const focusCapsuleIcon = document.getElementById("focusCapsuleIcon");
+    const focusCapsuleTitle = document.getElementById("focusCapsuleTitle");
+    const focusCapsuleSubtitle = document.getElementById("focusCapsuleSubtitle");
+    const focusCapsuleHideButton = document.getElementById("focusCapsuleHideButton");
     const timerDisplay = document.getElementById("timerDisplay");
     const timerIndicator = document.getElementById("timerIndicator");
     const timerStartButton = document.getElementById("timerStartButton");
     const timerPauseButton = document.getElementById("timerPauseButton");
     const timerStopButton = document.getElementById("timerStopButton");
-    const timerResetButton = document.getElementById("timerResetButton");
 
     let isSending = false;
     let selectedDifficulty = "Easy";
     let timerSeconds = 0;
     let timerInterval = null;
     let timerState = "stopped";
-    let isDraggingTimer = false;
-    let timerDragOffsetX = 0;
-    let timerDragOffsetY = 0;
+    let selectedExamDifficulty = "Easy";
+    let selectedMentor = "kai-sensei";
+    const focusCapsuleStates = {
+      timer: { icon: "⏱", label: "Timer", title: "Study Timer", subtitle: "Elapsed Time" },
+      aiThinking: { icon: "✦", label: "AI Thinking", title: "AI Thinking", subtitle: "Working through the next step" },
+      examMode: { icon: "◇", label: "Exam Active", title: "Exam Mode Active", subtitle: "Timed practice in progress" },
+      diagram: { icon: "△", label: "Diagram", title: "Generating Diagram", subtitle: "Building a visual explanation" },
+      streak: { icon: "◆", label: "Streak", title: "Study Streak", subtitle: "Consistency updated" },
+      continueLesson: { icon: "↗", label: "Continue", title: "Continue Last Lesson", subtitle: "Resume where you stopped" },
+      memoryUpdated: { icon: "✓", label: "Memory", title: "Memory Updated", subtitle: "Learning preference saved" }
+    };
 
     function openSidebar() {
       sidebar.classList.add("is-open");
@@ -1731,8 +2035,22 @@
       }).join(":");
     }
 
+    function renderFocusCapsuleState(stateName) {
+      const capsuleState = focusCapsuleStates[stateName] || focusCapsuleStates.timer;
+      focusCapsule.dataset.state = stateName;
+      focusCapsuleIcon.textContent = capsuleState.icon;
+      focusCapsuleLabel.textContent = capsuleState.label;
+      focusCapsuleTitle.textContent = capsuleState.title;
+      focusCapsuleSubtitle.textContent = capsuleState.subtitle;
+      focusCapsuleValue.textContent = stateName === "timer" ? formatTimer(timerSeconds) : capsuleState.subtitle;
+    }
+
     function renderTimer() {
-      timerDisplay.textContent = formatTimer(timerSeconds);
+      const formattedTime = formatTimer(timerSeconds);
+      timerDisplay.textContent = formattedTime;
+      if (focusCapsule.dataset.state === "timer") {
+        focusCapsuleValue.textContent = formattedTime;
+      }
       timerIndicator.classList.toggle("running", timerState === "running");
       timerIndicator.classList.toggle("paused", timerState === "paused");
     }
@@ -1742,6 +2060,8 @@
         return;
       }
 
+      renderFocusCapsuleState("timer");
+      focusCapsule.classList.remove("is-hidden");
       timerState = "running";
       renderTimer();
 
@@ -1762,11 +2082,14 @@
     }
 
     async function stopTimer() {
+      const secondsToSave = timerSeconds;
+
       if (timerInterval) {
         window.clearInterval(timerInterval);
         timerInterval = null;
       }
 
+      timerSeconds = 0;
       timerState = "stopped";
       renderTimer();
 
@@ -1777,56 +2100,12 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            seconds: timerSeconds
+            seconds: secondsToSave
           })
         });
       } catch (error) {
         setStatus("Study timer could not be saved.", true);
       }
-    }
-
-    function resetTimer() {
-      if (timerInterval) {
-        window.clearInterval(timerInterval);
-        timerInterval = null;
-      }
-
-      timerSeconds = 0;
-      timerState = "stopped";
-      renderTimer();
-    }
-
-    function beginTimerDrag(event) {
-      const pointer = event.touches ? event.touches[0] : event;
-      const rect = studyTimer.getBoundingClientRect();
-
-      isDraggingTimer = true;
-      timerDragOffsetX = pointer.clientX - rect.left;
-      timerDragOffsetY = pointer.clientY - rect.top;
-
-      studyTimer.style.left = `${rect.left}px`;
-      studyTimer.style.top = `${rect.top}px`;
-      studyTimer.style.right = "auto";
-      studyTimer.style.bottom = "auto";
-    }
-
-    function moveTimer(event) {
-      if (!isDraggingTimer) {
-        return;
-      }
-
-      const pointer = event.touches ? event.touches[0] : event;
-      const maxLeft = window.innerWidth - studyTimer.offsetWidth - 8;
-      const maxTop = window.innerHeight - studyTimer.offsetHeight - 8;
-      const nextLeft = Math.max(8, Math.min(maxLeft, pointer.clientX - timerDragOffsetX));
-      const nextTop = Math.max(8, Math.min(maxTop, pointer.clientY - timerDragOffsetY));
-
-      studyTimer.style.left = `${nextLeft}px`;
-      studyTimer.style.top = `${nextTop}px`;
-    }
-
-    function endTimerDrag() {
-      isDraggingTimer = false;
     }
 
     mobileMenuButton.addEventListener("click", toggleSidebar);
@@ -1855,6 +2134,7 @@
         closeModal(renameModal);
         closeModal(deleteModal);
         closeModal(questionModeModal);
+        closeModal(examModeModal);
       }
     });
 
@@ -1884,16 +2164,48 @@
       sendMessage(message);
     });
 
-    quickActions.forEach(function (button) {
-      button.addEventListener("click", function () {
-        promptInput.value = button.dataset.prompt || "";
-        autoResizeTextarea();
-        promptInput.focus();
+    function setActiveSidebarItem(item) {
+      document.querySelectorAll("[data-nav-item]").forEach(function (navItem) {
+        navItem.classList.toggle("is-active", navItem.dataset.navItem === item);
       });
+    }
+
+    function handleMentorSelected(card) {
+      selectedMentor = card.dataset.mentor;
+      mentorCards.forEach(function (mentorCard) {
+        mentorCard.classList.toggle("is-selected", mentorCard === card);
+      });
+
+      window.dispatchEvent(new CustomEvent("eka:mentor-selected", {
+        detail: { mentor: selectedMentor }
+      }));
+      setStatus("Mentor selected. Backend hook is ready for integration.");
+    }
+
+    mentorCards.forEach(function (card) {
+      card.addEventListener("click", function () {
+        handleMentorSelected(card);
+      });
+    });
+
+    sidebarCollapseButton.addEventListener("click", function () {
+      const isCollapsed = sidebar.classList.toggle("is-collapsed");
+      sidebarCollapseButton.setAttribute("aria-expanded", String(!isCollapsed));
+      sidebarCollapseButton.querySelector(".sidebar-nav-icon").textContent = isCollapsed ? "›" : "‹";
+    });
+
+    showFocusCapsuleButton.addEventListener("click", function () {
+      closeSidebar();
+      setActiveSidebarItem("timer");
+      focusCapsule.classList.remove("is-hidden");
+      focusCapsule.classList.add("is-expanded");
+      focusCapsule.classList.remove("is-collapsed");
+      focusCapsuleToggle.setAttribute("aria-expanded", "true");
     });
 
     questionModeButton.addEventListener("click", function () {
       closeSidebar();
+      setActiveSidebarItem("questions");
       openModal(questionModeModal);
       setTimeout(function () {
         questionSubject.focus();
@@ -1918,6 +2230,99 @@
     questionModeForm.addEventListener("submit", function (event) {
       event.preventDefault();
       startQuestionMode();
+    });
+
+    examModeButton.addEventListener("click", function () {
+      closeSidebar();
+      setActiveSidebarItem("exam");
+      openModal(examModeModal);
+      setTimeout(function () {
+        examName.focus();
+      }, 0);
+    });
+
+    cancelExamModeButton.addEventListener("click", function () {
+      closeModal(examModeModal);
+      setStatus("");
+    });
+
+    examDifficultyOptions.forEach(function (button) {
+      button.addEventListener("click", function () {
+        selectedExamDifficulty = button.dataset.difficulty;
+        examDifficultyOptions.forEach(function (option) {
+          option.classList.remove("is-active");
+        });
+        button.classList.add("is-active");
+      });
+    });
+
+    async function startExamMode() {
+      const exam = examName.value.trim();
+      const subject = examSubject.value.trim();
+      const chapter = examChapter.value.trim();
+      const questionType = examQuestionType.value;
+      const availableTime = examAvailableTime.value.trim();
+
+      if (!exam || !subject || !availableTime) {
+        setStatus("Enter exam, subject, and available time for Exam Mode.", true);
+        return;
+      }
+
+      startExamModeButton.disabled = true;
+      setStatus("Starting Exam Mode...");
+      closeModal(examModeModal);
+      renderFocusCapsuleState("examMode");
+      focusCapsule.classList.remove("is-hidden");
+
+      const typingRow = appendTyping();
+
+      try {
+        const response = await fetch("/exam_mode", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            exam: exam,
+            subject: subject,
+            chapter: chapter,
+            difficulty: selectedExamDifficulty,
+            question_type: questionType,
+            available_time: availableTime
+          })
+        });
+
+        const payload = await parseResponse(response);
+
+        if (!response.ok) {
+          const errorMessage = typeof payload === "string"
+            ? payload
+            : payload.error || payload.message || "Exam Mode failed.";
+          throw new Error(errorMessage);
+        }
+
+        const examMessage = extractQuestionMessage(payload);
+
+        if (!examMessage) {
+          throw new Error("The server response did not include exam content.");
+        }
+
+        typingRow.remove();
+        appendMessage("assistant", examMessage);
+        setStatus("");
+      } catch (error) {
+        typingRow.remove();
+        appendMessage("assistant", "I could not start Exam Mode right now. Please try again.");
+        setStatus(error.message || "Exam Mode failed.", true);
+      } finally {
+        renderFocusCapsuleState("timer");
+        startExamModeButton.disabled = false;
+      }
+    }
+
+    examModeForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      startExamMode();
     });
 
     renameMenuItem.addEventListener("click", function () {
@@ -1967,18 +2372,20 @@
       });
     });
 
+    focusCapsuleToggle.addEventListener("click", function () {
+      const shouldExpand = focusCapsule.classList.contains("is-collapsed");
+      focusCapsule.classList.toggle("is-expanded", shouldExpand);
+      focusCapsule.classList.toggle("is-collapsed", !shouldExpand);
+      focusCapsuleToggle.setAttribute("aria-expanded", String(shouldExpand));
+    });
+
     timerStartButton.addEventListener("click", startTimer);
     timerPauseButton.addEventListener("click", pauseTimer);
     timerStopButton.addEventListener("click", stopTimer);
-    timerResetButton.addEventListener("click", resetTimer);
-
-    timerDragHandle.addEventListener("mousedown", beginTimerDrag);
-    document.addEventListener("mousemove", moveTimer);
-    document.addEventListener("mouseup", endTimerDrag);
-
-    timerDragHandle.addEventListener("touchstart", beginTimerDrag, { passive: true });
-    document.addEventListener("touchmove", moveTimer, { passive: true });
-    document.addEventListener("touchend", endTimerDrag);
+    focusCapsuleHideButton.addEventListener("click", function () {
+      focusCapsule.classList.add("is-hidden");
+      setActiveSidebarItem("home");
+    });
 
     window.addEventListener("resize", function () {
       if (window.innerWidth > 820) {
@@ -1988,6 +2395,7 @@
 
     scrollToBottom();
     autoResizeTextarea();
+    renderFocusCapsuleState("timer");
     renderTimer();
   </script>
 </body>
