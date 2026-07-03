@@ -757,14 +757,17 @@ VALUES(?, ?, ?)
     memory = extract_memory(prompt, result)
     if memory:
       old = load_memory(user_id)
+      save_memory(
+    user_id,
+    memory["subject"] if memory["subject"] else (old["subject"] if old else ""),
+    memory["chapter"] if memory["chapter"] else (old["chapter"] if old else ""),
+    memory["concept"] if memory["concept"] else (old["current_concept"] if old else ""),
+    memory["language"] if memory["language"] else (old["language"] if old else ""),
+    old["difficulty"] if old else "Beginner",
+    old["mentor_personality"] if old else "Kai Sensei"
+)
 
-    save_memory(
-        user_id,
-        memory["subject"] if memory["subject"] else (old["subject"] if old else ""),
-        memory["chapter"] if memory["chapter"] else (old["chapter"] if old else ""),
-        memory["concept"] if memory["concept"] else (old["current_concept"] if old else ""),
-        memory["language"] if memory["language"] else (old["language"] if old else "")
-    )
+
 
     conn = get_db()
     cur = conn.cursor()
