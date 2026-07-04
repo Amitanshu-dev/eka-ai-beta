@@ -435,6 +435,9 @@ def ask_ai(prompt, chat_id, user_id="default"):
         saved_language=""
         saved_difficulty="beginner"
         saved_personality="Kai Sensei"
+        personality_prompt =(
+        get_personality_prompt(saved_personality)
+           )
         if memory:
            saved_subject = memory["subject"] or ""
            saved_chapter = memory["chapter"] or ""
@@ -445,6 +448,7 @@ def ask_ai(prompt, chat_id, user_id="default"):
            personality_prompt =(
            get_personality_prompt(saved_personality)
            )
+
         if user_id not in chat_history:
             chat_history[user_id] = {
                 "summary": "",
