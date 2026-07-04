@@ -461,7 +461,6 @@ def ask_ai(prompt, chat_id, user_id="default"):
             }
         else:
             chat_history[user_id]["chat_id"] = chat_id
-        saved_personality = "Kai Sensei"
 
         SYSTEM_PROMPT = """
 You are EKA AI.
@@ -732,7 +731,6 @@ def ask():
         }
 
     chat_history[user_id]["chat_id"] = chat_id
-
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
@@ -812,13 +810,10 @@ VALUES(?, ?, ?)
 
 @app.route("/change_personality", methods=["POST"])
 def change_personality():
-
     if "user" not in session:
         return jsonify({"success": False})
-
     data = request.json
     personality = data.get("personality", "Kai Sensei")
-
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
@@ -840,6 +835,8 @@ mentor_personality = excluded.mentor_personality
 
 
     conn.commit()
+    if session["user"]["email"] in chat_history:
+      chat_history[session["user"]["email"]]["personality"] = personality
     conn.close()
 
     return jsonify({"success": True})
