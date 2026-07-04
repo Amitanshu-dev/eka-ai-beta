@@ -35,7 +35,7 @@ def load_memory(user_email):
     memory=cur.fetchone()
     conn.close()
     return memory
-def save_memory(user_email, subject, chapter, concept, language,difficulty,mentor_personality):
+def save_memory(user_email, subject, chapter, concept, language,difficulty="Beginner",mentor_personality="Kai Sensei"):
     conn = get_db()
     cur = conn.cursor()
 
@@ -442,7 +442,9 @@ def ask_ai(prompt, chat_id, user_id="default"):
            saved_language = memory["language"] or ""
            saved_difficulty = memory["difficulty"] or "Beginner"
            saved_personality = memory["mentor_personality"] or "Kai Sensei"
-           personality_prompt = get_personality_prompt(saved_personality)
+           personality_prompt =(
+           get_personality_prompt(saved_personality)
+           )
         if user_id not in chat_history:
             chat_history[user_id] = {
                 "summary": "",
@@ -456,10 +458,6 @@ def ask_ai(prompt, chat_id, user_id="default"):
         else:
             chat_history[user_id]["chat_id"] = chat_id
         saved_personality = "Kai Sensei"
-
-        if memory:
-          saved_personality = memory["mentor_personality"] or "Kai Sensei"
-          personality_prompt = get_personality_prompt(saved_personality)
 
         SYSTEM_PROMPT = """
 You are EKA AI.
@@ -819,15 +817,23 @@ def change_personality():
 
     conn = get_db()
     cur = conn.cursor()
-
     cur.execute("""
-    UPDATE lesson_memory
-    SET mentor_personality=?
-    WHERE user_email=?
-    """, (
-        personality,
-        session["user"]["email"]
-    ))
+INSERT INTO lesson_memory
+(
+    user_email,
+    mentor_personality
+)
+VALUES (?, ?)
+
+ON CONFLICT(user_email)
+DO UPDATE SET
+
+mentor_personality = excluded.mentor_personality
+""", (
+    session["user"]["email"],
+    personality
+))
+
 
     conn.commit()
     conn.close()
