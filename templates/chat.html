@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EKA AI</title>
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css" crossorigin="anonymous">
   <style>
     :root {
       --bg: #050505;
@@ -696,8 +697,132 @@
       padding: 13px 15px;
       font-size: 15px;
       line-height: 1.6;
-      white-space: pre-wrap;
       overflow-wrap: anywhere;
+    }
+
+    .message-row.user .message-bubble {
+      white-space: pre-wrap;
+    }
+
+    .message-row.assistant .message-bubble {
+      white-space: normal;
+    }
+
+    .message-row.assistant .message-bubble :first-child { margin-top: 0; }
+    .message-row.assistant .message-bubble :last-child { margin-bottom: 0; }
+
+    .message-row.assistant .message-bubble p,
+    .message-row.assistant .message-bubble ul,
+    .message-row.assistant .message-bubble ol,
+    .message-row.assistant .message-bubble blockquote,
+    .message-row.assistant .message-bubble pre,
+    .message-row.assistant .message-bubble table,
+    .message-row.assistant .message-bubble .katex-display {
+      margin: 0 0 0.9em;
+    }
+
+    .message-row.assistant .message-bubble h1,
+    .message-row.assistant .message-bubble h2,
+    .message-row.assistant .message-bubble h3 {
+      margin: 1.05em 0 0.45em;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .message-row.assistant .message-bubble h1 { font-size: 1.55em; }
+    .message-row.assistant .message-bubble h2 { font-size: 1.32em; }
+    .message-row.assistant .message-bubble h3 { font-size: 1.14em; }
+
+    .message-row.assistant .message-bubble ul,
+    .message-row.assistant .message-bubble ol {
+      padding-left: 1.45em;
+    }
+
+    .message-row.assistant .message-bubble li + li {
+      margin-top: 0.28em;
+    }
+
+    .message-row.assistant .message-bubble blockquote {
+      border-left: 3px solid rgba(168,85,247,.55);
+      color: rgba(255,255,255,.82);
+      padding-left: 1em;
+    }
+
+    .message-row.assistant .message-bubble a {
+      color: #c4b5fd;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .message-row.assistant .message-bubble code {
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 6px;
+      background: rgba(255,255,255,.07);
+      padding: 0.12em 0.34em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    .message-row.assistant .message-bubble pre {
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 10px;
+      background: rgba(0,0,0,.34);
+      padding: 12px;
+      white-space: pre;
+    }
+
+    .message-row.assistant .message-bubble pre code {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      font-size: 0.9em;
+    }
+
+    .message-row.assistant .message-bubble table {
+      width: 100%;
+      border-collapse: collapse;
+      display: block;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .message-row.assistant .message-bubble th,
+    .message-row.assistant .message-bubble td {
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 7px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .message-row.assistant .message-bubble th {
+      background: rgba(255,255,255,.06);
+      font-weight: 750;
+    }
+
+    .message-row.assistant .message-bubble hr {
+      border: 0;
+      border-top: 1px solid rgba(255,255,255,.12);
+      margin: 1em 0;
+    }
+
+    .message-row.assistant .katex {
+      color: var(--text);
+      font-size: 1.05em;
+    }
+
+    .message-row.assistant .katex-display {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.15em 0 0.35em;
+      text-align: center;
+    }
+
+    .message-row.assistant .katex-display > .katex {
+      display: inline-block;
+      max-width: 100%;
+      white-space: normal;
     }
 
     .message-row.user .message-bubble {
@@ -1174,6 +1299,8 @@
       .mentor-grid { grid-template-columns: 1fr; }
       .mentor-card { min-height: 104px; }
       .message-bubble { max-width: 91%; font-size: 14px; }
+      .message-row.assistant .katex { font-size: 0.98em; }
+      .message-row.assistant .message-bubble pre { padding: 10px; }
       .assistant-avatar { width: 26px; height: 26px; }
       .composer { border-radius: 20px; }
       .difficulty-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1221,15 +1348,15 @@
 
           <nav class="sidebar-nav" aria-label="Primary study navigation">
             <a class="sidebar-nav-link is-active" href="/" data-nav-item="home">
-              <span class="sidebar-nav-icon" aria-hidden="true">⌂</span>
+              <span class="sidebar-nav-icon" aria-hidden="true">âŒ‚</span>
               <span class="sidebar-nav-label">Home</span>
             </a>
             <a class="sidebar-nav-link" href="#chatList" data-nav-item="chats">
-              <span class="sidebar-nav-icon" aria-hidden="true">◐</span>
+              <span class="sidebar-nav-icon" aria-hidden="true">â—</span>
               <span class="sidebar-nav-label">Chats</span>
             </a>
             <button class="exam-mode-button" type="button" id="examModeButton" data-nav-item="exam">
-              <span class="sidebar-nav-icon" aria-hidden="true">✦</span>
+              <span class="sidebar-nav-icon" aria-hidden="true">âœ¦</span>
               <span>Exam Mode</span>
             </button>
             <button class="question-mode-button" type="button" id="questionModeButton" data-nav-item="questions">
@@ -1237,19 +1364,19 @@
               <span>Question Mode</span>
             </button>
             <a class="sidebar-nav-link" href="#" data-nav-item="planner">
-              <span class="sidebar-nav-icon" aria-hidden="true">▣</span>
+              <span class="sidebar-nav-icon" aria-hidden="true">â–£</span>
               <span class="sidebar-nav-label">Study Planner</span>
             </a>
             <button class="sidebar-nav-link" type="button" id="showFocusCapsuleButton" data-nav-item="timer">
-              <span class="sidebar-nav-icon" aria-hidden="true">◷</span>
+              <span class="sidebar-nav-icon" aria-hidden="true">â—·</span>
               <span class="sidebar-nav-label">Study Timer</span>
             </button>
             <a class="sidebar-nav-link" href="#" data-nav-item="settings">
-              <span class="sidebar-nav-icon" aria-hidden="true">⚙</span>
+              <span class="sidebar-nav-icon" aria-hidden="true">âš™</span>
               <span class="sidebar-nav-label">Settings</span>
             </a>
             <button class="sidebar-collapse-toggle" type="button" id="sidebarCollapseButton" aria-label="Collapse sidebar" aria-expanded="true">
-              <span class="sidebar-nav-icon" aria-hidden="true">‹</span>
+              <span class="sidebar-nav-icon" aria-hidden="true">â€¹</span>
               <span class="sidebar-nav-label">Collapse</span>
             </button>
           </nav>
@@ -1348,7 +1475,7 @@
             {% for msg in messages %}
               {% if msg.role == "user" %}
                 <div class="message-row user">
-                  <div class="message-bubble">{{ msg.message }}</div>
+                  <div class="message-bubble js-rendered-response">{{ msg.message }}</div>
                 </div>
               {% else %}
                 <div class="message-row assistant">
@@ -1375,12 +1502,12 @@
                     <button class="mentor-card is-selected" type="button" data-mentor="kai-sensei">
                       <span class="mentor-avatar" aria-hidden="true">K</span>
                       <span class="mentor-name">Kai Sensei</span>
-                      <span class="mentor-description">Strict • Concept First</span>
+                      <span class="mentor-description">Strict â€¢ Concept First</span>
                     </button>
                     <button class="mentor-card" type="button" data-mentor="friendly-teacher">
                       <span class="mentor-avatar" aria-hidden="true">F</span>
                       <span class="mentor-name">Friendly Teacher</span>
-                      <span class="mentor-description">Patient • Beginner Friendly</span>
+                      <span class="mentor-description">Patient â€¢ Beginner Friendly</span>
                     </button>
                     <button class="mentor-card" type="button" data-mentor="professor">
                       <span class="mentor-avatar" aria-hidden="true">P</span>
@@ -1400,7 +1527,7 @@
                     <button class="mentor-card" type="button" data-mentor="ruthless-mentor">
                       <span class="mentor-avatar" aria-hidden="true">R</span>
                       <span class="mentor-name">Ruthless Mentor</span>
-                      <span class="mentor-description">Discipline • Execution</span>
+                      <span class="mentor-description">Discipline â€¢ Execution</span>
                     </button>
                   </div>
                 </section>
@@ -1437,7 +1564,7 @@
 
   <div class="focus-capsule is-collapsed" id="focusCapsule" data-state="timer" aria-label="Focus Capsule">
     <button class="focus-capsule-summary" type="button" id="focusCapsuleToggle" aria-expanded="false">
-      <span class="focus-capsule-icon" id="focusCapsuleIcon" aria-hidden="true">⏱</span>
+      <span class="focus-capsule-icon" id="focusCapsuleIcon" aria-hidden="true">â±</span>
       <span class="focus-capsule-copy">
         <span class="focus-capsule-label" id="focusCapsuleLabel">Timer</span>
         <span class="focus-capsule-value" id="focusCapsuleValue">00:00:00</span>
@@ -1581,6 +1708,10 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked@18.0.5/lib/marked.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
   <script>
     const currentChatId={{ chat_id }};
 
@@ -1658,13 +1789,13 @@
     let selectedExamDifficulty = "Easy";
     let selectedMentor = "kai-sensei";
     const focusCapsuleStates = {
-      timer: { icon: "⏱", label: "Timer", title: "Study Timer", subtitle: "Elapsed Time" },
-      aiThinking: { icon: "✦", label: "AI Thinking", title: "AI Thinking", subtitle: "Working through the next step" },
-      examMode: { icon: "◇", label: "Exam Active", title: "Exam Mode Active", subtitle: "Timed practice in progress" },
-      diagram: { icon: "△", label: "Diagram", title: "Generating Diagram", subtitle: "Building a visual explanation" },
-      streak: { icon: "◆", label: "Streak", title: "Study Streak", subtitle: "Consistency updated" },
-      continueLesson: { icon: "↗", label: "Continue", title: "Continue Last Lesson", subtitle: "Resume where you stopped" },
-      memoryUpdated: { icon: "✓", label: "Memory", title: "Memory Updated", subtitle: "Learning preference saved" }
+      timer: { icon: "â±", label: "Timer", title: "Study Timer", subtitle: "Elapsed Time" },
+      aiThinking: { icon: "âœ¦", label: "AI Thinking", title: "AI Thinking", subtitle: "Working through the next step" },
+      examMode: { icon: "â—‡", label: "Exam Active", title: "Exam Mode Active", subtitle: "Timed practice in progress" },
+      diagram: { icon: "â–³", label: "Diagram", title: "Generating Diagram", subtitle: "Building a visual explanation" },
+      streak: { icon: "â—†", label: "Streak", title: "Study Streak", subtitle: "Consistency updated" },
+      continueLesson: { icon: "â†—", label: "Continue", title: "Continue Last Lesson", subtitle: "Resume where you stopped" },
+      memoryUpdated: { icon: "âœ“", label: "Memory", title: "Memory Updated", subtitle: "Learning preference saved" }
     };
 
     function openSidebar() {
@@ -1717,6 +1848,80 @@
       }
     }
 
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, function (character) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#39;"
+        }[character];
+      });
+    }
+
+    const markedLibrary = typeof marked !== "undefined" ? marked : window.marked;
+    const markdownRenderer = markedLibrary ? new markedLibrary.Renderer() : null;
+
+    if (markdownRenderer) {
+      markdownRenderer.html = function (html) {
+        return escapeHtml(typeof html === "string" ? html : html.raw || "");
+      };
+
+      markedLibrary.setOptions({
+        gfm: true,
+        breaks: false,
+        renderer: markdownRenderer
+      });
+    }
+
+    function renderAssistantResponse(bubble, text) {
+      if (!bubble || bubble.dataset.renderedResponse === "true") {
+        return;
+      }
+
+      const source = typeof text === "string" ? text : bubble.textContent || "";
+      bubble.dataset.renderedResponse = "true";
+
+      if (!markedLibrary) {
+        bubble.textContent = source;
+        return;
+      }
+
+      try {
+        bubble.innerHTML = markedLibrary.parse(source);
+      } catch (error) {
+        bubble.textContent = source;
+        return;
+      }
+
+      const mathRenderer = typeof renderMathInElement !== "undefined" ? renderMathInElement : window.renderMathInElement;
+
+      if (typeof mathRenderer === "function") {
+        try {
+          mathRenderer(bubble, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false },
+              { left: "\\(", right: "\\)", display: false },
+              { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"],
+            throwOnError: false,
+            errorColor: "#fca5a5"
+          });
+        } catch (error) {
+          bubble.textContent = source;
+        }
+      }
+    }
+
+    function renderExistingAssistantResponses() {
+      document.querySelectorAll(".message-row.assistant .message-bubble").forEach(function (bubble) {
+        renderAssistantResponse(bubble);
+      });
+    }
+
     function appendMessage(role, text) {
       removeEmptyState();
 
@@ -1733,7 +1938,12 @@
 
       const bubble = document.createElement("div");
       bubble.className = "message-bubble";
-      bubble.textContent = text;
+
+      if (role === "assistant") {
+        renderAssistantResponse(bubble, text);
+      } else {
+        bubble.textContent = text;
+      }
 
       row.appendChild(bubble);
       messagesInner.appendChild(row);
@@ -2203,7 +2413,7 @@
     sidebarCollapseButton.addEventListener("click", function () {
       const isCollapsed = sidebar.classList.toggle("is-collapsed");
       sidebarCollapseButton.setAttribute("aria-expanded", String(!isCollapsed));
-      sidebarCollapseButton.querySelector(".sidebar-nav-icon").textContent = isCollapsed ? "›" : "‹";
+      sidebarCollapseButton.querySelector(".sidebar-nav-icon").textContent = isCollapsed ? "â€º" : "â€¹";
     });
 
     showFocusCapsuleButton.addEventListener("click", function () {
@@ -2405,6 +2615,7 @@
       }
     });
 
+    renderExistingAssistantResponses();
     scrollToBottom();
     autoResizeTextarea();
     renderFocusCapsuleState("timer");
@@ -2412,3 +2623,4 @@
   </script>
 </body>
 </html>
+
