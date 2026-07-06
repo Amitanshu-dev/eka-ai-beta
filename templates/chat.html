@@ -2170,17 +2170,29 @@
       });
     }
 
-    function handleMentorSelected(card) {
-      selectedMentor = card.dataset.mentor;
-      mentorCards.forEach(function (mentorCard) {
-        mentorCard.classList.toggle("is-selected", mentorCard === card);
-      });
+    async function handleMentorSelected(card) {
+    selectedMentor = card.dataset.mentor;
 
-      window.dispatchEvent(new CustomEvent("eka:mentor-selected", {
+    mentorCards.forEach(function (mentorCard) {
+        mentorCard.classList.toggle("is-selected", mentorCard === card);
+    });
+
+    await fetch("/change_personality", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            personality: card.querySelector(".mentor-name").innerText
+        })
+    });
+
+    window.dispatchEvent(new CustomEvent("eka:mentor-selected", {
         detail: { mentor: selectedMentor }
-      }));
-      setStatus("Mentor selected. Backend hook is ready for integration.");
-    }
+    }));
+
+    setStatus("Mentor changed successfully.");
+}
 
     mentorCards.forEach(function (card) {
       card.addEventListener("click", function () {
