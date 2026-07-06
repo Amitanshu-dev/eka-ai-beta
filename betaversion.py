@@ -714,6 +714,8 @@ Language: {chat_history[user_id]["language"]}
 
 @app.route("/ask", methods=["POST"])
 def ask():
+    print("========== ASK ==========")
+    print(request.json)
     data = request.json
     prompt = data.get("prompt")
     chat_id = data.get("chat_id")
@@ -810,6 +812,8 @@ VALUES(?, ?, ?)
 
 @app.route("/change_personality", methods=["POST"])
 def change_personality():
+    print("========== CHANGE PERSONALITY ==========")
+    print(request.json)
     if "user" not in session:
         return jsonify({"success": False})
     data = request.json
