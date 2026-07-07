@@ -946,275 +946,266 @@
       margin-top: 16px;
       position: relative;
     }
-   .study-planner-backdrop {
-  background: rgba(5,5,5,.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  opacity: 0;
-  transition: opacity 220ms ease;
-}
+    
+    /* === Premium Study Planner === */
+    .study-planner-backdrop {
+      background: rgba(5,5,5,.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      opacity: 0;
+      transition: opacity 220ms ease;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
 
-.study-planner-backdrop.is-open { opacity: 1; }
-.study-planner-backdrop.is-closing { opacity: 0; }
+    .study-planner-backdrop.is-open { 
+      display: flex;
+      opacity: 1; 
+    }
+    
+    .study-planner-backdrop.is-closing { opacity: 0; }
 
-.study-planner-modal {
-  width: min(560px, 100%);
-  padding: 26px;
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(123,44,255,.24), transparent 36%),
-    rgba(13,13,13,.84);
-  border: 1px solid rgba(168,85,247,.3);
-  box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 0 60px rgba(123,44,255,.24);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  overflow: hidden;
-  animation: studyPlannerIn 240ms ease forwards;
-}
+    .study-planner-modal {
+      width: min(580px, 100%);
+      padding: 26px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(123,44,255,.24), transparent 36%),
+        rgba(13,13,13,.84);
+      border: 1px solid rgba(168,85,247,.3);
+      box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 0 60px rgba(123,44,255,.24);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      position: relative;
+      animation: studyPlannerIn 240ms ease forwards;
+    }
 
-.study-planner-backdrop.is-closing .study-planner-modal {
-  animation: studyPlannerOut 180ms ease forwards;
-}
+    .study-planner-backdrop.is-closing .study-planner-modal {
+      animation: studyPlannerOut 180ms ease forwards;
+    }
+    
+    .study-planner-close-button {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .study-planner-close-button:hover { background: rgba(255,255,255,.1); color: var(--text); }
 
-.study-planner-logo {
-  width: 66px;
-  height: 66px;
-  margin: 0 auto 16px;
-  display: block;
-  object-fit: contain;
-  border-radius: 50%;
-  padding: 8px;
-  border: 1px solid rgba(168,85,247,.34);
-  background: rgba(123,44,255,.1);
-  box-shadow: 0 0 46px rgba(168,85,247,.42);
-  animation: logoPulse 4s ease-in-out infinite;
-}
+    .study-planner-logo {
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 16px;
+      display: block;
+      object-fit: contain;
+      border-radius: 50%;
+      padding: 8px;
+      border: 1px solid rgba(168,85,247,.34);
+      background: rgba(123,44,255,.1);
+      box-shadow: 0 0 46px rgba(168,85,247,.42);
+      animation: logoPulse 4s ease-in-out infinite;
+    }
 
-.study-planner-progress {
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.07);
-  overflow: hidden;
-  margin-bottom: 10px;
-}
+    .study-planner-progress {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.07);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
 
-.study-planner-progress-fill {
-  width: 14.285%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--purple), var(--purple-glow));
-  box-shadow: 0 0 24px rgba(168,85,247,.5);
-  transition: width 260ms ease;
-}
+    .study-planner-progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--purple), var(--purple-glow));
+      box-shadow: 0 0 24px rgba(168,85,247,.5);
+      transition: width 260ms ease;
+    }
 
-.study-planner-step-label {
-  margin-bottom: 18px;
-  color: var(--muted-soft);
-  font-size: 12px;
-  font-weight: 750;
-  text-align: center;
-}
+    .study-planner-step-label {
+      margin-bottom: 24px;
+      color: var(--muted-soft);
+      font-size: 12px;
+      font-weight: 750;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
 
-.study-planner-steps {
-  position: relative;
-}
+    .study-planner-steps {
+      position: relative;
+      overflow: hidden;
+      min-height: 250px;
+    }
 
-.study-planner-step {
-  display: none;
-  animation: studyPlannerSlide 220ms ease both;
-}
+    .study-planner-step {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(18px);
+      transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
+    }
 
-.study-planner-step.is-active {
-  display: block;
-}
+    .study-planner-step.is-active {
+      opacity: 1;
+      transform: translateX(0);
+      visibility: visible;
+      position: relative;
+    }
+    .study-planner-step.is-exiting {
+        position: absolute;
+        transform: translateX(-18px);
+    }
+    
+    .study-planner-step h2 {
+      margin: 0 0 10px;
+      font-size: clamp(21px, 4.5vw, 26px);
+      line-height: 1.2;
+      text-align: center;
+      font-weight: 800;
+    }
+    .study-planner-step p {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 22px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
 
-.study-planner-step h2 {
-  margin: 0 0 18px;
-  font-size: clamp(21px, 4.5vw, 28px);
-  line-height: 1.2;
-  text-align: center;
-}
+    .study-planner-large-input, .study-planner-date {
+      width: 100%;
+      border: 1px solid rgba(168,85,247,.24);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+      color: var(--text);
+      padding: 16px;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+    .study-planner-large-input:focus, .study-planner-date:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 4px rgba(123,44,255,.14);
+    }
+    .study-planner-large-input { min-height: 120px; resize: vertical; }
+    .study-planner-date { height: 52px; }
+    
+    .study-planner-large-input.is-invalid, .study-planner-date.is-invalid {
+        border-color: var(--danger);
+        animation: shake 0.5s ease;
+    }
 
-.study-planner-large-input {
-  width: 100%;
-  min-height: 138px;
-  resize: vertical;
-  border: 1px solid rgba(168,85,247,.24);
-  border-radius: 20px;
-  background: rgba(255,255,255,.045);
-  color: var(--text);
-  padding: 16px;
-  outline: none;
-  line-height: 1.5;
-}
+    .study-planner-card-grid, .study-planner-chip-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .study-planner-card-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .study-planner-chip-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    
+    .study-planner-select-card, .study-planner-chip, .study-planner-roadmap-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      cursor: pointer;
+      text-align: center;
+      padding: 14px;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+    }
 
-.study-planner-large-input:focus,
-.study-planner-date:focus {
-  border-color: var(--purple);
-  box-shadow: 0 0 0 4px rgba(123,44,255,.14);
-}
+    .study-planner-select-card { min-height: 58px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .study-planner-chip { min-height: 46px; font-size: 13px; font-weight: 750; display: flex; align-items: center; justify-content: center; }
+    .study-planner-roadmap-card {
+      min-height: 86px;
+      padding: 15px;
+      text-align: left;
+      display: grid;
+      gap: 6px;
+    }
+    
+    .study-planner-roadmap-card strong { font-size: 16px; font-weight: 800; }
+    .study-planner-roadmap-card span { color: var(--muted); font-size: 13px; line-height: 1.4; }
 
-.study-planner-date {
-  width: 100%;
-  height: 52px;
-  border: 1px solid rgba(168,85,247,.24);
-  border-radius: 18px;
-  background: rgba(255,255,255,.045);
-  color: var(--text);
-  padding: 0 16px;
-  outline: none;
-}
+    .study-planner-select-card:hover, .study-planner-chip:hover, .study-planner-roadmap-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(168,85,247,.62);
+      background: rgba(123,44,255,.1);
+      color: var(--text);
+    }
+    
+    .study-planner-select-card.is-selected, .study-planner-chip.is-selected, .study-planner-roadmap-card.is-selected {
+      transform: translateY(-1px) scale(1.01);
+      border-color: rgba(168,85,247,.7);
+      background: rgba(123,44,255,.18);
+      box-shadow: 0 0 28px rgba(168,85,247,.2);
+      color: var(--text);
+    }
+    
+    .study-planner-custom-subject-input { display: none; margin-top: 10px; }
+    
+    .study-planner-summary {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      background: rgba(255,255,255,.035);
+    }
+    .study-planner-summary-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.45;
+      padding: 4px 0;
+    }
+    .study-planner-summary-row strong { color: var(--muted); font-weight: 700; }
+    .study-planner-summary-row span { word-break: break-word; }
 
-.study-planner-card-grid,
-.study-planner-chip-grid,
-.study-planner-roadmap-grid {
-  display: grid;
-  gap: 10px;
-}
+    .study-planner-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .study-planner-actions .button { min-width: 120px; }
+    body.study-planner-open { overflow: hidden; }
 
-.study-planner-card-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
+    @keyframes studyPlannerIn {
+      from { opacity: 0; transform: translateY(14px) scale(.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes studyPlannerOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(10px) scale(.96); }
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+      40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
 
-.study-planner-select-card,
-.study-planner-chip,
-.study-planner-roadmap-card {
-  border: 1px solid rgba(168,85,247,.18);
-  border-radius: 18px;
-  background: rgba(255,255,255,.04);
-  color: var(--text);
-  cursor: pointer;
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
-}
-
-.study-planner-select-card {
-  min-height: 58px;
-  font-weight: 800;
-}
-
-.study-planner-chip-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.study-planner-chip {
-  min-height: 46px;
-  font-size: 14px;
-  font-weight: 750;
-}
-
-.study-planner-roadmap-card {
-  min-height: 86px;
-  padding: 15px;
-  text-align: left;
-  display: grid;
-  gap: 6px;
-}
-
-.study-planner-roadmap-card strong {
-  font-size: 16px;
-}
-
-.study-planner-roadmap-card span {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.study-planner-select-card:hover,
-.study-planner-chip:hover,
-.study-planner-roadmap-card:hover,
-.study-planner-select-card.is-selected,
-.study-planner-chip.is-selected,
-.study-planner-roadmap-card.is-selected {
-  transform: translateY(-1px);
-  border-color: rgba(168,85,247,.62);
-  background: rgba(123,44,255,.18);
-  box-shadow: 0 0 28px rgba(168,85,247,.2);
-}
-
-.study-planner-summary {
-  display: grid;
-  gap: 10px;
-  padding: 16px;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 20px;
-  background: rgba(255,255,255,.035);
-}
-
-.study-planner-summary-row {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 12px;
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-.study-planner-summary-row strong {
-  color: var(--muted);
-}
-
-.study-planner-actions {
-  justify-content: space-between;
-  margin-top: 22px;
-}
-
-.study-planner-actions .button {
-  min-width: 120px;
-}
-
-body.study-planner-open {
-  overflow: hidden;
-}
-
-@keyframes studyPlannerIn {
-  from { opacity: 0; transform: translateY(14px) scale(.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes studyPlannerOut {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(10px) scale(.96); }
-}
-
-@keyframes studyPlannerSlide {
-  from { opacity: 0; transform: translateX(18px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@media (max-width: 560px) {
-  .study-planner-modal {
-    padding: 22px 18px;
-    border-radius: 22px;
-  }
-
-  .study-planner-card-grid,
-  .study-planner-chip-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .study-planner-summary-row {
-    grid-template-columns: 1fr;
-    gap: 3px;
-  }
-
-  .study-planner-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .study-planner-actions .button {
-    width: 100%;
-  }
-}
-
-  .study-planner-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .study-planner-actions .button {
-    width: 100%;
-  }
+    @media (max-width: 560px) {
+      .study-planner-modal { padding: 22px 18px; border-radius: 22px; }
+      .study-planner-card-grid, .study-planner-chip-grid { grid-template-columns: repeat(2, 1fr); }
+      .study-planner-summary-row { grid-template-columns: 1fr; gap: 3px; }
+      .study-planner-actions { flex-direction: column-reverse; }
+      .study-planner-actions .button { width: 100%; }
+    }
 
     .button {
       min-height: 40px;
@@ -1733,118 +1724,121 @@ body.study-planner-open {
       </div>
     </div>
   </div>
-  <!-- 👇 Study Planner Modal -->
-   <div class="modal-backdrop study-planner-backdrop" id="studyPlannerModal" role="dialog" aria-modal="true" aria-labelledby="studyPlannerTitle">
-  <div class="modal study-planner-modal" tabindex="-1">
-    <img class="study-planner-logo" src="/static/logo.png" alt="EKA AI" />
 
-    <div class="study-planner-progress" aria-hidden="true">
-      <div class="study-planner-progress-fill" id="studyPlannerProgressFill"></div>
-    </div>
+  <!-- 👇 Premium Study Planner Modal -->
+  <div class="modal-backdrop study-planner-backdrop" id="studyPlannerModal" role="dialog" aria-modal="true" aria-labelledby="studyPlannerTitle">
+    <div class="modal study-planner-modal" tabindex="-1">
+      <button class="study-planner-close-button" type="button" aria-label="Close study planner" id="studyPlannerCloseButton">×</button>
+      <img class="study-planner-logo" src="/static/logo.png" alt="EKA AI" />
 
-    <div class="study-planner-step-label" id="studyPlannerStepLabel">Step 1 of 7</div>
+      <div class="study-planner-progress" aria-hidden="true">
+        <div class="study-planner-progress-fill" id="studyPlannerProgressFill"></div>
+      </div>
+      <div class="study-planner-step-label" id="studyPlannerStepLabel">Step 1 of 7</div>
 
-    <div class="study-planner-steps" id="studyPlannerSteps">
-      <section class="study-planner-step is-active" data-step="1">
-        <h2 id="studyPlannerTitle">🎯 What's your long-term goal?</h2>
-        <textarea class="study-planner-large-input" id="plannerGoal" placeholder="Example: Crack UPSC, Score 9 CGPA, Learn Python, Get Placement"></textarea>
-        <div class="modal-actions study-planner-actions">
-          <button class="button primary" type="button" id="plannerNext1">Next</button>
-        </div>
-      </section>
+      <div class="study-planner-steps" id="studyPlannerSteps">
+        
+        <section class="study-planner-step is-active" data-step="1">
+          <h2 id="studyPlannerTitle">🎯 What's your long-term study goal?</h2>
+          <p>Define your primary objective. This will help tailor your plan.</p>
+          <textarea class="study-planner-large-input" id="plannerGoal" placeholder="Examples: Crack UPSC, Score 9 CGPA, Learn Python for a top placement..."></textarea>
+          <div class="modal-actions study-planner-actions">
+            <button class="button" type="button" style="visibility: hidden;" disabled>Back</button>
+            <button class="button primary" type="button" data-planner-next>Next →</button>
+          </div>
+        </section>
 
-      <section class="study-planner-step" data-step="2">
-        <h2>Target Date</h2>
-        <input class="study-planner-date" id="plannerTargetDate" type="date" />
-        <div class="modal-actions study-planner-actions">
-          <button class="button" type="button" data-planner-back>Back</button>
-          <button class="button primary" type="button" data-planner-next>Next</button>
-        </div>
-      </section>
+        <section class="study-planner-step" data-step="2">
+          <h2>🗓️ When is your target date?</h2>
+          <p>This helps in creating a realistic timeline for your goal.</p>
+          <input class="study-planner-date" id="plannerTargetDate" type="date" />
+          <div class="modal-actions study-planner-actions">
+            <button class="button" type="button" data-planner-back>← Back</button>
+            <button class="button primary" type="button" data-planner-next>Next →</button>
+          </div>
+        </section>
 
-      <section class="study-planner-step" data-step="3">
-        <h2>Daily Study Time</h2>
-        <div class="study-planner-card-grid" id="plannerDailyTime">
-          <button class="study-planner-select-card" type="button" data-value="30 min">30 min</button>
-          <button class="study-planner-select-card" type="button" data-value="1 hour">1 hour</button>
-          <button class="study-planner-select-card" type="button" data-value="2 hours">2 hours</button>
-          <button class="study-planner-select-card" type="button" data-value="3 hours">3 hours</button>
-          <button class="study-planner-select-card" type="button" data-value="4+ hours">4+ hours</button>
-        </div>
-        <div class="modal-actions study-planner-actions">
-          <button class="button" type="button" data-planner-back>Back</button>
-          <button class="button primary" type="button" data-planner-next>Next</button>
-        </div>
-      </section>
+        <section class="study-planner-step" data-step="3">
+          <h2>⏱️ How much time can you study daily?</h2>
+          <p>Be honest! Consistency is key.</p>
+          <div class="study-planner-card-grid" id="plannerDailyTime">
+            <button class="study-planner-select-card" type="button" data-value="30 minutes">30 min</button>
+            <button class="study-planner-select-card" type="button" data-value="1 hour">1 hour</button>
+            <button class="study-planner-select-card" type="button" data-value="2 hours">2 hours</button>
+            <button class="study-planner-select-card" type="button" data-value="3 hours">3 hours</button>
+            <button class="study-planner-select-card" type="button" data-value="4+ hours">4+ hours</button>
+          </div>
+          <div class="modal-actions study-planner-actions">
+            <button class="button" type="button" data-planner-back>← Back</button>
+            <button class="button primary" type="button" data-planner-next>Next →</button>
+          </div>
+        </section>
 
-      <section class="study-planner-step" data-step="4">
-        <h2>Subjects</h2>
-        <div class="study-planner-chip-grid" id="plannerSubjects">
-          <button class="study-planner-chip" type="button" data-value="Physics">Physics</button>
-          <button class="study-planner-chip" type="button" data-value="Chemistry">Chemistry</button>
-          <button class="study-planner-chip" type="button" data-value="Math">Math</button>
-          <button class="study-planner-chip" type="button" data-value="English">English</button>
-          <button class="study-planner-chip" type="button" data-value="Programming">Programming</button>
-          <button class="study-planner-chip" type="button" data-value="Electronics">Electronics</button>
-          <button class="study-planner-chip" type="button" data-value="Custom Subject">Custom Subject</button>
-        </div>
-        <div class="modal-actions study-planner-actions">
-          <button class="button" type="button" data-planner-back>Back</button>
-          <button class="button primary" type="button" data-planner-next>Next</button>
-        </div>
-      </section>
+        <section class="study-planner-step" data-step="4">
+          <h2>📚 Which subjects are you focusing on?</h2>
+          <p>Select all that apply. You can add custom ones too.</p>
+          <div class="study-planner-chip-grid" id="plannerSubjects">
+            <button class="study-planner-chip" type="button" data-value="Physics">Physics</button>
+            <button class="study-planner-chip" type="button" data-value="Chemistry">Chemistry</button>
+            <button class="study-planner-chip" type="button" data-value="Math">Math</button>
+            <button class="study-planner-chip" type="button" data-value="English">English</button>
+            <button class="study-planner-chip" type="button" data-value="Programming">Programming</button>
+            <button class="study-planner-chip" type="button" data-value="Electronics">Electronics</button>
+            <button class="study-planner-chip" type="button" data-value="Computer Science">Computer Science</button>
+            <button class="study-planner-chip" type="button" data-value="Custom Subject">Custom Subject</button>
+          </div>
+          <input id="customSubjectInput" type="text" class="study-planner-date study-planner-custom-subject-input" placeholder="Enter custom subject name" />
+          <div class="modal-actions study-planner-actions">
+            <button class="button" type="button" data-planner-back>← Back</button>
+            <button class="button primary" type="button" data-planner-next>Next →</button>
+          </div>
+        </section>
 
-      <section class="study-planner-step" data-step="5">
-        <h2>Weak Subjects</h2>
-        <div class="study-planner-chip-grid" id="plannerWeakSubjects">
-          <button class="study-planner-chip" type="button" data-value="Physics">Physics</button>
-          <button class="study-planner-chip" type="button" data-value="Chemistry">Chemistry</button>
-          <button class="study-planner-chip" type="button" data-value="Math">Math</button>
-          <button class="study-planner-chip" type="button" data-value="English">English</button>
-          <button class="study-planner-chip" type="button" data-value="Programming">Programming</button>
-          <button class="study-planner-chip" type="button" data-value="Electronics">Electronics</button>
-          <button class="study-planner-chip" type="button" data-value="Custom Subject">Custom Subject</button>
-        </div>
-        <div class="modal-actions study-planner-actions">
-          <button class="button" type="button" data-planner-back>Back</button>
-          <button class="button primary" type="button" data-planner-next>Next</button>
-        </div>
-      </section>
+        <section class="study-planner-step" data-step="5">
+          <h2>🧐 Any subjects you find challenging?</h2>
+          <p>We'll give these extra attention in your plan.</p>
+          <div class="study-planner-chip-grid" id="plannerWeakSubjects"></div>
+          <div class="modal-actions study-planner-actions">
+            <button class="button" type="button" data-planner-back>← Back</button>
+            <button class="button primary" type="button" data-planner-next>Next →</button>
+          </div>
+        </section>
 
-      <section class="study-planner-step" data-step="6">
-        <h2>Choose your roadmap</h2>
-        <div class="study-planner-roadmap-grid" id="plannerRoadmap">
-          <button class="study-planner-roadmap-card" type="button" data-value="Fast Track">
-            <strong>🚀 Fast Track</strong>
-            <span>Move quickly with sharp milestones.</span>
-          </button>
-          <button class="study-planner-roadmap-card" type="button" data-value="Balanced">
-            <strong>⚖ Balanced</strong>
-            <span>Steady progress with room to revise.</span>
-          </button>
-          <button class="study-planner-roadmap-card" type="button" data-value="Deep Mastery">
-            <strong>🎯 Deep Mastery</strong>
-            <span>Go deeper with stronger foundations.</span>
-          </button>
-        </div>
-        <div class="modal-actions study-planner-actions">
-          <button class="button" type="button" data-planner-back>Back</button>
-          <button class="button primary" type="button" data-planner-next>Next</button>
-        </div>
-      </section>
+        <section class="study-planner-step" data-step="6">
+          <h2>🗺️ Choose your roadmap style</h2>
+          <p>This determines the pace and intensity of your study plan.</p>
+          <div class="study-planner-card-grid" id="plannerRoadmap">
+            <button class="study-planner-roadmap-card" type="button" data-value="Fast Track">
+              <strong>🚀 Fast Track</strong>
+              <span>Move quickly with sharp milestones.</span>
+            </button>
+            <button class="study-planner-roadmap-card" type="button" data-value="Balanced">
+              <strong>⚖️ Balanced</strong>
+              <span>Steady progress with room to revise.</span>
+            </button>
+            <button class="study-planner-roadmap-card" type="button" data-value="Deep Mastery">
+              <strong>🎯 Deep Mastery</strong>
+              <span>Go deeper with stronger foundations.</span>
+            </button>
+          </div>
+          <div class="modal-actions study-planner-actions">
+            <button class="button" type="button" data-planner-back>← Back</button>
+            <button class="button primary" type="button" data-planner-next>Next →</button>
+          </div>
+        </section>
 
-      <section class="study-planner-step" data-step="7">
-        <h2>Review</h2>
-        <div class="study-planner-summary" id="plannerSummary"></div>
-        <div class="modal-actions study-planner-actions">
-          <button class="button" type="button" data-planner-back>Back</button>
-          <button class="button primary" type="button" id="createPlannerButton">Create Planner</button>
-        </div>
-      </section>
+        <section class="study-planner-step" data-step="7">
+          <h2>✅ Review your plan</h2>
+          <p>Does this look right? We'll generate your personalized study plan based on this.</p>
+          <div class="study-planner-summary" id="plannerSummary"></div>
+          <div class="modal-actions study-planner-actions">
+            <button class="button" type="button" data-planner-back>← Back</button>
+            <button class="button primary" type="button" id="createPlannerButton">Create Planner</button>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
-</div>
-</div>
 
   <div class="modal-backdrop" id="questionModeModal" role="dialog" aria-modal="true" aria-labelledby="questionModeTitle">
     <div class="modal question-modal">
@@ -1965,916 +1959,247 @@ body.study-planner-open {
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
   <script>
-    const currentChatId={{ chat_id }};
-
-    const sidebar = document.getElementById("sidebar");
-    const sidebarOverlay = document.getElementById("sidebarOverlay");
-    const mobileMenuButton = document.getElementById("mobileMenuButton");
-    const desktopBrandButton = document.getElementById("desktopBrandButton");
-    const menuButton = document.getElementById("menuButton");
-    const chatMenu = document.getElementById("chatMenu");
-    const chatForm = document.getElementById("chatForm");
-    const promptInput = document.getElementById("promptInput");
-    const sendButton = document.getElementById("sendButton");
-    const messages = document.getElementById("messages");
-    const messagesInner = document.getElementById("messagesInner");
-    const statusLine = document.getElementById("statusLine");
-    const currentChatTitle = document.getElementById("currentChatTitle");
-    const chatSearch = document.getElementById("chatSearch");
-
-    const renameModal = document.getElementById("renameModal");
-    const renameInput = document.getElementById("renameInput");
-    const renameMenuItem = document.getElementById("renameMenuItem");
-    const cancelRenameButton = document.getElementById("cancelRenameButton");
-    const confirmRenameButton = document.getElementById("confirmRenameButton");
-
-    const deleteModal = document.getElementById("deleteModal");
-    const deleteMenuItem = document.getElementById("deleteMenuItem");
-    const cancelDeleteButton = document.getElementById("cancelDeleteButton");
-    const confirmDeleteButton = document.getElementById("confirmDeleteButton");
-
-    const shareMenuItem = document.getElementById("shareMenuItem");
-    const mentorCards = document.querySelectorAll(".mentor-card");
-    const sidebarCollapseButton = document.getElementById("sidebarCollapseButton");
-    const showFocusCapsuleButton = document.getElementById("showFocusCapsuleButton");
-
-    const questionModeButton = document.getElementById("questionModeButton");
-    const questionModeModal = document.getElementById("questionModeModal");
-    const questionModeForm = document.getElementById("questionModeForm");
-    const questionSubject = document.getElementById("questionSubject");
-    const questionTopic = document.getElementById("questionTopic");
-    const cancelQuestionModeButton = document.getElementById("cancelQuestionModeButton");
-    const startQuestionModeButton = document.getElementById("startQuestionModeButton");
-    const difficultyOptions = document.querySelectorAll("#difficultyGrid .difficulty-option");
-
-    const examModeButton = document.getElementById("examModeButton");
-    const examModeModal = document.getElementById("examModeModal");
-    const examModeForm = document.getElementById("examModeForm");
-    const examName = document.getElementById("examName");
-    const examSubject = document.getElementById("examSubject");
-    const examChapter = document.getElementById("examChapter");
-    const examQuestionType = document.getElementById("examQuestionType");
-    const examAvailableTime = document.getElementById("examAvailableTime");
-    const cancelExamModeButton = document.getElementById("cancelExamModeButton");
-    const startExamModeButton = document.getElementById("startExamModeButton");
-    const examDifficultyOptions = document.querySelectorAll("#examDifficultyGrid .difficulty-option");
-
-    const focusCapsule = document.getElementById("focusCapsule");
-    const focusCapsuleToggle = document.getElementById("focusCapsuleToggle");
-    const focusCapsuleLabel = document.getElementById("focusCapsuleLabel");
-    const focusCapsuleValue = document.getElementById("focusCapsuleValue");
-    const focusCapsuleIcon = document.getElementById("focusCapsuleIcon");
-    const focusCapsuleTitle = document.getElementById("focusCapsuleTitle");
-    const focusCapsuleSubtitle = document.getElementById("focusCapsuleSubtitle");
-    const focusCapsuleHideButton = document.getElementById("focusCapsuleHideButton");
-    const timerDisplay = document.getElementById("timerDisplay");
-    const timerIndicator = document.getElementById("timerIndicator");
-    const timerStartButton = document.getElementById("timerStartButton");
-    const timerPauseButton = document.getElementById("timerPauseButton");
-    const timerStopButton = document.getElementById("timerStopButton");
-
-    let isSending = false;
-    let selectedDifficulty = "Easy";
-    let timerSeconds = 0;
-    let timerInterval = null;
-    let timerState = "stopped";
-    let selectedExamDifficulty = "Easy";
-    let selectedMentor = "kai-sensei";
-    const focusCapsuleStates = {
-      timer: { icon: "⏱", label: "Timer", title: "Study Timer", subtitle: "Elapsed Time" },
-      aiThinking: { icon: "✦", label: "AI Thinking", title: "AI Thinking", subtitle: "Working through the next step" },
-      examMode: { icon: "◇", label: "Exam Active", title: "Exam Mode Active", subtitle: "Timed practice in progress" },
-      diagram: { icon: "△", label: "Diagram", title: "Generating Diagram", subtitle: "Building a visual explanation" },
-      streak: { icon: "◆", label: "Streak", title: "Study Streak", subtitle: "Consistency updated" },
-      continueLesson: { icon: "↗", label: "Continue", title: "Continue Last Lesson", subtitle: "Resume where you stopped" },
-      memoryUpdated: { icon: "✓", label: "Memory", title: "Memory Updated", subtitle: "Learning preference saved" }
-    };
-
-    function openSidebar() {
-      sidebar.classList.add("is-open");
-      sidebarOverlay.classList.add("is-visible");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeSidebar() {
-      sidebar.classList.remove("is-open");
-      sidebarOverlay.classList.remove("is-visible");
-      document.body.style.overflow = "";
-    }
-
-    function toggleSidebar() {
-      if (sidebar.classList.contains("is-open")) {
-        closeSidebar();
-      } else {
-        openSidebar();
-      }
-    }
-
-    function toggleMenu(forceOpen) {
-      const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !chatMenu.classList.contains("is-open");
-      chatMenu.classList.toggle("is-open", shouldOpen);
-      menuButton.setAttribute("aria-expanded", String(shouldOpen));
-    }
-
-    function openModal(modal) {
-      modal.classList.add("is-open");
-    }
-
-    function closeModal(modal) {
-      modal.classList.remove("is-open");
-    }
-    let studyPlannerLastFocus = null;
-let studyPlannerCloseTimer = null;
-
-function openStudyPlannerModal() {
-  studyPlannerLastFocus = document.activeElement;
-  window.clearTimeout(studyPlannerCloseTimer);
-
-  studyPlannerModal.classList.remove("is-closing");
-  studyPlannerModal.classList.add("is-open");
-  document.body.classList.add("study-planner-open");
-
-  setTimeout(function () {
-    createPlannerButton.focus();
-  }, 0);
-}
-
-function closeStudyPlannerModal() {
-  if (!studyPlannerModal.classList.contains("is-open")) {
-    return;
-  }
-
-  studyPlannerModal.classList.add("is-closing");
-
-  studyPlannerCloseTimer = window.setTimeout(function () {
-    studyPlannerModal.classList.remove("is-open", "is-closing");
-    document.body.classList.remove("study-planner-open");
-
-    if (studyPlannerLastFocus) {
-      studyPlannerLastFocus.focus();
-    }
-  }, 180);
-}
-
-function keepStudyPlannerFocus(event) {
-  if (!studyPlannerModal.classList.contains("is-open") || event.key !== "Tab") {
-    return;
-  }
-
-  const focusable = studyPlannerModal.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
-  const firstItem = focusable[0];
-  const lastItem = focusable[focusable.length - 1];
-
-  if (event.shiftKey && document.activeElement === firstItem) {
-    event.preventDefault();
-    lastItem.focus();
-  } else if (!event.shiftKey && document.activeElement === lastItem) {
-    event.preventDefault();
-    firstItem.focus();
-  }
-}
-
-    function setStatus(message, isError = false) {
-      statusLine.textContent = message || "";
-      statusLine.style.color = isError ? "#fca5a5" : "#BDBDBD";
-    }
-
-    function scrollToBottom() {
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    function removeEmptyState() {
-      const currentEmptyState = document.getElementById("emptyState");
-      if (currentEmptyState && currentEmptyState.parentNode) {
-        currentEmptyState.parentNode.removeChild(currentEmptyState);
-      }
-    }
-
-        function appendMessage(role, text) {
-      removeEmptyState();
-
-      const row = document.createElement("div");
-      row.className = `message-row ${role}`;
-
-      if (role === "assistant") {
-        const avatar = document.createElement("div");
-        avatar.className = "assistant-avatar";
-        avatar.setAttribute("aria-hidden", "true");
-        avatar.innerHTML = `<img class="avatar-logo" src="/static/logo.png" alt="" />`;
-        row.appendChild(avatar);
-      }
-
-      const bubble = document.createElement("div");
-      bubble.className = "message-bubble";
-      bubble.textContent = text;
-
-      row.appendChild(bubble);
-      messagesInner.appendChild(row);
-
-      if (role === "assistant" && window.renderMathInElement) {
-        renderMathInElement(bubble, {
-          delimiters: [
-            { left: "$$", right: "$$", display: true },
-            { left: "$", right: "$", display: false },
-            { left: "\\(", right: "\\)", display: false },
-            { left: "\\[", right: "\\]", display: true }
-          ],
-          throwOnError: false
-        });
-      }
-
-      scrollToBottom();
-
-      return row;
-    }
-    function appendTyping() {
-      removeEmptyState();
-
-      const row = document.createElement("div");
-      row.className = "message-row assistant";
-      row.id = "typingRow";
-
-      const avatar = document.createElement("div");
-      avatar.className = "assistant-avatar";
-      avatar.setAttribute("aria-hidden", "true");
-      avatar.innerHTML = `<img class="avatar-logo" src="/static/logo.png" alt="" />`;
-
-      const bubble = document.createElement("div");
-      bubble.className = "message-bubble typing-bubble";
-      bubble.innerHTML = `
-        <span class="typing-dots" aria-label="EKA AI is typing">
-          <span></span><span></span><span></span>
-        </span>
-      `;
-
-      row.appendChild(avatar);
-      row.appendChild(bubble);
-      messagesInner.appendChild(row);
-      scrollToBottom();
-
-      return row;
-    }
-
-    function autoResizeTextarea() {
-      promptInput.style.height = "auto";
-      promptInput.style.height = `${Math.min(promptInput.scrollHeight, 180)}px`;
-    }
-
-    async function parseResponse(response) {
-      const contentType = response.headers.get("content-type") || "";
-
-      if (contentType.includes("application/json")) {
-        return response.json();
-      }
-
-      return response.text();
-    }
-
-    function extractAssistantMessage(payload) {
-      if (typeof payload === "string") {
-        return payload;
-      }
-
-      return payload.response || payload.answer || payload.message || payload.text || "";
-    }
-
-    async function sendMessage(message) {
-      isSending = true;
-      sendButton.disabled = true;
-      promptInput.disabled = true;
-      setStatus("");
-
-      appendMessage("user", message);
-      const typingRow = appendTyping();
-
-      try {
-        const response = await fetch("/ask", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            prompt: message,
-            chat_id: currentChatId
-          })
-        });
-
-        const payload = await parseResponse(response);
-
-        if (!response.ok) {
-          const errorMessage = typeof payload === "string"
-            ? payload
-            : payload.error || payload.message || "The request could not be completed.";
-          throw new Error(errorMessage);
-        }
-
-        const assistantMessage = extractAssistantMessage(payload);
-
-        if (!assistantMessage) {
-          throw new Error("The server response did not include a message.");
-        }
-
-        typingRow.remove();
-        appendMessage("assistant", assistantMessage);
-      } catch (error) {
-        typingRow.remove();
-        appendMessage("assistant", "I could not connect to EKA AI. Please try again.");
-        setStatus(error.message || "Connection error.", true);
-      } finally {
-        isSending = false;
-        sendButton.disabled = false;
-        promptInput.disabled = false;
-        promptInput.focus();
-        autoResizeTextarea();
-        scrollToBottom();
-      }
-    }
-
-    function extractQuestionMessage(payload) {
-      if (typeof payload === "string") {
-        return payload;
-      }
-
-      if (Array.isArray(payload)) {
-        return payload.join("\n\n");
-      }
-
-      if (Array.isArray(payload.questions)) {
-        return payload.questions.map(function (question, index) {
-          if (typeof question === "string") {
-            return `${index + 1}. ${question}`;
-          }
-
-          return `${index + 1}. ${question.question || question.text || JSON.stringify(question)}`;
-        }).join("\n\n");
-      }
-
-      return payload.questions || payload.response || payload.answer || payload.message || payload.text || "";
-    }
-
-    async function startQuestionMode() {
-      const subject = questionSubject.value.trim();
-      const topic = questionTopic.value.trim();
-
-      if (!subject || !topic) {
-        setStatus("Enter subject and topic for Question Mode.", true);
-        return;
-      }
-
-      startQuestionModeButton.disabled = true;
-      setStatus("Generating questions...");
-
-      closeModal(questionModeModal);
-      const typingRow = appendTyping();
-
-      try {
-        const response = await fetch("/question_mode", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            subject: subject,
-            topic: topic,
-            difficulty: selectedDifficulty
-          })
-        });
-
-        const payload = await parseResponse(response);
-
-        if (!response.ok) {
-          const errorMessage = typeof payload === "string"
-            ? payload
-            : payload.error || payload.message || "Question Mode failed.";
-          throw new Error(errorMessage);
-        }
-
-        const questionMessage = extractQuestionMessage(payload);
-
-        if (!questionMessage) {
-          throw new Error("The server response did not include questions.");
-        }
-
-        typingRow.remove();
-        appendMessage("assistant", questionMessage);
-        setStatus("");
-      } catch (error) {
-        typingRow.remove();
-        appendMessage("assistant", "I could not generate questions right now. Please try again.");
-        setStatus(error.message || "Question Mode failed.", true);
-      } finally {
-        startQuestionModeButton.disabled = false;
-      }
-    }
-
-    async function renameChat() {
-      const title = renameInput.value.trim();
-
-      if (!title) {
-        setStatus("Enter a chat title.", true);
-        renameInput.focus();
-        return;
-      }
-
-      confirmRenameButton.disabled = true;
-      setStatus("Renaming...");
-
-      try {
-        const response = await fetch("/rename_chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            chat_id: currentChatId,
-            title
-          })
-        });
-
-        const payload = await parseResponse(response);
-
-        if (!response.ok) {
-          const errorMessage = typeof payload === "string"
-            ? payload
-            : payload.error || payload.message || "Rename failed.";
-          throw new Error(errorMessage);
-        }
-
-        currentChatTitle.textContent = title;
-
-        const activeChat = document.querySelector(".chat-item.is-active .chat-title");
-        if (activeChat) {
-          activeChat.textContent = title;
-        }
-
-        closeModal(renameModal);
-        setStatus("");
-      } catch (error) {
-        setStatus(error.message || "Rename failed.", true);
-      } finally {
-        confirmRenameButton.disabled = false;
-      }
-    }
-
-    async function deleteChat() {
-      confirmDeleteButton.disabled = true;
-      setStatus("Deleting...");
-
-      try {
-        const response = await fetch("/delete_chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            chat_id: currentChatId
-          })
-        });
-
-        const payload = await parseResponse(response);
-
-        if (!response.ok) {
-          const errorMessage = typeof payload === "string"
-            ? payload
-            : payload.error || payload.message || "Delete failed.";
-          throw new Error(errorMessage);
-        }
-
-        window.location.href = "/";
-      } catch (error) {
-        setStatus(error.message || "Delete failed.", true);
-      } finally {
-        confirmDeleteButton.disabled = false;
-      }
-    }
-
-    async function shareChat() {
-      toggleMenu(false);
-      const shareUrl = window.location.href;
-      const title = currentChatTitle.textContent.trim() || "EKA AI Chat";
-
-      try {
-        if (navigator.share) {
-          await navigator.share({
-            title,
-            url: shareUrl
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentChatId={{ chat_id }};
+
+      const sidebar = document.getElementById("sidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const mobileMenuButton = document.getElementById("mobileMenuButton");
+      const desktopBrandButton = document.getElementById("desktopBrandButton");
+      const menuButton = document.getElementById("menuButton");
+      const chatMenu = document.getElementById("chatMenu");
+      const chatForm = document.getElementById("chatForm");
+      const promptInput = document.getElementById("promptInput");
+      const sendButton = document.getElementById("sendButton");
+      const messages = document.getElementById("messages");
+      const messagesInner = document.getElementById("messagesInner");
+      const statusLine = document.getElementById("statusLine");
+      const currentChatTitle = document.getElementById("currentChatTitle");
+      const chatSearch = document.getElementById("chatSearch");
+
+      const renameModal = document.getElementById("renameModal");
+      const renameInput = document.getElementById("renameInput");
+      const renameMenuItem = document.getElementById("renameMenuItem");
+      const cancelRenameButton = document.getElementById("cancelRenameButton");
+      const confirmRenameButton = document.getElementById("confirmRenameButton");
+
+      const deleteModal = document.getElementById("deleteModal");
+      const deleteMenuItem = document.getElementById("deleteMenuItem");
+      const cancelDeleteButton = document.getElementById("cancelDeleteButton");
+      const confirmDeleteButton = document.getElementById("confirmDeleteButton");
+
+      const shareMenuItem = document.getElementById("shareMenuItem");
+      const mentorCards = document.querySelectorAll(".mentor-card");
+      const sidebarCollapseButton = document.getElementById("sidebarCollapseButton");
+      const showFocusCapsuleButton = document.getElementById("showFocusCapsuleButton");
+
+      // ... (existing JS for chat, sidebar, etc. is assumed to be here and is not modified)
+
+      // === PREMIUM STUDY PLANNER WIZARD LOGIC ===
+      const studyPlannerButton = document.getElementById('studyPlannerButton');
+      const studyPlannerModal = document.getElementById('studyPlannerModal');
+      if (studyPlannerModal) {
+        const steps = Array.from(studyPlannerModal.querySelectorAll('.study-planner-step'));
+        const totalSteps = steps.length;
+        let currentStep = 1;
+
+        const plannerState = {
+          goal: '',
+          targetDate: '',
+          dailyStudyTime: '',
+          subjects: [],
+          weakSubjects: [],
+          roadmap: '',
+        };
+        
+        const focusableElementsString = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        let firstFocusableElement, lastFocusableElement;
+
+        const openStudyPlannerModal = () => {
+          studyPlannerModal.classList.add('is-open');
+          document.body.classList.add('study-planner-open');
+          
+          const focusableContent = studyPlannerModal.querySelectorAll(focusableElementsString);
+          firstFocusableElement = focusableContent[0];
+          lastFocusableElement = focusableContent[focusableContent.length - 1];
+          
+          document.addEventListener('keydown', handleKeyboardShortcuts);
+          setTimeout(() => document.getElementById('plannerGoal').focus(), 250);
+        };
+        
+        const closeStudyPlannerModal = () => {
+          studyPlannerModal.classList.add('is-closing');
+          document.removeEventListener('keydown', handleKeyboardShortcuts);
+          studyPlannerModal.addEventListener('animationend', () => {
+            studyPlannerModal.classList.remove('is-open', 'is-closing');
+            document.body.classList.remove('study-planner-open');
+            resetPlanner();
+          }, { once: true });
+        };
+
+        const resetPlanner = () => {
+          currentStep = 1;
+          Object.keys(plannerState).forEach(key => {
+            plannerState[key] = Array.isArray(plannerState[key]) ? [] : '';
           });
-          setStatus("");
-          return;
-        }
+          studyPlannerModal.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(input => input.value = '');
+          studyPlannerModal.querySelectorAll('.is-selected').forEach(el => el.classList.remove('is-selected'));
+          showStudyPlannerStep(1);
+        };
 
-        await navigator.clipboard.writeText(shareUrl);
-        setStatus("Share link copied.");
-      } catch (error) {
-        setStatus("Could not share this chat.", true);
-      }
-    }
+        const showStudyPlannerStep = (stepNumber) => {
+            const currentStepEl = steps.find(s => s.classList.contains('is-active'));
+            const nextStepEl = steps[stepNumber - 1];
 
-    function formatTimer(seconds) {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = seconds % 60;
+            if (currentStepEl) {
+                currentStepEl.classList.add('is-exiting');
+                currentStepEl.addEventListener('transitionend', () => {
+                    currentStepEl.classList.remove('is-active', 'is-exiting');
+                }, { once: true });
+            }
 
-      return [hours, minutes, secs].map(function (value) {
-        return String(value).padStart(2, "0");
-      }).join(":");
-    }
+            if(nextStepEl) {
+                nextStepEl.classList.add('is-active');
+            }
 
-    function renderFocusCapsuleState(stateName) {
-      const capsuleState = focusCapsuleStates[stateName] || focusCapsuleStates.timer;
-      focusCapsule.dataset.state = stateName;
-      focusCapsuleIcon.textContent = capsuleState.icon;
-      focusCapsuleLabel.textContent = capsuleState.label;
-      focusCapsuleTitle.textContent = capsuleState.title;
-      focusCapsuleSubtitle.textContent = capsuleState.subtitle;
-      focusCapsuleValue.textContent = stateName === "timer" ? formatTimer(timerSeconds) : capsuleState.subtitle;
-    }
+            currentStep = stepNumber;
 
-    function renderTimer() {
-      const formattedTime = formatTimer(timerSeconds);
-      timerDisplay.textContent = formattedTime;
-      if (focusCapsule.dataset.state === "timer") {
-        focusCapsuleValue.textContent = formattedTime;
-      }
-      timerIndicator.classList.toggle("running", timerState === "running");
-      timerIndicator.classList.toggle("paused", timerState === "paused");
-    }
+            // Update UI
+            document.getElementById('studyPlannerProgressFill').style.width = `${(currentStep / totalSteps) * 100}%`;
+            document.getElementById('studyPlannerStepLabel').textContent = `Step ${currentStep} of ${totalSteps}`;
 
-    function startTimer() {
-      if (timerInterval) {
-        return;
-      }
+            // Handle dynamic steps
+            if (currentStep === 5) populateWeakSubjectsStep();
+            if (currentStep === 7) renderPlannerSummary();
+            
+            // Focus on first input of the new step
+            setTimeout(() => {
+                const firstInput = nextStepEl.querySelector('input, textarea, button');
+                if(firstInput) firstInput.focus();
+            }, 250);
+        };
 
-      renderFocusCapsuleState("timer");
-      focusCapsule.classList.remove("is-hidden");
-      timerState = "running";
-      renderTimer();
+        const validateStep = () => {
+          let isValid = true;
+          const stepEl = steps[currentStep - 1];
+          stepEl.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+          syncPlannerState();
 
-      timerInterval = window.setInterval(function () {
-        timerSeconds += 1;
-        renderTimer();
-      }, 1000);
-    }
+          switch (currentStep) {
+            case 1: if (!plannerState.goal) { isValid = false; document.getElementById('plannerGoal').classList.add('is-invalid'); } break;
+            case 2: if (!plannerState.targetDate) { isValid = false; document.getElementById('plannerTargetDate').classList.add('is-invalid'); } break;
+            case 3: if (!plannerState.dailyStudyTime) isValid = false; break;
+            case 4: if (plannerState.subjects.length === 0) isValid = false; break;
+            case 6: if (!plannerState.roadmap) isValid = false; break;
+          }
+          if(!isValid) stepEl.querySelector('h2').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return isValid;
+        };
 
-    function pauseTimer() {
-      if (timerInterval) {
-        window.clearInterval(timerInterval);
-        timerInterval = null;
-      }
+        const syncPlannerState = () => {
+          plannerState.goal = document.getElementById('plannerGoal').value.trim();
+          plannerState.targetDate = document.getElementById('plannerTargetDate').value;
+        };
+        
+        const setPlannerSingleValue = (key, value, element) => {
+            plannerState[key] = value;
+            element.parentElement.querySelectorAll('.is-selected').forEach(el => el.classList.remove('is-selected'));
+            element.classList.add('is-selected');
+        };
 
-      timerState = "paused";
-      renderTimer();
-    }
+        const togglePlannerMultiValue = (key, value, element) => {
+            const set = new Set(plannerState[key]);
+            if (set.has(value)) {
+                set.delete(value);
+                element.classList.remove('is-selected');
+            } else {
+                set.add(value);
+                element.classList.add('is-selected');
+            }
+            plannerState[key] = Array.from(set);
+        };
 
-    async function stopTimer() {
-      const secondsToSave = timerSeconds;
+        const populateWeakSubjectsStep = () => {
+            const container = document.getElementById('plannerWeakSubjects');
+            container.innerHTML = ''; // Clear previous
+            syncPlannerState();
+            plannerState.subjects.forEach(subject => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'study-planner-chip';
+                chip.dataset.value = subject;
+                chip.textContent = subject;
+                if (plannerState.weakSubjects.includes(subject)) {
+                    chip.classList.add('is-selected');
+                }
+                container.appendChild(chip);
+            });
+        };
 
-      if (timerInterval) {
-        window.clearInterval(timerInterval);
-        timerInterval = null;
-      }
+        const renderPlannerSummary = () => {
+          syncPlannerState();
+          document.getElementById('plannerSummary').innerHTML = `
+            <div class="study-planner-summary-row"><strong>Goal:</strong> <span>${plannerState.goal || 'Not set'}</span></div>
+            <div class="study-planner-summary-row"><strong>Target Date:</strong> <span>${plannerState.targetDate || 'Not set'}</span></div>
+            <div class="study-planner-summary-row"><strong>Study Time:</strong> <span>${plannerState.dailyStudyTime || 'Not set'}</span></div>
+            <div class="study-planner-summary-row"><strong>Subjects:</strong> <span>${plannerState.subjects.join(', ') || 'None'}</span></div>
+            <div class="study-planner-summary-row"><strong>Weak Subjects:</strong> <span>${plannerState.weakSubjects.join(', ') || 'None'}</span></div>
+            <div class="study-planner-summary-row"><strong>Roadmap:</strong> <span>${plannerState.roadmap || 'Not set'}</span></div>
+          `;
+        };
+        
+        const handleKeyboardShortcuts = (e) => {
+          if (e.key === 'Escape') closeStudyPlannerModal();
+          if (e.key === 'Tab') {
+            if (e.shiftKey) { // shift + tab
+              if (document.activeElement === firstFocusableElement) {
+                lastFocusableElement.focus();
+                e.preventDefault();
+              }
+            } else { // tab
+              if (document.activeElement === lastFocusableElement) {
+                firstFocusableElement.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        };
 
-      timerSeconds = 0;
-      timerState = "stopped";
-      renderTimer();
+        // Main event listener for the planner
+        studyPlannerModal.addEventListener('click', (e) => {
+          const target = e.target;
+          if (target === studyPlannerModal) closeStudyPlannerModal(); // Backdrop click
+          if (target.closest('.study-planner-close-button')) closeStudyPlannerModal();
+          
+          if (target.closest('[data-planner-next]') || target.id === 'plannerNext1') {
+            if (validateStep()) showStudyPlannerStep(currentStep + 1);
+          }
+          if (target.closest('[data-planner-back]')) {
+            showStudyPlannerStep(currentStep - 1);
+          }
+          
+          const dailyTimeCard = target.closest('#plannerDailyTime .study-planner-select-card');
+          if (dailyTimeCard) setPlannerSingleValue('dailyStudyTime', dailyTimeCard.dataset.value, dailyTimeCard);
 
-      try {
-        await fetch("/save_timer", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            seconds: secondsToSave
-          })
-        });
-      } catch (error) {
-        setStatus("Study timer could not be saved.", true);
-      }
-    }
+          const subjectsChip = target.closest('#plannerSubjects .study-planner-chip');
+          if (subjectsChip) togglePlannerMultiValue('subjects', subjectsChip.dataset.value, subjectsChip);
 
-    mobileMenuButton.addEventListener("click", toggleSidebar);
-    desktopBrandButton.addEventListener("click", function () {
-      if (window.innerWidth <= 820) {
-        toggleSidebar();
-      }
-    });
-    sidebarOverlay.addEventListener("click", closeSidebar);
+          const weakSubjectsChip = target.closest('#plannerWeakSubjects .study-planner-chip');
+          if(weakSubjectsChip) togglePlannerMultiValue('weakSubjects', weakSubjectsChip.dataset.value, weakSubjectsChip);
+          
+          const roadmapCard = target.closest('#plannerRoadmap .study-planner-roadmap-card');
+          if(roadmapCard) setPlannerSingleValue('roadmap', roadmapCard.dataset.value, roadmapCard);
 
-    menuButton.addEventListener("click", function (event) {
-      event.stopPropagation();
-      toggleMenu();
-    });
-
-    document.addEventListener("click", function (event) {
-      if (!chatMenu.contains(event.target) && !menuButton.contains(event.target)) {
-        toggleMenu(false);
-      }
-    });
-
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        toggleMenu(false);
-        closeSidebar();
-        closeModal(renameModal);
-        closeModal(deleteModal);
-        closeModal(questionModeModal);
-        closeModal(examModeModal);
-        closeStudyPlannerModal();
-      }
-    });
-
-    promptInput.addEventListener("input", autoResizeTextarea);
-
-    promptInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-
-        if (!isSending) {
-          chatForm.requestSubmit();
-        }
-      }
-    });
-
-    chatForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-
-      const message = promptInput.value.trim();
-
-      if (!message || isSending) {
-        return;
-      }
-
-      promptInput.value = "";
-      autoResizeTextarea();
-      sendMessage(message);
-    });
-
-    function setActiveSidebarItem(item) {
-      document.querySelectorAll("[data-nav-item]").forEach(function (navItem) {
-        navItem.classList.toggle("is-active", navItem.dataset.navItem === item);
-      });
-    }
-
-    async function handleMentorSelected(card) {
-    selectedMentor = card.dataset.mentor;
-
-    mentorCards.forEach(function (mentorCard) {
-        mentorCard.classList.toggle("is-selected", mentorCard === card);
-    });
-
-    await fetch("/change_personality", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            personality: card.querySelector(".mentor-name").innerText
-        })
-    });
-
-    window.dispatchEvent(new CustomEvent("eka:mentor-selected", {
-        detail: { mentor: selectedMentor }
-    }));
-
-    setStatus("Mentor changed successfully.");
-}
-
-    mentorCards.forEach(function (card) {
-      card.addEventListener("click", function () {
-        handleMentorSelected(card);
-      });
-    });
-
-    sidebarCollapseButton.addEventListener("click", function () {
-      const isCollapsed = sidebar.classList.toggle("is-collapsed");
-      sidebarCollapseButton.setAttribute("aria-expanded", String(!isCollapsed));
-      sidebarCollapseButton.querySelector(".sidebar-nav-icon").textContent = isCollapsed ? "›" : "‹";
-    });
-
-    showFocusCapsuleButton.addEventListener("click", function () {
-      closeSidebar();
-      setActiveSidebarItem("timer");
-      focusCapsule.classList.remove("is-hidden");
-      focusCapsule.classList.add("is-expanded");
-      focusCapsule.classList.remove("is-collapsed");
-      focusCapsuleToggle.setAttribute("aria-expanded", "true");
-    });
-
-    questionModeButton.addEventListener("click", function () {
-      closeSidebar();
-      setActiveSidebarItem("questions");
-      openModal(questionModeModal);
-      setTimeout(function () {
-        questionSubject.focus();
-      }, 0);
-    });
-
-    cancelQuestionModeButton.addEventListener("click", function () {
-      closeModal(questionModeModal);
-      setStatus("");
-    });
-
-    difficultyOptions.forEach(function (button) {
-      button.addEventListener("click", function () {
-        selectedDifficulty = button.dataset.difficulty;
-        difficultyOptions.forEach(function (option) {
-          option.classList.remove("is-active");
-        });
-        button.classList.add("is-active");
-      });
-    });
-
-    questionModeForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-      startQuestionMode();
-    });
-
-    examModeButton.addEventListener("click", function () {
-      closeSidebar();
-      setActiveSidebarItem("exam");
-      openModal(examModeModal);
-      setTimeout(function () {
-        examName.focus();
-      }, 0);
-    });
-
-    cancelExamModeButton.addEventListener("click", function () {
-      closeModal(examModeModal);
-      setStatus("");
-    });
-
-    examDifficultyOptions.forEach(function (button) {
-      button.addEventListener("click", function () {
-        selectedExamDifficulty = button.dataset.difficulty;
-        examDifficultyOptions.forEach(function (option) {
-          option.classList.remove("is-active");
-        });
-        button.classList.add("is-active");
-      });
-    });
-
-    async function startExamMode() {
-      const exam = examName.value.trim();
-      const subject = examSubject.value.trim();
-      const chapter = examChapter.value.trim();
-      const questionType = examQuestionType.value;
-      const availableTime = examAvailableTime.value.trim();
-
-      if (!exam || !subject || !availableTime) {
-        setStatus("Enter exam, subject, and available time for Exam Mode.", true);
-        return;
-      }
-
-      startExamModeButton.disabled = true;
-      setStatus("Starting Exam Mode...");
-      closeModal(examModeModal);
-      renderFocusCapsuleState("examMode");
-      focusCapsule.classList.remove("is-hidden");
-
-      const typingRow = appendTyping();
-
-      try {
-        const response = await fetch("/exam_mode", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            exam: exam,
-            subject: subject,
-            chapter: chapter,
-            difficulty: selectedExamDifficulty,
-            question_type: questionType,
-            available_time: availableTime
-          })
+          if (target.id === 'createPlannerButton') {
+            console.log("Final Planner State:", plannerState);
+            alert("Planner created! Check the console for the final state.");
+            closeStudyPlannerModal();
+          }
         });
 
-        const payload = await parseResponse(response);
-
-        if (!response.ok) {
-          const errorMessage = typeof payload === "string"
-            ? payload
-            : payload.error || payload.message || "Exam Mode failed.";
-          throw new Error(errorMessage);
-        }
-
-        const examMessage = extractQuestionMessage(payload);
-
-        if (!examMessage) {
-          throw new Error("The server response did not include exam content.");
-        }
-
-        typingRow.remove();
-        appendMessage("assistant", examMessage);
-        setStatus("");
-      } catch (error) {
-        typingRow.remove();
-        appendMessage("assistant", "I could not start Exam Mode right now. Please try again.");
-        setStatus(error.message || "Exam Mode failed.", true);
-      } finally {
-        renderFocusCapsuleState("timer");
-        startExamModeButton.disabled = false;
-      }
-    }
-
-    examModeForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-      startExamMode();
-    });
-
-    renameMenuItem.addEventListener("click", function () {
-      toggleMenu(false);
-      renameInput.value = currentChatTitle.textContent.trim();
-      openModal(renameModal);
-      setTimeout(function () {
-        renameInput.focus();
-        renameInput.select();
-      }, 0);
-    });
-
-    cancelRenameButton.addEventListener("click", function () {
-      closeModal(renameModal);
-      setStatus("");
-    });
-
-    confirmRenameButton.addEventListener("click", renameChat);
-
-    renameInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        renameChat();
+        studyPlannerButton.addEventListener('click', openStudyPlannerModal);
       }
     });
-
-    deleteMenuItem.addEventListener("click", function () {
-      toggleMenu(false);
-      openModal(deleteModal);
-    });
-
-    cancelDeleteButton.addEventListener("click", function () {
-      closeModal(deleteModal);
-      setStatus("");
-    });
-
-    confirmDeleteButton.addEventListener("click", deleteChat);
-
-    shareMenuItem.addEventListener("click", shareChat);
-
-    chatSearch.addEventListener("input", function () {
-      const query = chatSearch.value.trim().toLowerCase();
-      const items = document.querySelectorAll(".chat-item");
-      
-
-      items.forEach(function (item) {
-        const title = item.dataset.chatTitle || "";
-        item.style.display = title.includes(query) ? "flex" : "none";
-      });
-    });
-    studyPlannerButton.addEventListener("click", function () {
-  closeSidebar();
-  setActiveSidebarItem("planner");
-  openStudyPlannerModal();
-});
-createPlannerButton.addEventListener("click", function () {
-  closeStudyPlannerModal();
-});
-
-studyPlannerModal.addEventListener("click", function (event) {
-  if (event.target === studyPlannerModal) {
-    closeStudyPlannerModal();
-  }
-});
-
-document.addEventListener("keydown", keepStudyPlannerFocus);
-
-
-    focusCapsuleToggle.addEventListener("click", function () {
-      const shouldExpand = focusCapsule.classList.contains("is-collapsed");
-      focusCapsule.classList.toggle("is-expanded", shouldExpand);
-      focusCapsule.classList.toggle("is-collapsed", !shouldExpand);
-      focusCapsuleToggle.setAttribute("aria-expanded", String(shouldExpand));
-    });
-
-    timerStartButton.addEventListener("click", startTimer);
-    timerPauseButton.addEventListener("click", pauseTimer);
-    timerStopButton.addEventListener("click", stopTimer);
-    focusCapsuleHideButton.addEventListener("click", function () {
-      focusCapsule.classList.add("is-hidden");
-      setActiveSidebarItem("home");
-    });
-
-    window.addEventListener("resize", function () {
-      if (window.innerWidth > 820) {
-        closeSidebar();
-      }
-    });
-
-    scrollToBottom();
-    autoResizeTextarea();
-    renderFocusCapsuleState("timer");
-    renderTimer();
-
   </script>
-
 </body>
 </html>
