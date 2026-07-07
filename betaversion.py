@@ -77,6 +77,64 @@ def save_memory(user_email, subject, chapter, concept, language,difficulty="Begi
 
     conn.commit()
     conn.close()
+def save_study_planner(
+    user_email,
+    goal,
+    target_date,
+    daily_hours,
+    subjects,
+    weak_subjects,
+    roadmap
+):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+    INSERT OR REPLACE INTO study_planner(
+        user_email,
+        goal,
+        target_date,
+        daily_hours,
+        subjects,
+        weak_subjects,
+        roadmap,
+        current_week,
+        current_day,
+        study_streak,
+        planner_status
+    )
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+    """, (
+        user_email,
+        goal,
+        target_date,
+        daily_hours,
+        subjects,
+        weak_subjects,
+        roadmap,
+        1,
+        1,
+        0,
+        "active"
+    ))
+
+    conn.commit()
+    conn.close()
+def load_study_planner(user_email):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT *
+        FROM study_planner
+        WHERE user_email=?
+    """, (user_email,))
+
+    planner = cur.fetchone()
+
+    conn.close()
+
+    return planner
 
 
 def init_db():
@@ -120,6 +178,31 @@ CREATE TABLE IF NOT EXISTS messages(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    cur.execute("""
+CREATE TABLE IF NOT EXISTS study_planner(
+    user_email TEXT PRIMARY KEY,
+
+    goal TEXT,
+
+    target_date TEXT,
+
+    daily_hours INTEGER,
+
+    subjects TEXT,
+
+    weak_subjects TEXT,
+
+    roadmap TEXT,
+
+    current_week INTEGER DEFAULT 1,
+
+    current_day INTEGER DEFAULT 1,
+
+    study_streak INTEGER DEFAULT 0,
+
+    planner_status TEXT DEFAULT 'setup'
+)
+""")
     try:
      cur.execute("""
     ALTER TABLE lesson_memory
@@ -513,6 +596,42 @@ What are we conquering today?
 def ask_ai(prompt, chat_id, user_id="default"):
     try:
         memory=load_memory(user_id)
+        planner = load_study_planner(user_id)
+        planner_exists = planner is not None
+        if not planner_exists:
+         planner_context = """
+Study Planner Status: Not Configured
+
+The user has not created a study planner yet.
+
+If the user asks about planning, roadmap, study schedule, goals, revision plan, or wants long-term guidance,
+tell them to open the Study Planner and complete the setup.
+
+Do not invent planner data.
+"""
+        else:
+         planner_context = f"""
+Study Planner Status: Active
+
+Goal: {planner["goal"]}
+
+Target Date: {planner["target_date"]}
+
+Daily Hours: {planner["daily_hours"]}
+
+Subjects: {planner["subjects"]}
+
+Weak Subjects: {planner["weak_subjects"]}
+
+Roadmap: {planner["roadmap"]}
+
+Current Week: {planner["current_week"]}
+
+Current Day: {planner["current_day"]}
+
+Study Streak: {planner["study_streak"]}
+"""
+        print("Planner Exists:", planner_exists)
         saved_subject=""
         saved_chapter=""
         saved_concept=""
@@ -842,6 +961,7 @@ Current Concept: {saved_concept}
 Language: {saved_language}
 Difficulty: {saved_difficulty}
 Mentor Personality: {saved_personality}
+{planner_context}
         Previous Summary:
         {summary}
         Current Lesson:
@@ -993,6 +1113,25 @@ mentor_personality = excluded.mentor_personality
     if session["user"]["email"] in chat_history:
       chat_history[session["user"]["email"]]["personality"] = personality
     conn.close()
+
+    return jsonify({"success": True})
+@app.route("/save_study_planner", methods=["POST"])
+def save_study_planner_route():
+
+    if "user" not in session:
+        return jsonify({"success": False})
+
+    data = request.json
+
+    save_study_planner(
+        session["user"]["email"],
+        data.get("goal"),
+        data.get("target_date"),
+        data.get("daily_hours"),
+        data.get("subjects"),
+        data.get("weak_subjects"),
+        data.get("roadmap")
+    )
 
     return jsonify({"success": True})
 @app.route("/question_mode", methods=["POST"])
