@@ -2056,10 +2056,35 @@
       const currentChatId={{ chat_id }};
 
       const sidebar = document.getElementById("sidebar");
-      // ... (rest of existing element getters)
-      const showFocusCapsuleButton = document.getElementById("showFocusCapsuleButton");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const mobileMenuButton = document.getElementById("mobileMenuButton");
+      const desktopBrandButton = document.getElementById("desktopBrandButton");
+      const menuButton = document.getElementById("menuButton");
+      const chatMenu = document.getElementById("chatMenu");
+      const chatForm = document.getElementById("chatForm");
+      const promptInput = document.getElementById("promptInput");
+      const sendButton = document.getElementById("sendButton");
+      const messages = document.getElementById("messages");
+      const messagesInner = document.getElementById("messagesInner");
+      const statusLine = document.getElementById("statusLine");
+      const currentChatTitle = document.getElementById("currentChatTitle");
+      const chatSearch = document.getElementById("chatSearch");
 
-      // ... (existing sidebar, modal logic etc.)
+      const renameModal = document.getElementById("renameModal");
+      const renameInput = document.getElementById("renameInput");
+      const renameMenuItem = document.getElementById("renameMenuItem");
+      const cancelRenameButton = document.getElementById("cancelRenameButton");
+      const confirmRenameButton = document.getElementById("confirmRenameButton");
+
+      const deleteModal = document.getElementById("deleteModal");
+      const deleteMenuItem = document.getElementById("deleteMenuItem");
+      const cancelDeleteButton = document.getElementById("cancelDeleteButton");
+      const confirmDeleteButton = document.getElementById("confirmDeleteButton");
+
+      const shareMenuItem = document.getElementById("shareMenuItem");
+      const mentorCards = document.querySelectorAll(".mentor-card");
+      const sidebarCollapseButton = document.getElementById("sidebarCollapseButton");
+      const showFocusCapsuleButton = document.getElementById("showFocusCapsuleButton");
 
       // === PREMIUM CHAT UX & STUDY PLANNER LOGIC ===
 
@@ -2096,23 +2121,64 @@
           bubble.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
       });
       
-      // ... (existing chatForm submit logic needs to be updated)
       chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        // ... (existing form submission code)
+        const prompt = promptInput.value.trim();
+        if (!prompt) return;
+
+        const emptyState = document.getElementById('emptyState');
+        if(emptyState) emptyState.remove();
+
+        // Add user message to UI
+        const userMessageRow = document.createElement('div');
+        userMessageRow.className = 'message-row user';
+        userMessageRow.innerHTML = `<div class="message-bubble">${prompt}</div>`;
+        messagesInner.appendChild(userMessageRow);
+        
+        promptInput.value = '';
+        promptInput.style.height = 'auto';
+        sendButton.disabled = true;
+        messages.scrollTop = messages.scrollHeight;
 
         // Add thinking indicator
         const thinkingRow = createMessageRow('assistant', true);
         messagesInner.appendChild(thinkingRow);
         messages.scrollTop = messages.scrollHeight;
 
-        // ... (existing fetch call)
-        // On response success:
-        thinkingRow.remove(); // Remove thinking indicator
-        const assistantRow = createMessageRow('assistant');
-        const bubble = assistantRow.querySelector(".message-bubble");
-        messagesInner.appendChild(assistantRow);
-        streamText(bubble, response.message); // Use new streamText function
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt, chat_id: currentChatId })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                statusLine.textContent = `Error: ${err.error}`;
+                thinkingRow.remove();
+                return;
+            }
+
+            const data = await response.json();
+            
+            thinkingRow.remove();
+            
+            if (data.chat_id !== currentChatId) {
+                window.location.href = `/chat/${data.chat_id}`;
+                return;
+            }
+
+            const assistantRow = createMessageRow('assistant');
+            const bubble = assistantRow.querySelector(".message-bubble");
+            messagesInner.appendChild(assistantRow);
+            streamText(bubble, data.message);
+
+        } catch (error) {
+            statusLine.textContent = "Network error. Please try again.";
+            thinkingRow.remove();
+        } finally {
+            sendButton.disabled = false;
+        }
       });
 
       const createMessageRow = (role, isThinking = false) => {
@@ -2130,8 +2196,6 @@
               content = `
                   <div class="assistant-avatar" aria-hidden="true"><img class="avatar-logo" src="/static/logo.png" alt="" /></div>
                   <div class="message-bubble"></div>`;
-          } else { // user
-              // This part should be handled by your existing logic that reloads the page
           }
           row.innerHTML = content;
           return row;
@@ -2167,6 +2231,13 @@
           type();
       };
       
+      mentorCards.forEach(card => {
+        card.addEventListener('click', () => {
+          mentorCards.forEach(c => c.classList.remove('is-selected'));
+          card.classList.add('is-selected');
+        });
+      });
+      
       // === STUDY PLANNER BUG FIX & LOGIC ===
       const studyPlannerButton = document.getElementById('studyPlannerButton');
       const studyPlannerModal = document.getElementById('studyPlannerModal');
@@ -2181,7 +2252,7 @@
         const focusableElementsString = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
         const openStudyPlannerModal = () => {
-          resetPlanner(); // **BUG FIX: Reset state on open**
+          resetPlanner(); 
           studyPlannerModal.classList.add('is-open');
           document.body.classList.add('study-planner-open');
           
@@ -2209,16 +2280,15 @@
           });
           studyPlannerModal.querySelectorAll('input, textarea').forEach(input => {
             if(input.type !== 'button') input.value = '';
+            input.classList.remove('is-invalid');
           });
           studyPlannerModal.querySelectorAll('.is-selected').forEach(el => el.classList.remove('is-selected'));
           document.getElementById('plannerSummary').innerHTML = '';
 
           steps.forEach((step, index) => {
+            step.classList.remove('is-active', 'is-exiting');
             if (index === 0) {
               step.classList.add('is-active');
-              step.classList.remove('is-exiting');
-            } else {
-              step.classList.remove('is-active', 'is-exiting');
             }
           });
           
@@ -2232,10 +2302,7 @@
 
             if (currentStepEl) {
                 currentStepEl.classList.add('is-exiting');
-                // Use animationend to ensure smooth transition before hiding
-                currentStepEl.addEventListener('animationend', () => {
-                    currentStepEl.classList.remove('is-active');
-                }, { once: true });
+                currentStepEl.classList.remove('is-active');
             }
             
             if(nextStepEl) {
@@ -2256,19 +2323,122 @@
                 if(firstInput) firstInput.focus();
             }, 250);
         };
+        
+        const validateStep = () => {
+          let isValid = true;
+          const stepEl = steps[currentStep - 1];
+          stepEl.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+          syncPlannerState();
 
-        // ... (rest of planner functions: validateStep, syncPlannerState, setPlannerSingleValue, etc. from previous turn)
-        // Make sure all functions from the previous implementation are here.
-        // ...
+          switch (currentStep) {
+            case 1: if (!plannerState.goal) { isValid = false; document.getElementById('plannerGoal').classList.add('is-invalid'); } break;
+            case 2: if (!plannerState.targetDate) { isValid = false; document.getElementById('plannerTargetDate').classList.add('is-invalid'); } break;
+            case 3: if (!plannerState.dailyStudyTime) isValid = false; break;
+            case 4: if (plannerState.subjects.length === 0) isValid = false; break;
+            case 6: if (!plannerState.roadmap) isValid = false; break;
+          }
+          if(!isValid) stepEl.querySelector('h2').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return isValid;
+        };
 
-        // Event Listeners
+        const syncPlannerState = () => {
+          plannerState.goal = document.getElementById('plannerGoal').value.trim();
+          plannerState.targetDate = document.getElementById('plannerTargetDate').value;
+        };
+        
+        const setPlannerSingleValue = (key, value, element) => {
+            plannerState[key] = value;
+            element.parentElement.querySelectorAll('.is-selected').forEach(el => el.classList.remove('is-selected'));
+            element.classList.add('is-selected');
+        };
+
+        const togglePlannerMultiValue = (key, value, element) => {
+            const set = new Set(plannerState[key]);
+            if (set.has(value)) {
+                set.delete(value);
+                element.classList.remove('is-selected');
+            } else {
+                set.add(value);
+                element.classList.add('is-selected');
+            }
+            plannerState[key] = Array.from(set);
+        };
+        
+        const populateWeakSubjectsStep = () => {
+            const container = document.getElementById('plannerWeakSubjects');
+            container.innerHTML = '';
+            syncPlannerState();
+            plannerState.subjects.forEach(subject => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'study-planner-chip';
+                chip.dataset.value = subject;
+                chip.textContent = subject;
+                if (plannerState.weakSubjects.includes(subject)) {
+                    chip.classList.add('is-selected');
+                }
+                container.appendChild(chip);
+            });
+        };
+
+        const renderPlannerSummary = () => {
+          syncPlannerState();
+          document.getElementById('plannerSummary').innerHTML = `
+            <div class="study-planner-summary-row"><strong>Goal:</strong> <span>${plannerState.goal || 'Not set'}</span></div>
+            <div class="study-planner-summary-row"><strong>Target Date:</strong> <span>${plannerState.targetDate || 'Not set'}</span></div>
+            <div class="study-planner-summary-row"><strong>Study Time:</strong> <span>${plannerState.dailyStudyTime || 'Not set'}</span></div>
+            <div class="study-planner-summary-row"><strong>Subjects:</strong> <span>${plannerState.subjects.join(', ') || 'None'}</span></div>
+            <div class="study-planner-summary-row"><strong>Weak Subjects:</strong> <span>${plannerState.weakSubjects.join(', ') || 'None'}</span></div>
+            <div class="study-planner-summary-row"><strong>Roadmap:</strong> <span>${plannerState.roadmap || 'Not set'}</span></div>
+          `;
+        };
+        
+        const handleKeyboardShortcuts = (e) => {
+          if (e.key === 'Escape') closeStudyPlannerModal();
+          if (e.key === 'Tab') {
+            if (e.shiftKey) { 
+              if (document.activeElement === firstFocusableElement) {
+                lastFocusableElement.focus();
+                e.preventDefault();
+              }
+            } else { 
+              if (document.activeElement === lastFocusableElement) {
+                firstFocusableElement.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        };
+
         studyPlannerButton.addEventListener('click', openStudyPlannerModal);
         studyPlannerModal.addEventListener('click', (e) => {
           const target = e.target;
           if (target === studyPlannerModal || target.closest('.study-planner-close-button')) {
             closeStudyPlannerModal();
           }
-          // ... (rest of the detailed click handling logic from previous implementation)
+          if (target.closest('[data-planner-next]')) {
+            if (validateStep()) showStudyPlannerStep(currentStep + 1);
+          }
+          if (target.closest('[data-planner-back]')) {
+            showStudyPlannerStep(currentStep - 1);
+          }
+          const dailyTimeCard = target.closest('#plannerDailyTime .study-planner-select-card');
+          if (dailyTimeCard) setPlannerSingleValue('dailyStudyTime', dailyTimeCard.dataset.value, dailyTimeCard);
+
+          const subjectsChip = target.closest('#plannerSubjects .study-planner-chip');
+          if (subjectsChip) togglePlannerMultiValue('subjects', subjectsChip.dataset.value, subjectsChip);
+
+          const weakSubjectsChip = target.closest('#plannerWeakSubjects .study-planner-chip');
+          if(weakSubjectsChip) togglePlannerMultiValue('weakSubjects', weakSubjectsChip.dataset.value, weakSubjectsChip);
+          
+          const roadmapCard = target.closest('#plannerRoadmap .study-planner-roadmap-card');
+          if(roadmapCard) setPlannerSingleValue('roadmap', roadmapCard.dataset.value, roadmapCard);
+
+          if (target.id === 'createPlannerButton') {
+            console.log("Final Planner State:", plannerState);
+            alert("Planner created! Check the console for the final state.");
+            closeStudyPlannerModal();
+          }
         });
       }
     });
