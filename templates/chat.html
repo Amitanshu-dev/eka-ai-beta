@@ -946,6 +946,275 @@
       margin-top: 16px;
       position: relative;
     }
+   .study-planner-backdrop {
+  background: rgba(5,5,5,.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.study-planner-backdrop.is-open { opacity: 1; }
+.study-planner-backdrop.is-closing { opacity: 0; }
+
+.study-planner-modal {
+  width: min(560px, 100%);
+  padding: 26px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(123,44,255,.24), transparent 36%),
+    rgba(13,13,13,.84);
+  border: 1px solid rgba(168,85,247,.3);
+  box-shadow: 0 24px 80px rgba(0,0,0,.5), 0 0 60px rgba(123,44,255,.24);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  overflow: hidden;
+  animation: studyPlannerIn 240ms ease forwards;
+}
+
+.study-planner-backdrop.is-closing .study-planner-modal {
+  animation: studyPlannerOut 180ms ease forwards;
+}
+
+.study-planner-logo {
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 16px;
+  display: block;
+  object-fit: contain;
+  border-radius: 50%;
+  padding: 8px;
+  border: 1px solid rgba(168,85,247,.34);
+  background: rgba(123,44,255,.1);
+  box-shadow: 0 0 46px rgba(168,85,247,.42);
+  animation: logoPulse 4s ease-in-out infinite;
+}
+
+.study-planner-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.study-planner-progress-fill {
+  width: 14.285%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--purple), var(--purple-glow));
+  box-shadow: 0 0 24px rgba(168,85,247,.5);
+  transition: width 260ms ease;
+}
+
+.study-planner-step-label {
+  margin-bottom: 18px;
+  color: var(--muted-soft);
+  font-size: 12px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.study-planner-steps {
+  position: relative;
+}
+
+.study-planner-step {
+  display: none;
+  animation: studyPlannerSlide 220ms ease both;
+}
+
+.study-planner-step.is-active {
+  display: block;
+}
+
+.study-planner-step h2 {
+  margin: 0 0 18px;
+  font-size: clamp(21px, 4.5vw, 28px);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.study-planner-large-input {
+  width: 100%;
+  min-height: 138px;
+  resize: vertical;
+  border: 1px solid rgba(168,85,247,.24);
+  border-radius: 20px;
+  background: rgba(255,255,255,.045);
+  color: var(--text);
+  padding: 16px;
+  outline: none;
+  line-height: 1.5;
+}
+
+.study-planner-large-input:focus,
+.study-planner-date:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px rgba(123,44,255,.14);
+}
+
+.study-planner-date {
+  width: 100%;
+  height: 52px;
+  border: 1px solid rgba(168,85,247,.24);
+  border-radius: 18px;
+  background: rgba(255,255,255,.045);
+  color: var(--text);
+  padding: 0 16px;
+  outline: none;
+}
+
+.study-planner-card-grid,
+.study-planner-chip-grid,
+.study-planner-roadmap-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.study-planner-card-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.study-planner-select-card,
+.study-planner-chip,
+.study-planner-roadmap-card {
+  border: 1px solid rgba(168,85,247,.18);
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.study-planner-select-card {
+  min-height: 58px;
+  font-weight: 800;
+}
+
+.study-planner-chip-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.study-planner-chip {
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.study-planner-roadmap-card {
+  min-height: 86px;
+  padding: 15px;
+  text-align: left;
+  display: grid;
+  gap: 6px;
+}
+
+.study-planner-roadmap-card strong {
+  font-size: 16px;
+}
+
+.study-planner-roadmap-card span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.study-planner-select-card:hover,
+.study-planner-chip:hover,
+.study-planner-roadmap-card:hover,
+.study-planner-select-card.is-selected,
+.study-planner-chip.is-selected,
+.study-planner-roadmap-card.is-selected {
+  transform: translateY(-1px);
+  border-color: rgba(168,85,247,.62);
+  background: rgba(123,44,255,.18);
+  box-shadow: 0 0 28px rgba(168,85,247,.2);
+}
+
+.study-planner-summary {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  background: rgba(255,255,255,.035);
+}
+
+.study-planner-summary-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.study-planner-summary-row strong {
+  color: var(--muted);
+}
+
+.study-planner-actions {
+  justify-content: space-between;
+  margin-top: 22px;
+}
+
+.study-planner-actions .button {
+  min-width: 120px;
+}
+
+body.study-planner-open {
+  overflow: hidden;
+}
+
+@keyframes studyPlannerIn {
+  from { opacity: 0; transform: translateY(14px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes studyPlannerOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(10px) scale(.96); }
+}
+
+@keyframes studyPlannerSlide {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 560px) {
+  .study-planner-modal {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+
+  .study-planner-card-grid,
+  .study-planner-chip-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .study-planner-summary-row {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  .study-planner-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .study-planner-actions .button {
+    width: 100%;
+  }
+}
+
+  .study-planner-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .study-planner-actions .button {
+    width: 100%;
+  }
 
     .button {
       min-height: 40px;
@@ -1237,10 +1506,10 @@
               <span class="sidebar-nav-icon" aria-hidden="true">?</span>
               <span>Question Mode</span>
             </button>
-            <a class="sidebar-nav-link" href="#" data-nav-item="planner">
-              <span class="sidebar-nav-icon" aria-hidden="true">▣</span>
-              <span class="sidebar-nav-label">Study Planner</span>
-            </a>
+           <button class="sidebar-nav-link" type="button" id="studyPlannerButton" data-nav-item="planner" aria-haspopup="dialog">
+            <span class="sidebar-nav-icon" aria-hidden="true">▣</span>
+            <span class="sidebar-nav-label">Study Planner</span>
+            </button>
             <button class="sidebar-nav-link" type="button" id="showFocusCapsuleButton" data-nav-item="timer">
               <span class="sidebar-nav-icon" aria-hidden="true">◷</span>
               <span class="sidebar-nav-label">Study Timer</span>
@@ -1464,6 +1733,118 @@
       </div>
     </div>
   </div>
+  <!-- 👇 Study Planner Modal -->
+   <div class="modal-backdrop study-planner-backdrop" id="studyPlannerModal" role="dialog" aria-modal="true" aria-labelledby="studyPlannerTitle">
+  <div class="modal study-planner-modal" tabindex="-1">
+    <img class="study-planner-logo" src="/static/logo.png" alt="EKA AI" />
+
+    <div class="study-planner-progress" aria-hidden="true">
+      <div class="study-planner-progress-fill" id="studyPlannerProgressFill"></div>
+    </div>
+
+    <div class="study-planner-step-label" id="studyPlannerStepLabel">Step 1 of 7</div>
+
+    <div class="study-planner-steps" id="studyPlannerSteps">
+      <section class="study-planner-step is-active" data-step="1">
+        <h2 id="studyPlannerTitle">🎯 What's your long-term goal?</h2>
+        <textarea class="study-planner-large-input" id="plannerGoal" placeholder="Example: Crack UPSC, Score 9 CGPA, Learn Python, Get Placement"></textarea>
+        <div class="modal-actions study-planner-actions">
+          <button class="button primary" type="button" id="plannerNext1">Next</button>
+        </div>
+      </section>
+
+      <section class="study-planner-step" data-step="2">
+        <h2>Target Date</h2>
+        <input class="study-planner-date" id="plannerTargetDate" type="date" />
+        <div class="modal-actions study-planner-actions">
+          <button class="button" type="button" data-planner-back>Back</button>
+          <button class="button primary" type="button" data-planner-next>Next</button>
+        </div>
+      </section>
+
+      <section class="study-planner-step" data-step="3">
+        <h2>Daily Study Time</h2>
+        <div class="study-planner-card-grid" id="plannerDailyTime">
+          <button class="study-planner-select-card" type="button" data-value="30 min">30 min</button>
+          <button class="study-planner-select-card" type="button" data-value="1 hour">1 hour</button>
+          <button class="study-planner-select-card" type="button" data-value="2 hours">2 hours</button>
+          <button class="study-planner-select-card" type="button" data-value="3 hours">3 hours</button>
+          <button class="study-planner-select-card" type="button" data-value="4+ hours">4+ hours</button>
+        </div>
+        <div class="modal-actions study-planner-actions">
+          <button class="button" type="button" data-planner-back>Back</button>
+          <button class="button primary" type="button" data-planner-next>Next</button>
+        </div>
+      </section>
+
+      <section class="study-planner-step" data-step="4">
+        <h2>Subjects</h2>
+        <div class="study-planner-chip-grid" id="plannerSubjects">
+          <button class="study-planner-chip" type="button" data-value="Physics">Physics</button>
+          <button class="study-planner-chip" type="button" data-value="Chemistry">Chemistry</button>
+          <button class="study-planner-chip" type="button" data-value="Math">Math</button>
+          <button class="study-planner-chip" type="button" data-value="English">English</button>
+          <button class="study-planner-chip" type="button" data-value="Programming">Programming</button>
+          <button class="study-planner-chip" type="button" data-value="Electronics">Electronics</button>
+          <button class="study-planner-chip" type="button" data-value="Custom Subject">Custom Subject</button>
+        </div>
+        <div class="modal-actions study-planner-actions">
+          <button class="button" type="button" data-planner-back>Back</button>
+          <button class="button primary" type="button" data-planner-next>Next</button>
+        </div>
+      </section>
+
+      <section class="study-planner-step" data-step="5">
+        <h2>Weak Subjects</h2>
+        <div class="study-planner-chip-grid" id="plannerWeakSubjects">
+          <button class="study-planner-chip" type="button" data-value="Physics">Physics</button>
+          <button class="study-planner-chip" type="button" data-value="Chemistry">Chemistry</button>
+          <button class="study-planner-chip" type="button" data-value="Math">Math</button>
+          <button class="study-planner-chip" type="button" data-value="English">English</button>
+          <button class="study-planner-chip" type="button" data-value="Programming">Programming</button>
+          <button class="study-planner-chip" type="button" data-value="Electronics">Electronics</button>
+          <button class="study-planner-chip" type="button" data-value="Custom Subject">Custom Subject</button>
+        </div>
+        <div class="modal-actions study-planner-actions">
+          <button class="button" type="button" data-planner-back>Back</button>
+          <button class="button primary" type="button" data-planner-next>Next</button>
+        </div>
+      </section>
+
+      <section class="study-planner-step" data-step="6">
+        <h2>Choose your roadmap</h2>
+        <div class="study-planner-roadmap-grid" id="plannerRoadmap">
+          <button class="study-planner-roadmap-card" type="button" data-value="Fast Track">
+            <strong>🚀 Fast Track</strong>
+            <span>Move quickly with sharp milestones.</span>
+          </button>
+          <button class="study-planner-roadmap-card" type="button" data-value="Balanced">
+            <strong>⚖ Balanced</strong>
+            <span>Steady progress with room to revise.</span>
+          </button>
+          <button class="study-planner-roadmap-card" type="button" data-value="Deep Mastery">
+            <strong>🎯 Deep Mastery</strong>
+            <span>Go deeper with stronger foundations.</span>
+          </button>
+        </div>
+        <div class="modal-actions study-planner-actions">
+          <button class="button" type="button" data-planner-back>Back</button>
+          <button class="button primary" type="button" data-planner-next>Next</button>
+        </div>
+      </section>
+
+      <section class="study-planner-step" data-step="7">
+        <h2>Review</h2>
+        <div class="study-planner-summary" id="plannerSummary"></div>
+        <div class="modal-actions study-planner-actions">
+          <button class="button" type="button" data-planner-back>Back</button>
+          <button class="button primary" type="button" id="createPlannerButton">Create Planner</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
 
   <div class="modal-backdrop" id="questionModeModal" role="dialog" aria-modal="true" aria-labelledby="questionModeTitle">
     <div class="modal question-modal">
@@ -1702,6 +2083,56 @@
     function closeModal(modal) {
       modal.classList.remove("is-open");
     }
+    let studyPlannerLastFocus = null;
+let studyPlannerCloseTimer = null;
+
+function openStudyPlannerModal() {
+  studyPlannerLastFocus = document.activeElement;
+  window.clearTimeout(studyPlannerCloseTimer);
+
+  studyPlannerModal.classList.remove("is-closing");
+  studyPlannerModal.classList.add("is-open");
+  document.body.classList.add("study-planner-open");
+
+  setTimeout(function () {
+    createPlannerButton.focus();
+  }, 0);
+}
+
+function closeStudyPlannerModal() {
+  if (!studyPlannerModal.classList.contains("is-open")) {
+    return;
+  }
+
+  studyPlannerModal.classList.add("is-closing");
+
+  studyPlannerCloseTimer = window.setTimeout(function () {
+    studyPlannerModal.classList.remove("is-open", "is-closing");
+    document.body.classList.remove("study-planner-open");
+
+    if (studyPlannerLastFocus) {
+      studyPlannerLastFocus.focus();
+    }
+  }, 180);
+}
+
+function keepStudyPlannerFocus(event) {
+  if (!studyPlannerModal.classList.contains("is-open") || event.key !== "Tab") {
+    return;
+  }
+
+  const focusable = studyPlannerModal.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+  const firstItem = focusable[0];
+  const lastItem = focusable[focusable.length - 1];
+
+  if (event.shiftKey && document.activeElement === firstItem) {
+    event.preventDefault();
+    lastItem.focus();
+  } else if (!event.shiftKey && document.activeElement === lastItem) {
+    event.preventDefault();
+    firstItem.focus();
+  }
+}
 
     function setStatus(message, isError = false) {
       statusLine.textContent = message || "";
@@ -2149,6 +2580,7 @@
         closeModal(deleteModal);
         closeModal(questionModeModal);
         closeModal(examModeModal);
+        closeStudyPlannerModal();
       }
     });
 
@@ -2391,12 +2823,35 @@
     chatSearch.addEventListener("input", function () {
       const query = chatSearch.value.trim().toLowerCase();
       const items = document.querySelectorAll(".chat-item");
+      
 
       items.forEach(function (item) {
         const title = item.dataset.chatTitle || "";
         item.style.display = title.includes(query) ? "flex" : "none";
       });
     });
+    studyPlannerButton.addEventListener("click", function () {
+  closeSidebar();
+  setActiveSidebarItem("planner");
+  openStudyPlannerModal();
+});
+
+cancelStudyPlannerButton.addEventListener("click", function () {
+  closeStudyPlannerModal();
+});
+
+createPlannerButton.addEventListener("click", function () {
+  closeStudyPlannerModal();
+});
+
+studyPlannerModal.addEventListener("click", function (event) {
+  if (event.target === studyPlannerModal) {
+    closeStudyPlannerModal();
+  }
+});
+
+document.addEventListener("keydown", keepStudyPlannerFocus);
+
 
     focusCapsuleToggle.addEventListener("click", function () {
       const shouldExpand = focusCapsule.classList.contains("is-collapsed");
