@@ -135,7 +135,79 @@ def load_study_planner(user_email):
     conn.close()
 
     return planner
+# =======STUDY PLLANNERR ENGINNE========
 
+from datetime import datetime
+
+
+def remaining_days(target_date):
+
+    if not target_date:
+        return 0
+
+    try:
+
+        target = datetime.strptime(target_date, "%Y-%m-%d").date()
+
+        today = datetime.now().date()
+
+        days = (target - today).days
+
+        return max(days, 0)
+
+    except:
+        return 0
+
+
+def planner_progress(planner):
+
+    if not planner:
+        return 0
+
+    total_days = remaining_days(planner["target_date"])
+
+    current_day = planner["current_day"]
+
+    if total_days <= 0:
+        return 100
+
+    progress = (current_day / (current_day + total_days)) * 100
+
+    return round(progress)
+
+
+def planner_summary(planner):
+
+    if not planner:
+        return None
+
+    return {
+
+        "goal": planner["goal"],
+
+        "target_date": planner["target_date"],
+
+        "daily_hours": planner["daily_hours"],
+
+        "subjects": planner["subjects"],
+
+        "weak_subjects": planner["weak_subjects"],
+
+        "roadmap": planner["roadmap"],
+
+        "week": planner["current_week"],
+
+        "day": planner["current_day"],
+
+        "streak": planner["study_streak"],
+
+        "remaining_days": remaining_days(
+            planner["target_date"]
+        ),
+
+        "progress": planner_progress(planner)
+
+    }
 
 def init_db():
     conn = get_db()
@@ -597,41 +669,35 @@ def ask_ai(prompt, chat_id, user_id="default"):
     try:
         memory=load_memory(user_id)
         planner = load_study_planner(user_id)
-        planner_exists = planner is not None
-        if not planner_exists:
-         planner_context = """
-Study Planner Status: Not Configured
-
-The user has not created a study planner yet.
-
-If the user asks about planning, roadmap, study schedule, goals, revision plan, or wants long-term guidance,
-tell them to open the Study Planner and complete the setup.
-
-Do not invent planner data.
-"""
-        else:
+        planner_data = planner_summary(planner)
+        planner_context = ""
+        if planner_data:
          planner_context = f"""
-Study Planner Status: Active
 
-Goal: {planner["goal"]}
+===== ACTIVE STUDY PLANNER =====
 
-Target Date: {planner["target_date"]}
+Goal: {planner_data['goal']}
 
-Daily Hours: {planner["daily_hours"]}
+Daily Study Time: {planner_data['daily_hours']}
 
-Subjects: {planner["subjects"]}
+Roadmap: {planner_data['roadmap']}
 
-Weak Subjects: {planner["weak_subjects"]}
+Current Week: {planner_data['week']}
 
-Roadmap: {planner["roadmap"]}
+Current Day: {planner_data['day']}
 
-Current Week: {planner["current_week"]}
+Remaining Days: {planner_data['remaining_days']}
 
-Current Day: {planner["current_day"]}
+Progress: {planner_data['progress']}%
 
-Study Streak: {planner["study_streak"]}
+Subjects: {planner_data['subjects']}
+
+Weak Subjects: {planner_data['weak_subjects']}
+
+================================
+
 """
-        print("Planner Exists:", planner_exists)
+        print("Planner Exists:", planner is not None)
         saved_subject=""
         saved_chapter=""
         saved_concept=""
@@ -917,7 +983,40 @@ Otherwise continue.
 Always adapt the teaching speed to the student's understanding.
 The goal is genuine understanding, not finishing the syllabus quickly.
 
+ACTIVE STUDY PLANNER RULES
+
+If an active study planner exists:
+
+Always use it as the student's primary long-term goal.
+
+Before answering any study-related question, silently consider:
+
+- Goal
+- Current Week
+- Current Day
+- Remaining Days
+- Progress
+- Weak Subjects
+- Roadmap
+
+If the user asks something unrelated to their active study goal,
+politely remind them about today's study goal before answering.
+
+If the user asks about the subject inside their planner,
+teach according to that planner.
+
+Never ignore an active planner.
+
+Behave like a personal mentor, not just a chatbot.
+
+Always encourage the student to complete today's target before moving ahead.
+
+Never invent planner data.
+
+Only use the planner information provided in the Active Study Planner section.
+
 """
+        SYSTEM_PROMPT += "\n\n" + planner_context
         conn = get_db()
         cur = conn.cursor()
         cur.execute("""
@@ -1134,6 +1233,32 @@ def save_study_planner_route():
     )
 
     return jsonify({"success": True})
+@app.route("/load_study_planner", methods=["GET"])
+def load_study_planner_route():
+
+    if "user" not in session:
+        return jsonify({
+            "success": False
+        })
+
+    planner = load_study_planner(session["user"]["email"])
+
+    if not planner:
+        return jsonify({
+            "success": False
+        })
+
+    return jsonify({
+        "success": True,
+        "planner": {
+            "goal": planner["goal"],
+            "targetDate": planner["target_date"],
+            "dailyTime": planner["daily_hours"],
+            "subjects": planner["subjects"],
+            "weakSubjects": planner["weak_subjects"],
+            "roadmap": planner["roadmap"]
+        }
+    })
 @app.route("/question_mode", methods=["POST"])
 def question_mode():
     if "user" not in session:
