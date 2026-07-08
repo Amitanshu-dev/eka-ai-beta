@@ -1132,25 +1132,60 @@
   box-shadow: 0 0 28px rgba(168,85,247,.2);
 }
 
-.study-planner-summary {
-  display: grid;
-  gap: 10px;
-  padding: 16px;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 20px;
-  background: rgba(255,255,255,.035);
+.study-planner-summary{
+
+display:flex;
+flex-direction:column;
+gap:14px;
+
 }
 
-.study-planner-summary-row {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 12px;
-  font-size: 14px;
-  line-height: 1.45;
+.study-planner-summary-row{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:14px 18px;
+
+border-radius:16px;
+
+background:rgba(255,255,255,.04);
+
+border:1px solid rgba(255,255,255,.06);
+
+transition:.25s;
+
 }
 
-.study-planner-summary-row strong {
-  color: var(--muted);
+.study-planner-summary-row:hover{
+
+transform:translateY(-2px);
+
+border-color:rgba(123,44,255,.45);
+
+box-shadow:0 0 18px rgba(123,44,255,.15);
+
+}
+
+.study-planner-summary-row strong{
+
+font-size:15px;
+
+color:#fff;
+
+}
+
+.study-planner-summary-row span{
+
+color:#bdbdbd;
+
+text-align:right;
+
+font-size:14px;
+
+max-width:60%;
+
 }
 
 .study-planner-actions {
@@ -2928,10 +2963,91 @@ function savePlannerInputs(){
         document.getElementById("plannerTargetDate")?.value||"";
 
 }
+function isCodingGoal(goal){
+
+    const text = goal.toLowerCase();
+
+    const codingKeywords = [
+        "python",
+        "java",
+        "c++",
+        "c#",
+        "javascript",
+        "typescript",
+        "react",
+        "node",
+        "html",
+        "css",
+        "web",
+        "frontend",
+        "backend",
+        "full stack",
+        "coding",
+        "programming",
+        "developer",
+        "flutter",
+        "android",
+        "ios",
+        "ai",
+        "machine learning",
+        "data science"
+    ];
+
+    return codingKeywords.some(keyword=>text.includes(keyword));
+
+}
 
 function nextPlannerStep(){
 
     savePlannerInputs();
+    if(currentPlannerStep===3){
+    if(isCodingGoal(plannerState.goal)){
+
+        showPlannerStep(6);
+
+        return;
+
+    }
+    if(currentPlannerStep===2){
+
+    if(!isValidFutureDate()){
+
+        return;
+
+    }
+
+}
+
+}
+function isValidFutureDate(){
+
+    const input=document.getElementById("plannerTargetDate");
+
+    if(!input.value){
+
+        alert("Please select your target date.");
+
+        return false;
+
+    }
+
+    const today=new Date();
+
+    today.setHours(0,0,0,0);
+
+    const selected=new Date(input.value);
+
+    if(selected<=today){
+
+        alert("Target date must be in the future.");
+
+        return false;
+
+    }
+
+    return true;
+
+}
 
     if(currentPlannerStep<totalPlannerSteps){
 
@@ -3050,10 +3166,194 @@ document.querySelectorAll("#plannerWeakSubjects .study-planner-chip")
     });
 
 });
+/* ==========================
+   ROADMAP SELECTION
+========================== */
+
+document.querySelectorAll("#plannerRoadmap .study-planner-roadmap-card")
+.forEach((card)=>{
+
+    card.addEventListener("click",function(){
+
+        document
+            .querySelectorAll("#plannerRoadmap .study-planner-roadmap-card")
+            .forEach(c=>c.classList.remove("is-selected"));
+
+        this.classList.add("is-selected");
+
+        plannerState.roadmap=this.dataset.value;
+
+    });
+
+});
+/* ==========================
+   REVIEW + CREATE PLANNER
+========================== */
+
+const plannerSummary = document.getElementById("plannerSummary");
+
+function renderPlannerSummary() {
+
+    if (!plannerSummary) return;
+    plannerSummary.innerHTML = `
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:16px;
+">
+
+<div class="study-planner-summary-row">
+<strong>🎯 Goal</strong>
+<span>${plannerState.goal || "Not Selected"}</span>
+</div>
+
+<div class="study-planner-summary-row">
+<strong>📅 Target Date</strong>
+<span>${plannerState.targetDate || "Not Selected"}</span>
+</div>
+
+<div class="study-planner-summary-row">
+<strong>⏳ Remaining Days</strong>
+<span>${
+plannerState.targetDate
+?
+Math.max(
+0,
+Math.ceil(
+(new Date(plannerState.targetDate)-new Date())/
+86400000
+)
+)
++" Days Left"
+:
+"Not Selected"
+}</span>
+</div>
+
+<div class="study-planner-summary-row">
+<strong>📖 Daily Study</strong>
+<span>${plannerState.dailyTime || "Not Selected"}</span>
+</div>
+
+<div class="study-planner-summary-row">
+<strong>📚 Subjects</strong>
+<span>${
+plannerState.subjects.length
+?
+plannerState.subjects.join(", ")
+:
+"None"
+}</span>
+</div>
+
+<div class="study-planner-summary-row">
+<strong>⚠ Weak Subjects</strong>
+<span>${
+plannerState.weakSubjects.length
+?
+plannerState.weakSubjects.join(", ")
+:
+"None"
+}</span>
+</div>
+
+<div class="study-planner-summary-row">
+<strong>🧠 Roadmap</strong>
+<span>${plannerState.roadmap || "Not Selected"}</span>
+</div>
+
+<hr style="
+border:none;
+height:1px;
+background:rgba(255,255,255,.08);
+margin:4px 0;
+">
+
+<div style="
+text-align:center;
+color:#bdbdbd;
+font-size:14px;
+line-height:1.6;
+">
+
+✨ Your AI Study Planner is ready.
+
+Click <b>Create Planner</b> to continue.
+
+</div>
+
+`;
+}
 
 
+/* ---------- SHOW REVIEW ON STEP 7 ---------- */
+
+const oldShowPlannerStep = showPlannerStep;
+
+showPlannerStep = function(step){
+
+    oldShowPlannerStep(step);
+
+    if(step===7){
+
+        savePlannerInputs();
+
+        renderPlannerSummary();
+
+    }
+
+};
 
 
+/* ---------- CREATE PLANNER ---------- */
+
+if(createPlannerButton){
+
+    createPlannerButton.addEventListener("click",function(){
+
+        savePlannerInputs();
+
+        renderPlannerSummary();
+
+        savePlannerToStorage();
+
+        alert("Planner Created Successfully!");
+
+        closeStudyPlannerModal();
+
+    });
+/* ==========================
+   AUTO SAVE
+========================== */
+
+function savePlannerToStorage() {
+    localStorage.setItem(
+        "ekaStudyPlanner",
+        JSON.stringify(plannerState)
+    );
+}
+
+function loadPlannerFromStorage() {
+
+    const saved = localStorage.getItem("ekaStudyPlanner");
+
+    if (!saved) return;
+
+    const data = JSON.parse(saved);
+
+    Object.assign(plannerState, data);
+
+}
+}
+loadPlannerFromStorage();
+const plannerDate=document.getElementById("plannerTargetDate");
+
+if(plannerDate){
+
+    plannerDate.min=new Date().toISOString().split("T")[0];
+
+}
   </script>
 
 </body>
