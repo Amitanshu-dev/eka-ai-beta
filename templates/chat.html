@@ -2873,6 +2873,65 @@ document.addEventListener("keydown", keepStudyPlannerFocus);
     autoResizeTextarea();
     renderFocusCapsuleState("timer");
     renderTimer();
+    // ===== Study Planner Next Button =====
+
+let currentPlannerStep = 1;
+const totalPlannerSteps = 7;
+
+const plannerSteps = document.querySelectorAll(".study-planner-step");
+const plannerProgressFill = document.getElementById("studyPlannerProgressFill");
+const plannerStepLabel = document.getElementById("studyPlannerStepLabel");
+
+function showPlannerStep(step) {
+
+    plannerSteps.forEach((item) => {
+        item.classList.remove("is-active");
+    });
+
+    const activeStep = document.querySelector(
+        `.study-planner-step[data-step="${step}"]`
+    );
+
+    if (activeStep) {
+        activeStep.classList.add("is-active");
+    }
+
+    plannerStepLabel.textContent = `Step ${step} of ${totalPlannerSteps}`;
+    plannerProgressFill.style.width = `${(step / totalPlannerSteps) * 100}%`;
+}
+
+document.querySelectorAll("[data-planner-next]").forEach((btn) => {
+
+    btn.addEventListener("click", () => {
+
+        if (currentPlannerStep < totalPlannerSteps) {
+
+            currentPlannerStep++;
+
+            showPlannerStep(currentPlannerStep);
+
+        }
+
+    });
+
+});
+
+// First button (Step 1)
+const plannerNext1 = document.getElementById("plannerNext1");
+
+if (plannerNext1) {
+
+    plannerNext1.addEventListener("click", () => {
+
+        currentPlannerStep = 2;
+
+        showPlannerStep(currentPlannerStep);
+
+    });
+
+}
+
+showPlannerStep(1);
 
   </script>
 
