@@ -1133,59 +1133,81 @@
 }
 
 .study-planner-summary{
+.planner-review-grid{
 
-display:flex;
-flex-direction:column;
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
 gap:14px;
 
 }
 
-.study-planner-summary-row{
+.planner-review-card{
 
-display:flex;
-justify-content:space-between;
-align-items:center;
+background:rgba(255,255,255,.05);
 
-padding:14px 18px;
+border:1px solid rgba(255,255,255,.08);
 
-border-radius:16px;
+border-radius:18px;
 
-background:rgba(255,255,255,.04);
-
-border:1px solid rgba(255,255,255,.06);
+padding:18px;
 
 transition:.25s;
 
 }
 
-.study-planner-summary-row:hover{
+.planner-review-card:hover{
+
+border-color:#7b61ff;
 
 transform:translateY(-2px);
 
-border-color:rgba(123,44,255,.45);
+}
 
-box-shadow:0 0 18px rgba(123,44,255,.15);
+.planner-review-title{
+
+font-size:13px;
+
+color:#9ca3af;
+
+margin-bottom:8px;
 
 }
 
-.study-planner-summary-row strong{
+.planner-review-value{
 
-font-size:15px;
+font-size:17px;
 
-color:#fff;
+font-weight:600;
+
+color:white;
+
+word-break:break-word;
 
 }
 
-.study-planner-summary-row span{
+.planner-review-wide{
 
-color:#bdbdbd;
+grid-column:1/3;
 
-text-align:right;
+}
 
-font-size:14px;
+@media(max-width:700px){
 
-max-width:60%;
+.planner-review-grid{
 
+grid-template-columns:1fr;
+
+}
+
+.planner-review-wide{
+
+grid-column:auto;
+
+}
+
+}
 }
 
 .study-planner-actions {
@@ -3000,6 +3022,27 @@ function isCodingGoal(goal){
 function nextPlannerStep(){
 
     savePlannerInputs();
+    if (currentPlannerStep === 2) {
+
+    const input = document.getElementById("plannerTargetDate");
+
+    if (!input.value) {
+        alert("Please select a target date.");
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const selected = new Date(input.value);
+
+    if (selected <= today) {
+        alert("Please choose a future date.");
+        input.focus();
+        return;
+    }
+
+}
     if(currentPlannerStep===3){
     if(isCodingGoal(plannerState.goal)){
 
@@ -3106,6 +3149,11 @@ document.querySelectorAll("#plannerDailyTime .study-planner-select-card")
 });
 // ---------- INITIAL STEP ----------
 showPlannerStep(1);
+const targetDateInput= document.getElementById("plannerTargetDate");
+if (targetDateInput) {
+    const today = new Date().toISOString().split("T")[0];
+    targetDateInput.min = today;
+}
 /* ==========================
    SUBJECT SELECTION
 ========================== */
@@ -3197,93 +3245,46 @@ function renderPlannerSummary() {
     if (!plannerSummary) return;
     plannerSummary.innerHTML = `
 
-<div style="
-display:flex;
-flex-direction:column;
-gap:16px;
-">
+<div class="planner-review-grid">
 
-<div class="study-planner-summary-row">
-<strong>🎯 Goal</strong>
-<span>${plannerState.goal || "Not Selected"}</span>
+<div class="planner-review-card">
+<div class="planner-review-title">🎯 Goal</div>
+<div class="planner-review-value">${plannerState.goal || "Not Selected"}</div>
 </div>
 
-<div class="study-planner-summary-row">
-<strong>📅 Target Date</strong>
-<span>${plannerState.targetDate || "Not Selected"}</span>
+<div class="planner-review-card">
+<div class="planner-review-title">📅 Date</div>
+<div class="planner-review-value">${plannerState.targetDate || "Not Selected"}</div>
 </div>
 
-<div class="study-planner-summary-row">
-<strong>⏳ Remaining Days</strong>
-<span>${
-plannerState.targetDate
-?
-Math.max(
-0,
-Math.ceil(
-(new Date(plannerState.targetDate)-new Date())/
-86400000
-)
-)
-+" Days Left"
-:
-"Not Selected"
-}</span>
+<div class="planner-review-card">
+<div class="planner-review-title">📖 Daily Time</div>
+<div class="planner-review-value">${plannerState.dailyTime || "Not Selected"}</div>
 </div>
 
-<div class="study-planner-summary-row">
-<strong>📖 Daily Study</strong>
-<span>${plannerState.dailyTime || "Not Selected"}</span>
+<div class="planner-review-card">
+<div class="planner-review-title">🧠 Roadmap</div>
+<div class="planner-review-value">${plannerState.roadmap || "Not Selected"}</div>
 </div>
 
-<div class="study-planner-summary-row">
-<strong>📚 Subjects</strong>
-<span>${
-plannerState.subjects.length
-?
-plannerState.subjects.join(", ")
-:
-"None"
-}</span>
+<div class="planner-review-card planner-review-wide">
+<div class="planner-review-title">📚 Subjects</div>
+<div class="planner-review-value">
+${plannerState.subjects.length ? plannerState.subjects.join(", ") : "None"}
+</div>
 </div>
 
-<div class="study-planner-summary-row">
-<strong>⚠ Weak Subjects</strong>
-<span>${
-plannerState.weakSubjects.length
-?
-plannerState.weakSubjects.join(", ")
-:
-"None"
-}</span>
+<div class="planner-review-card planner-review-wide">
+<div class="planner-review-title">⚠ Weak Subjects</div>
+<div class="planner-review-value">
+${plannerState.weakSubjects.length ? plannerState.weakSubjects.join(", ") : "None"}
 </div>
-
-<div class="study-planner-summary-row">
-<strong>🧠 Roadmap</strong>
-<span>${plannerState.roadmap || "Not Selected"}</span>
 </div>
-
-<hr style="
-border:none;
-height:1px;
-background:rgba(255,255,255,.08);
-margin:4px 0;
-">
-
-<div style="
-text-align:center;
-color:#bdbdbd;
-font-size:14px;
-line-height:1.6;
-">
-
-✨ Your AI Study Planner is ready.
-
-Click <b>Create Planner</b> to continue.
 
 </div>
 
 `;
+
 }
 
 
