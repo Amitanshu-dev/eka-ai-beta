@@ -3333,6 +3333,27 @@ function savePlannerToStorage() {
         "ekaStudyPlanner",
         JSON.stringify(plannerState)
     );
+    fetch("/save_study_planner", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        goal: plannerState.goal,
+        target_date: plannerState.targetDate,
+        daily_hours: plannerState.dailyTime,
+        subjects: plannerState.subjects,
+        weak_subjects: plannerState.weakSubjects,
+        roadmap: plannerState.roadmap
+    })
+})
+.then(res => res.json())
+.then(data => {
+    console.log("Planner Saved:", data);
+})
+.catch(err => {
+    console.error(err);
+});
 }
 
 function loadPlannerFromStorage() {
@@ -3347,7 +3368,33 @@ function loadPlannerFromStorage() {
 
 }
 }
-loadPlannerFromStorage();
+async function loadPlannerFromDatabase() {
+
+    try {
+
+        const response = await fetch("/load_study_planner");
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        Object.assign(plannerState, data.planner);
+
+        renderPlannerSummary();
+
+        if (document.getElementById("plannerGoal"))
+            document.getElementById("plannerGoal").value = plannerState.goal || "";
+
+        if (document.getElementById("plannerTargetDate"))
+            document.getElementById("plannerTargetDate").value = plannerState.targetDate || "";
+
+    } catch (err) {
+
+        console.error("Planner Load Error:", err);
+
+    }
+
+}
+loadPlannerFromDatabase();
 const plannerDate=document.getElementById("plannerTargetDate");
 
 if(plannerDate){
