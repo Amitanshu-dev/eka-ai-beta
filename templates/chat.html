@@ -1164,6 +1164,15 @@ border-color:#7b61ff;
 transform:translateY(-2px);
 
 }
+.planner-review-actions{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+}
+
+.planner-review-actions .button{
+    flex:1;
+}
 
 .planner-review-title{
 
@@ -2146,6 +2155,33 @@ let studyPlannerCloseTimer = null;
 function openStudyPlannerModal() {
   studyPlannerLastFocus = document.activeElement;
   window.clearTimeout(studyPlannerCloseTimer);
+  if (plannerState.plannerCreated) {
+
+    currentPlannerStep = 7;
+
+    showPlannerStep(7);
+
+    renderPlannerSummary();
+
+    createPlannerButton.textContent = "Update Planner";
+
+    document.querySelectorAll("[data-planner-back]").forEach(btn => {
+        btn.style.display = "none";
+    });
+
+} else {
+
+    currentPlannerStep = 1;
+
+    showPlannerStep(1);
+
+    createPlannerButton.textContent = "Create Planner";
+
+    document.querySelectorAll("[data-planner-back]").forEach(btn => {
+        btn.style.display = "";
+    });
+
+}
 
   studyPlannerModal.classList.remove("is-closing");
   studyPlannerModal.classList.add("is-open");
@@ -2940,7 +2976,8 @@ const plannerState = {
     dailyTime: "",
     subjects: [],
     weakSubjects: [],
-    roadmap: ""
+    roadmap: "",
+    plannerCreated: false,
 };
 
 let currentPlannerStep = 1;
@@ -3282,8 +3319,66 @@ ${plannerState.weakSubjects.length ? plannerState.weakSubjects.join(", ") : "Non
 </div>
 
 </div>
+<div class="planner-review-actions">
 
+<button
+class="button"
+id="editPlannerButton">
+✏ Edit Planner
+</button>
+
+<button
+class="button danger"
+id="deletePlannerButton">
+🗑 Cancel Planner
+</button>
+
+</div>
 `;
+const editBtn = document.getElementById("editPlannerButton");
+
+if (editBtn) {
+
+    editBtn.onclick = function () {
+
+        plannerState.plannerCreated = false;
+
+        createPlannerButton.textContent = "Update Planner";
+
+        showPlannerStep(1);
+
+    };
+
+}
+const deleteBtn = document.getElementById("deletePlannerButton");
+
+if (deleteBtn) {
+
+    deleteBtn.onclick = function () {
+
+        if (!confirm("Are you sure you want to delete your Study Planner?")) {
+            return;
+        }
+
+        plannerState.goal = "";
+        plannerState.targetDate = "";
+        plannerState.dailyTime = "";
+        plannerState.subjects = [];
+        plannerState.weakSubjects = [];
+        plannerState.roadmap = "";
+        plannerState.plannerCreated = false;
+
+        localStorage.removeItem("ekaStudyPlanner");
+
+        createPlannerButton.textContent = "Create Planner";
+
+        showPlannerStep(1);
+
+        closeStudyPlannerModal();
+
+    };
+
+}
 
 }
 
@@ -3317,9 +3412,14 @@ if(createPlannerButton){
 
         renderPlannerSummary();
 
+        plannerState.plannerCreated = true;
+
         savePlannerToStorage();
 
-        alert("Planner Created Successfully!");
+
+        createPlannerButton.textContent = "Update Planner";
+        alert("Planner Saved Successfully!");
+
 
         closeStudyPlannerModal();
 
@@ -3378,6 +3478,11 @@ async function loadPlannerFromDatabase() {
         if (!data.success) return;
 
         Object.assign(plannerState, data.planner);
+        // Planner already exists
+        currentPlannerStep = 7;
+        showPlannerStep(7);
+
+renderPlannerSummary();
 
         renderPlannerSummary();
 
