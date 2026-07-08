@@ -2873,7 +2873,18 @@ document.addEventListener("keydown", keepStudyPlannerFocus);
     autoResizeTextarea();
     renderFocusCapsuleState("timer");
     renderTimer();
-    // ===== Study Planner Next Button =====
+    /* ==========================
+   STUDY PLANNER ENGINE PART 1
+========================== */
+
+const plannerState = {
+    goal: "",
+    targetDate: "",
+    dailyTime: "",
+    subjects: [],
+    weakSubjects: [],
+    roadmap: ""
+};
 
 let currentPlannerStep = 1;
 const totalPlannerSteps = 7;
@@ -2882,56 +2893,106 @@ const plannerSteps = document.querySelectorAll(".study-planner-step");
 const plannerProgressFill = document.getElementById("studyPlannerProgressFill");
 const plannerStepLabel = document.getElementById("studyPlannerStepLabel");
 
-function showPlannerStep(step) {
+function showPlannerStep(step){
 
-    plannerSteps.forEach((item) => {
-        item.classList.remove("is-active");
+    currentPlannerStep = step;
+
+    plannerSteps.forEach(section=>{
+        section.classList.remove("is-active");
     });
 
-    const activeStep = document.querySelector(
+    const active=document.querySelector(
         `.study-planner-step[data-step="${step}"]`
     );
 
-    if (activeStep) {
-        activeStep.classList.add("is-active");
+    if(active){
+        active.classList.add("is-active");
     }
 
-    plannerStepLabel.textContent = `Step ${step} of ${totalPlannerSteps}`;
-    plannerProgressFill.style.width = `${(step / totalPlannerSteps) * 100}%`;
+    if(plannerProgressFill){
+        plannerProgressFill.style.width=((step/totalPlannerSteps)*100)+"%";
+    }
+
+    if(plannerStepLabel){
+        plannerStepLabel.textContent=`Step ${step} of ${totalPlannerSteps}`;
+    }
+
 }
 
-document.querySelectorAll("[data-planner-next]").forEach((btn) => {
+function savePlannerInputs(){
 
-    btn.addEventListener("click", () => {
+    plannerState.goal=
+        document.getElementById("plannerGoal")?.value.trim()||"";
 
-        if (currentPlannerStep < totalPlannerSteps) {
+    plannerState.targetDate=
+        document.getElementById("plannerTargetDate")?.value||"";
 
-            currentPlannerStep++;
+}
 
-            showPlannerStep(currentPlannerStep);
+function nextPlannerStep(){
 
-        }
+    savePlannerInputs();
+
+    if(currentPlannerStep<totalPlannerSteps){
+
+        showPlannerStep(currentPlannerStep+1);
+
+    }
+
+}
+
+function previousPlannerStep(){
+
+    if(currentPlannerStep>1){
+
+        showPlannerStep(currentPlannerStep-1);
+
+    }
+
+}
+/* ==========================
+   STUDY PLANNER ENGINE PART 2
+========================== */
+
+// ---------- STEP 1 NEXT ----------
+const plannerNext1 = document.getElementById("plannerNext1");
+
+if (plannerNext1) {
+    plannerNext1.addEventListener("click", nextPlannerStep);
+}
+
+// ---------- NEXT BUTTONS ----------
+document.querySelectorAll("[data-planner-next]").forEach((button) => {
+    button.addEventListener("click", nextPlannerStep);
+});
+
+// ---------- BACK BUTTONS ----------
+document.querySelectorAll("[data-planner-back]").forEach((button) => {
+    button.addEventListener("click", previousPlannerStep);
+});
+
+// ---------- DAILY TIME ----------
+document.querySelectorAll("#plannerDailyTime .study-planner-select-card")
+.forEach((card) => {
+
+    card.addEventListener("click", function () {
+
+        document
+            .querySelectorAll("#plannerDailyTime .study-planner-select-card")
+            .forEach((c) => c.classList.remove("selected"));
+
+        this.classList.add("selected");
+
+        plannerState.dailyTime = this.dataset.value;
 
     });
 
 });
 
-// First button (Step 1)
-const plannerNext1 = document.getElementById("plannerNext1");
-
-if (plannerNext1) {
-
-    plannerNext1.addEventListener("click", () => {
-
-        currentPlannerStep = 2;
-
-        showPlannerStep(currentPlannerStep);
-
-    });
-
-}
-
+// ---------- INITIAL STEP ----------
 showPlannerStep(1);
+
+
 
   </script>
 
