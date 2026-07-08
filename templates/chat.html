@@ -2979,18 +2979,78 @@ document.querySelectorAll("#plannerDailyTime .study-planner-select-card")
 
         document
             .querySelectorAll("#plannerDailyTime .study-planner-select-card")
-            .forEach((c) => c.classList.remove("selected"));
+            .forEach((c) =>c.classList.remove("is-selected"));
 
-        this.classList.add("selected");
+        this.classList.add("is-selected");
 
         plannerState.dailyTime = this.dataset.value;
 
     });
 
 });
-
 // ---------- INITIAL STEP ----------
 showPlannerStep(1);
+/* ==========================
+   SUBJECT SELECTION
+========================== */
+
+document.querySelectorAll("#plannerSubjects .study-planner-chip")
+.forEach((chip)=>{
+
+    chip.addEventListener("click",function(){
+
+        this.classList.toggle("is-selected");
+
+        const value=this.dataset.value;
+
+        if(this.classList.contains("is-selected")){
+
+            if(!plannerState.subjects.includes(value)){
+                plannerState.subjects.push(value);
+            }
+
+        }else{
+
+            plannerState.subjects=
+                plannerState.subjects.filter(item=>item!==value);
+
+        }
+
+    });
+
+});
+
+
+/* ==========================
+   WEAK SUBJECTS
+========================== */
+
+document.querySelectorAll("#plannerWeakSubjects .study-planner-chip")
+.forEach((chip)=>{
+
+    chip.addEventListener("click",function(){
+
+        this.classList.toggle("is-selected");
+
+        const value=this.dataset.value;
+
+        if(this.classList.contains("is-selected")){
+
+            if(!plannerState.weakSubjects.includes(value)){
+                plannerState.weakSubjects.push(value);
+            }
+
+        }else{
+
+            plannerState.weakSubjects=
+                plannerState.weakSubjects.filter(item=>item!==value);
+
+        }
+
+    });
+
+});
+
 
 
 
