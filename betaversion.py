@@ -109,8 +109,8 @@ def save_study_planner(
         goal,
         target_date,
         daily_hours,
-        subjects,
-        weak_subjects,
+        ",".join(subjects) if subjects else "",
+        ",".join(weak_subjects) if weak_subjects else "",
         roadmap,
         1,
         1,
@@ -129,12 +129,25 @@ def load_study_planner(user_email):
         FROM study_planner
         WHERE user_email=?
     """, (user_email,))
-
     planner = cur.fetchone()
-
     conn.close()
+    if planner:
+     planner = dict(planner)
+
+     planner["subjects"] = (
+        planner["subjects"].split(",")
+        if planner["subjects"]
+        else []
+    )
+
+     planner["weak_subjects"] = (
+        planner["weak_subjects"].split(",")
+        if planner["weak_subjects"]
+        else []
+    )
 
     return planner
+
 # =======STUDY PLLANNERR ENGINNE========
 
 from datetime import datetime
