@@ -3422,6 +3422,7 @@ if(createPlannerButton){
         closeStudyPlannerModal();
 
     });
+}
 /* ==========================
    AUTO SAVE
 ========================== */
@@ -3484,7 +3485,8 @@ function loadPlannerFromStorage() {
 
 }
 
-}
+loadPlannerFromStorage();
+loadPlannerFromDatabase();
 async function loadPlannerFromDatabase() {
 
     try {
