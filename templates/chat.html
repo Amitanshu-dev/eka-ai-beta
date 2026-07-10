@@ -1142,6 +1142,7 @@ grid-template-columns:1fr 1fr;
 gap:14px;
 
 }
+}
 
 .planner-review-card{
 
@@ -1216,7 +1217,6 @@ grid-column:auto;
 
 }
 
-}
 }
 
 .study-planner-actions {
@@ -3382,7 +3382,6 @@ if (deleteBtn) {
 
 }
 
-
 /* ---------- SHOW REVIEW ON STEP 7 ---------- */
 
 const oldShowPlannerStep = showPlannerStep;
@@ -3392,7 +3391,6 @@ showPlannerStep = function(step){
     oldShowPlannerStep(step);
 
     if(step===7){
-
         savePlannerInputs();
 
         renderPlannerSummary();
@@ -3466,7 +3464,26 @@ function loadPlannerFromStorage() {
 
     Object.assign(plannerState, data);
 
+    if (plannerState.plannerCreated) {
+
+        currentPlannerStep = 7;
+
+        showPlannerStep(7);
+
+        renderPlannerSummary();
+
+        createPlannerButton.textContent = "Update Planner";
+
+    }
+
+    if (document.getElementById("plannerGoal"))
+        document.getElementById("plannerGoal").value = plannerState.goal || "";
+
+    if (document.getElementById("plannerTargetDate"))
+        document.getElementById("plannerTargetDate").value = plannerState.targetDate || "";
+
 }
+
 }
 async function loadPlannerFromDatabase() {
 
@@ -3481,8 +3498,6 @@ async function loadPlannerFromDatabase() {
         // Planner already exists
         currentPlannerStep = 7;
         showPlannerStep(7);
-
-renderPlannerSummary();
 
         renderPlannerSummary();
 
