@@ -345,7 +345,7 @@ def callback():
     conn.commit()
     conn.close()
 
-    return redirect("/new_chat")
+    return redirect("/last_chat")
 
 
 @app.route("/logout")
