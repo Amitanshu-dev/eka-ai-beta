@@ -21,7 +21,7 @@ client = genai.Client(api_key=api_key)
 def generate_ai_response(prompt):
 
     models = [
-        "gemini-2.5-xyz",
+        "gemini-2.5-flash",
         "gemini-2.5-flash-lite",
         "gemini-3.1-flash-lite",
         "gemini-3.5-flash",
