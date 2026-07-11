@@ -355,9 +355,35 @@ def logout():
 
 @app.route("/")
 def home():
+    if "user " in session:
+        return redirect("/last_chat")
     return render_template("index.html")
 
+@app.route("/last_chat")
+def last_chat():
 
+    if "user" not in session:
+        return redirect("/login")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id
+        FROM chats
+        WHERE user_email = ?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (session["user"]["email"],))
+
+    row = cur.fetchone()
+
+    conn.close()
+
+    if row:
+        return redirect(f"/chat/{row['id']}")
+
+    return redirect("/new_chat")
 @app.route("/new_chat")
 def new_chat():
     if "user" not in session:
@@ -1753,9 +1779,6 @@ Always teach high-return topics before low-return topics.
     return jsonify({
      "response": response.text
 })
-
-    
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
