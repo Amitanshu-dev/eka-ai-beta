@@ -18,7 +18,35 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
+def generate_ai_response(prompt):
 
+    models = [
+        "gemini-2.5-xyz",
+        "gemini-2.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.5-flash",
+    ]
+
+    last_error = None
+
+    for model in models:
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config={
+                    "max_output_tokens": 1200,
+                    "temperature": 0.6
+                }
+            )
+
+            return response.text.strip()
+
+        except Exception as e:
+            print(f"{model} failed: {e}")
+            last_error = e
+
+    raise Exception(f"Sorry For inconvenience we are experiencing technical difficulties: {last_error}")
 
 def get_db():
     conn = sqlite3.connect("eka_ai.db")
@@ -525,12 +553,8 @@ Rules:
 User:
 {first_message}
 """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-
-    return response.text.strip()
+    response = generate_ai_response(prompt)
+    return response
 def extract_memory(user_message, ai_response):
     prompt = f"""
 Extract lesson information.
@@ -555,15 +579,12 @@ AI:
 {ai_response}
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
 
+    response = generate_ai_response(prompt)
     import json
 
     try:
-        text = response.text.strip()
+        text = response
 
         if text.startswith("```"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -1088,9 +1109,9 @@ LIMIT 30
         for row in rows:
             conversation += f"{row['role'].upper()}: {row['message']}\n"
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=f"""
+            prompt=f"""
+
+
         {SYSTEM_PROMPT}
         Current Personality
         {personality_prompt}
@@ -1112,12 +1133,8 @@ Language: {chat_history[user_id]["language"]}
          {conversation}
      Reply to only the latest user message.
     """,
-            config={
-                "max_output_tokens": 900,
-                "temperature": 0.7
-            }
-        )
-        return response.text
+        response = generate_ai_response(prompt)
+        return response
     except Exception as e:
         return f"AI ERROR: {str(e)}"
 
@@ -1431,13 +1448,9 @@ Always produce valid KaTeX-compatible LaTeX.
 """
     
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-
+    response = client.models.generate_content
     return jsonify({
-        "response": response.text
+        "response": response
     })
 @app.route("/exam_mode", methods=["POST"])
 def exam_mode():
@@ -1763,14 +1776,7 @@ If the selected exam has Previous Year Question trends available in your knowled
 
 Always teach high-return topics before low-return topics.
 """
-    response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=prompt,
-    config={
-        "max_output_tokens": 1200,
-        "temperature": 0.6
-    }
-)
+    response = generate_ai_response(prompt)
     if not exam:
      return jsonify({"response": "Please select an exam."})
 
@@ -1778,7 +1784,7 @@ Always teach high-return topics before low-return topics.
      return jsonify({"response": "Please select a subject."})
 
     return jsonify({
-     "response": response.text
+     "response": response
 })
 
 if __name__ == "__main__":
