@@ -316,6 +316,7 @@ init_db()
 @app.route("/login")
 def login():
     redirect_uri = url_for("callback", _external=True)
+    print("REDIRECT URI =", redirect_uri)
     return oauth.google.authorize_redirect(redirect_uri)
 
 
