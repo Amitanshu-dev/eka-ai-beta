@@ -4,9 +4,8 @@ from datetime import timedelta
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for,send_from_directory
 from google import genai
-
 
 app = Flask(__name__)
 load_dotenv()
@@ -18,6 +17,9 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory("static", "robots.txt")
 def generate_ai_response(prompt):
 
     models = [
