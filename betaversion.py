@@ -23,6 +23,9 @@ def robots():
 @app.route("/sitemap.xml")
 def sitemap():
     return send_from_directory("static", "sitemap.xml")
+@app.route("/googlec11108631eacbc28.html")
+def google_verify():
+    return send_from_directory("static", "googlec11108631eacbc28.html")
 def generate_ai_response(prompt):
 
     models = [
