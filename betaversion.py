@@ -20,6 +20,9 @@ client = genai.Client(api_key=api_key)
 @app.route("/robots.txt")
 def robots():
     return send_from_directory("static", "robots.txt")
+@app.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory("static", "sitemap.xml")
 def generate_ai_response(prompt):
 
     models = [
