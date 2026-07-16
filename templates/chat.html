@@ -1519,6 +1519,49 @@ body.study-planner-open {
       .focus-capsule-time { font-size: 27px; }
       .focus-capsule-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
+    /* Planner dashboard: isolated from the chat layout to protect existing UI. */
+    .planner-dashboard { position: fixed; inset: 0; z-index: 80; display: none; overflow: auto; background: #07070b; color: var(--text); padding: 28px; }
+    .planner-dashboard.is-open { display: block; animation: plannerDashboardIn .28s ease both; }
+    .planner-dashboard::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at 15% 5%, rgba(123,44,255,.24), transparent 32%), radial-gradient(circle at 95% 50%, rgba(33,210,178,.12), transparent 28%); }
+    .planner-dashboard-inner { position: relative; width: min(1440px,100%); margin: 0 auto; }
+    .planner-dashboard-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    .planner-eyebrow { margin: 0 0 5px; color: #c4b5fd; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .planner-dashboard h1 { margin: 0; font-size: clamp(26px,4vw,42px); letter-spacing: -.04em; }
+    .planner-header-actions, .planner-inline-actions { display:flex; flex-wrap:wrap; gap:9px; }
+    .planner-action { min-height: 40px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 0 14px; background: rgba(255,255,255,.06); color: var(--text); font-weight: 700; cursor: pointer; }
+    .planner-action:hover { border-color: rgba(168,85,247,.7); background: rgba(123,44,255,.24); }
+    .planner-action.primary { border: 0; background: linear-gradient(135deg,#8b5cf6,#6d28d9); box-shadow: 0 10px 28px rgba(123,44,255,.3); }
+    .planner-action.danger { color: #fecaca; }
+    .planner-metrics { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:13px; margin-bottom: 18px; }
+    .planner-card { border:1px solid rgba(255,255,255,.1); border-radius:20px; padding:18px; background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025)); box-shadow:0 18px 45px rgba(0,0,0,.18); backdrop-filter: blur(16px); }
+    .planner-metric-label { color:var(--muted); font-size:12px; font-weight:700; }
+    .planner-metric-value { margin-top:8px; font-size:22px; font-weight:850; letter-spacing:-.04em; }
+    .planner-layout { display:grid; grid-template-columns: 1.15fr .85fr; gap:18px; margin-bottom:18px; }
+    .planner-section-title { margin:0 0 14px; font-size:15px; }
+    .planner-progress { height:9px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.09); }
+    .planner-progress > span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#7b2cff,#c084fc); transition:width .35s ease; }
+    .planner-goal-list,.planner-task-list,.planner-note-list { display:grid; gap:10px; }
+    .planner-goal-item,.planner-task { display:flex; align-items:center; gap:11px; width:100%; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; background:rgba(0,0,0,.14); color:var(--text); text-align:left; }
+    button.planner-goal-item { cursor:pointer; }
+    .planner-goal-item.is-active { border-color:rgba(168,85,247,.75); background:rgba(123,44,255,.17); }
+    .planner-goal-meta { margin-left:auto; color:var(--muted); font-size:12px; }
+    .planner-task { justify-content:space-between; }
+    .planner-task label { display:flex; align-items:center; gap:10px; min-width:0; cursor:pointer; }
+    .planner-task input { inline-size:18px; block-size:18px; accent-color:#8b5cf6; }
+    .planner-task.is-complete { opacity:.62; }
+    .planner-task.is-complete .planner-task-name { text-decoration:line-through; }
+    .planner-add-row { display:flex; gap:8px; margin-top:12px; }
+    .planner-input { min-width:0; flex:1; border:1px solid rgba(255,255,255,.13); border-radius:12px; padding:11px 12px; background:rgba(0,0,0,.22); color:var(--text); outline:none; }
+    .planner-input:focus { border-color:#9a5bff; box-shadow:0 0 0 3px rgba(123,44,255,.18); }
+    .planner-timeline { display:grid; gap:12px; }
+    .planner-timeline-item { border-left:2px solid #7b2cff; padding-left:13px; color:var(--muted); }
+    .planner-timeline-item strong { display:block; color:var(--text); margin-bottom:3px; }
+    .planner-chart { min-height:220px; }
+    .planner-quote { color:#ddd6fe; font-size:15px; line-height:1.6; }
+    .planner-empty { color:var(--muted); padding:18px 0; }
+    @keyframes plannerDashboardIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+    @media (max-width:1050px) { .planner-metrics { grid-template-columns:repeat(3,1fr) } .planner-layout { grid-template-columns:1fr } }
+    @media (max-width:640px) { .planner-dashboard { padding:16px; } .planner-dashboard-header { align-items:flex-start; flex-direction:column; } .planner-metrics { grid-template-columns:repeat(2,1fr); gap:9px; } .planner-card { padding:14px; } }
   </style>
 </head>
 
@@ -1800,6 +1843,15 @@ body.study-planner-open {
     </div>
   </div>
   <!-- 👇 Study Planner Modal -->
+  <section class="planner-dashboard" id="plannerDashboard" aria-label="Planner dashboard" aria-hidden="true">
+    <div class="planner-dashboard-inner">
+      <header class="planner-dashboard-header"><div><p class="planner-eyebrow">EKA AI · Planner</p><h1 id="plannerDashboardTitle">Your goals</h1></div><div class="planner-header-actions"><button class="planner-action" type="button" id="plannerDashboardClose">Back to chat</button><button class="planner-action primary" type="button" id="plannerCreateGoal">Create goal</button></div></header>
+      <div class="planner-metrics" id="plannerMetrics"></div>
+      <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Goals</h2><div class="planner-goal-list" id="plannerGoals"></div></section><section class="planner-card"><h2 class="planner-section-title">Today’s focus</h2><div id="plannerFocus"></div></section></div>
+      <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Daily task tracker</h2><div class="planner-task-list" id="plannerTasks"></div><div class="planner-add-row"><input class="planner-input" id="plannerTaskInput" maxlength="120" placeholder="Add a daily task" /><button class="planner-action primary" type="button" id="plannerAddTask">Add</button></div></section><section class="planner-card"><h2 class="planner-section-title">Roadmap</h2><div class="planner-timeline" id="plannerRoadmapView"></div></section></div>
+      <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Study momentum</h2><div class="planner-chart" id="plannerChart"></div></section><section class="planner-card"><h2 class="planner-section-title">Weekly review</h2><div id="plannerReview"></div><hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:18px 0"><h2 class="planner-section-title">Daily reflection</h2><p class="planner-quote">“You have a right to your work alone, but never to its fruits.” Progress is built by showing up for today’s work.</p></section></div>
+    </div>
+  </section>
    <div class="modal-backdrop study-planner-backdrop" id="studyPlannerModal" role="dialog" aria-modal="true" aria-labelledby="studyPlannerTitle">
   <div class="modal study-planner-modal" tabindex="-1">
     <img class="study-planner-logo" src="/static/logo.png" alt="EKA AI" />
@@ -3486,7 +3538,6 @@ function loadPlannerFromStorage() {
 }
 
 loadPlannerFromStorage();
-loadPlannerFromDatabase();
 async function loadPlannerFromDatabase() {
 
     try {
@@ -3525,6 +3576,74 @@ if(plannerDate){
 
 }
   </script>
+  <script>
+  (function () {
+    "use strict";
+    const STORAGE_KEY = "ekaPlannerGoalsV2";
+    const $ = (id) => document.getElementById(id);
+    const dashboard = $("plannerDashboard"), modal = $("studyPlannerModal");
+    const ui = { goals: $("plannerGoals"), metrics: $("plannerMetrics"), focus: $("plannerFocus"), tasks: $("plannerTasks"), roadmap: $("plannerRoadmapView"), review: $("plannerReview"), title: $("plannerDashboardTitle") };
+    let chart = null;
+    let state = load();
 
+    function uid() { return "goal_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+    function today() { return new Date().toISOString().slice(0, 10); }
+    function cleanText(value) { return String(value || "").trim().slice(0, 240); }
+    function load() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && Array.isArray(saved.goals)) return saved;
+        const legacy = JSON.parse(localStorage.getItem("ekaStudyPlanner") || "null");
+        if (legacy && legacy.goal) {
+          const goal = makeGoal(legacy);
+          return { activeId: goal.id, goals: [goal] };
+        }
+      } catch (_) { /* Invalid old browser data is safely ignored. */ }
+      return { activeId: null, goals: [] };
+    }
+    function makeGoal(data) {
+      return { id: data.id || uid(), name: cleanText(data.goal || data.name), targetDate: data.targetDate || data.target_date || "", dailyTime: data.dailyTime || data.daily_hours || "", subjects: Array.isArray(data.subjects) ? data.subjects.map(cleanText) : [], weakSubjects: Array.isArray(data.weakSubjects || data.weak_subjects) ? (data.weakSubjects || data.weak_subjects).map(cleanText) : [], roadmap: cleanText(data.roadmap), createdAt: data.createdAt || new Date().toISOString(), archived: Boolean(data.archived), xp: Number(data.xp) || 0, tasks: Array.isArray(data.tasks) ? data.tasks : [], history: Array.isArray(data.history) ? data.history : [], notes: Array.isArray(data.notes) ? data.notes : [] };
+    }
+    function active() { return state.goals.find((goal) => goal.id === state.activeId) || null; }
+    function save(sync) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); if (sync && active()) syncActiveGoal(); }
+    function syncActiveGoal() {
+      const goal = active(); if (!goal) return;
+      fetch("/save_study_planner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal: goal.name, target_date: goal.targetDate, daily_hours: goal.dailyTime, subjects: goal.subjects, weak_subjects: goal.weakSubjects, roadmap: goal.roadmap }) }).catch(() => {});
+    }
+    function taskStats(goal) { const items = goal ? goal.tasks.filter((task) => task.date === today()) : []; const done = items.filter((task) => task.done).length; return { items, done, total: items.length, progress: items.length ? Math.round(done / items.length * 100) : 0 }; }
+    function daysLeft(goal) { if (!goal || !goal.targetDate) return "—"; const delta = Math.ceil((new Date(goal.targetDate + "T00:00:00") - new Date(today() + "T00:00:00")) / 86400000); return delta < 0 ? "Past due" : delta + " days"; }
+    function level(goal) { return Math.floor((goal ? goal.xp : 0) / 100) + 1; }
+    function streak(goal) { if (!goal) return 0; const studied = new Set(goal.history.filter((entry) => entry.completed > 0).map((entry) => entry.date)); let date = new Date(); let count = 0; while (studied.has(date.toISOString().slice(0,10))) { count++; date.setDate(date.getDate() - 1); } return count; }
+    function el(tag, className, text) { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; }
+    function button(label, className, handler) { const node = el("button", className, label); node.type = "button"; node.addEventListener("click", handler); return node; }
+    function render() {
+      const goal = active();
+      dashboard.classList.toggle("is-open", Boolean(goal || dashboard.dataset.open === "true"));
+      dashboard.setAttribute("aria-hidden", String(!dashboard.classList.contains("is-open")));
+      ui.title.textContent = goal ? goal.name : "Your goals";
+      [ui.metrics, ui.goals, ui.focus, ui.tasks, ui.roadmap, ui.review].forEach((node) => { node.replaceChildren(); });
+      if (!goal) { ui.goals.append(el("p", "planner-empty", "Create your first goal to begin a focused learning system.")); return; }
+      const stats = taskStats(goal), progress = Math.min(100, Math.round(goal.xp / Math.max(100, goal.tasks.length * 25 || 100) * 100));
+      [["Current goal", goal.name], ["Level", "Level " + level(goal)], ["XP progress", goal.xp + " XP"], ["Study streak", streak(goal) + " days"], ["Today", stats.done + "/" + stats.total + " tasks"], ["Target", daysLeft(goal)]].forEach(([label, value]) => { const card = el("div", "planner-card"); card.append(el("div", "planner-metric-label", label), el("div", "planner-metric-value", value)); ui.metrics.append(card); });
+      state.goals.filter((item) => !item.archived).forEach((item) => { const row = button("", "planner-goal-item" + (item.id === goal.id ? " is-active" : ""), () => { state.activeId = item.id; save(true); render(); }); row.append(el("span", "", item.name), el("span", "planner-goal-meta", level(item) + " · " + item.xp + " XP")); ui.goals.append(row); });
+      const focus = el("div", ""); focus.append(el("strong", "", stats.items.find((task) => !task.done)?.text || "Plan your next focused task"), el("p", "planner-empty", goal.weakSubjects.length ? "Smart suggestion: review " + goal.weakSubjects[0] + " before moving forward." : "Add a weak subject in Edit goal for a personalised suggestion.")); const actions = el("div", "planner-inline-actions"); actions.append(button("Edit goal", "planner-action", () => openWizard(goal)), button(goal.archived ? "Unarchive" : "Archive", "planner-action", () => { goal.archived = !goal.archived; if (goal.archived) state.activeId = state.goals.find((item) => !item.archived)?.id || null; save(true); render(); }), button("Delete", "planner-action danger", () => { if (confirm("Delete this goal and its independent planner data?")) { state.goals = state.goals.filter((item) => item.id !== goal.id); state.activeId = state.goals.find((item) => !item.archived)?.id || null; save(Boolean(active())); render(); } })); focus.append(actions); ui.focus.append(focus);
+      if (!stats.items.length) ui.tasks.append(el("p", "planner-empty", "No daily tasks yet. They reset automatically tomorrow without affecting long-term progress."));
+      stats.items.forEach((task) => { const row = el("div", "planner-task" + (task.done ? " is-complete" : "")); const label = el("label"); const check = document.createElement("input"); check.type = "checkbox"; check.checked = Boolean(task.done); check.addEventListener("change", () => { task.done = check.checked; goal.xp = Math.max(0, goal.xp + (task.done ? 10 : -10)); record(goal); save(true); render(); }); label.append(check, el("span", "planner-task-name", task.text)); row.append(label, button("×", "planner-action danger", () => { goal.tasks = goal.tasks.filter((item) => item.id !== task.id); save(true); render(); })); ui.tasks.append(row); });
+      const plan = [["Current week", goal.roadmap || "Balanced roadmap"], ["Current day", stats.total ? "Complete today’s daily tracker" : "Set today’s first task"], ["Remaining", daysLeft(goal) + " to target date"]]; plan.forEach(([name, detail]) => { const item = el("div", "planner-timeline-item"); item.append(el("strong", "", name), el("span", "", detail)); ui.roadmap.append(item); });
+      ui.review.append(el("p", "planner-empty", "This week: " + goal.history.reduce((sum, entry) => sum + entry.completed, 0) + " tasks completed · " + streak(goal) + " day streak. Next week: prioritise " + (goal.weakSubjects[0] || "consistent practice") + ".")); renderChart(goal);
+    }
+    function record(goal) { const date = today(), entry = goal.history.find((item) => item.date === date) || (goal.history.push({ date, completed: 0 }), goal.history[goal.history.length - 1]); entry.completed = taskStats(goal).done; }
+    function renderChart(goal) { const target = $("plannerChart"); if (!target) return; if (chart) { chart.destroy(); chart = null; } const series = Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6-index)); return goal.history.find((item) => item.date === date.toISOString().slice(0,10))?.completed || 0; }); if (!window.ApexCharts) { target.textContent = "Weekly completed tasks: " + series.join(" · "); return; } chart = new ApexCharts(target, { chart:{type:"area",height:220,toolbar:{show:false},background:"transparent"}, series:[{name:"Tasks",data:series}], xaxis:{categories:["6d","5d","4d","3d","2d","Yesterday","Today"],labels:{style:{colors:"#bdbdbd"}}}, yaxis:{labels:{style:{colors:"#bdbdbd"}}}, stroke:{curve:"smooth",width:3}, colors:["#a855f7"], fill:{type:"gradient",gradient:{opacityFrom:.45,opacityTo:.03}}, grid:{borderColor:"rgba(255,255,255,.1)"}, theme:{mode:"dark"} }); chart.render(); }
+    function resetWizard(goal) { const data = goal || { goal:"", targetDate:"", dailyTime:"", subjects:[], weakSubjects:[], roadmap:"" }; $("plannerGoal").value = data.name || data.goal || ""; $("plannerTargetDate").value = data.targetDate || ""; document.querySelectorAll("#plannerDailyTime [data-value], #plannerSubjects [data-value], #plannerWeakSubjects [data-value], #plannerRoadmap [data-value]").forEach((node) => { const selected = node.closest("#plannerDailyTime") ? data.dailyTime === node.dataset.value : node.closest("#plannerSubjects") ? (data.subjects || []).includes(node.dataset.value) : node.closest("#plannerWeakSubjects") ? (data.weakSubjects || []).includes(node.dataset.value) : data.roadmap === node.dataset.value; node.classList.toggle("is-selected", selected); }); modal.dataset.editId = goal ? goal.id : ""; }
+    function openWizard(goal) { dashboard.classList.remove("is-open"); dashboard.dataset.open = ""; resetWizard(goal); currentPlannerStep = 1; showPlannerStep(1); modal.classList.add("is-open"); document.body.classList.add("study-planner-open"); setTimeout(() => $("plannerGoal").focus(), 0); }
+    function wizardData() { return { goal: cleanText($("plannerGoal").value), targetDate: $("plannerTargetDate").value, dailyTime: document.querySelector("#plannerDailyTime .is-selected")?.dataset.value || "", subjects: Array.from(document.querySelectorAll("#plannerSubjects .is-selected"), (node) => node.dataset.value), weakSubjects: Array.from(document.querySelectorAll("#plannerWeakSubjects .is-selected"), (node) => node.dataset.value), roadmap: document.querySelector("#plannerRoadmap .is-selected")?.dataset.value || "Balanced" }; }
+    function submitGoal(event) { event.preventDefault(); event.stopImmediatePropagation(); const data = wizardData(); if (!data.goal) { $("plannerGoal").focus(); return; } if (!data.targetDate || data.targetDate <= today()) { $("plannerTargetDate").focus(); return; } let goal = state.goals.find((item) => item.id === modal.dataset.editId); if (goal) Object.assign(goal, makeGoal(Object.assign({}, goal, data))); else { goal = makeGoal(data); state.goals.push(goal); } state.activeId = goal.id; save(true); modal.classList.remove("is-open", "is-closing"); document.body.classList.remove("study-planner-open"); dashboard.dataset.open = "true"; render(); }
+    $("plannerCreateGoal").addEventListener("click", () => openWizard(null)); $("plannerDashboardClose").addEventListener("click", () => { dashboard.classList.remove("is-open"); dashboard.dataset.open = ""; }); $("plannerAddTask").addEventListener("click", () => { const goal = active(), input = $("plannerTaskInput"), text = cleanText(input.value); if (!goal || !text) return; goal.tasks.push({ id: uid(), text, date: today(), done: false }); input.value = ""; save(true); render(); }); $("plannerTaskInput").addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); $("plannerAddTask").click(); } });
+    $("studyPlannerButton").addEventListener("click", (event) => { event.stopImmediatePropagation(); closeSidebar(); dashboard.dataset.open = "true"; render(); }, true); $("createPlannerButton").addEventListener("click", submitGoal, true);
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && dashboard.classList.contains("is-open")) $("plannerDashboardClose").click(); });
+    const apex = document.createElement("script"); apex.src = "https://cdn.jsdelivr.net/npm/apexcharts"; apex.onload = () => { if (dashboard.classList.contains("is-open")) render(); }; document.head.append(apex);
+    render();
+  }());
+  </script>
 </body>
 </html>
