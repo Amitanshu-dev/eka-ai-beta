@@ -1520,6 +1520,19 @@ body.study-planner-open {
       .focus-capsule-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     /* Planner dashboard: isolated from the chat layout to protect existing UI. */
+    .sidebar { position: sticky; top: 0; overflow: hidden; background: rgba(13,13,18,.78); backdrop-filter: blur(22px); }
+    .sidebar-top, .sidebar-tools, .chat-list { scrollbar-width: thin; }
+    .sidebar [data-nav-item="home"], .sidebar [data-nav-item="timer"], .sidebar [data-nav-item="settings"], .sidebar-collapse-toggle { display: none !important; }
+    .sidebar-nav::after { content: "✦ Notes"; min-height:44px; display:flex; align-items:center; gap:10px; padding:0 13px; border:1px solid rgba(168,85,247,.18); border-radius:16px; color:var(--text); background:rgba(255,255,255,.035); font-size:14px; font-weight:700; }
+    .sidebar-nav::after { transition:transform 180ms ease, background 180ms ease, border-color 180ms ease; }
+    .sidebar-nav::after:hover { transform:translateY(-1px); background:rgba(123,44,255,.14); border-color:rgba(168,85,247,.55); }
+    .messages { padding: 36px 28px; }
+    .messages-inner { max-width: 820px; gap: 28px; }
+    .message-row { gap: 13px; }
+    .message-bubble { max-width: min(88%, 760px); padding: 3px 0; line-height: 1.72; background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+    .message-row.user .message-bubble { max-width: min(78%, 680px); padding: 12px 16px; border-radius: 18px !important; background: linear-gradient(135deg, var(--purple-dark), var(--purple-light)) !important; }
+    .message-row.assistant .message-bubble { color: #f3f3f5; }
+    .typing-bubble { padding: 7px 0; }
     .planner-dashboard { position: fixed; inset: 0; z-index: 80; display: none; overflow: auto; background: #07070b; color: var(--text); padding: 28px; }
     .planner-dashboard.is-open { display: block; animation: plannerDashboardIn .28s ease both; }
     .planner-dashboard::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at 15% 5%, rgba(123,44,255,.24), transparent 32%), radial-gradient(circle at 95% 50%, rgba(33,210,178,.12), transparent 28%); }
@@ -1848,7 +1861,7 @@ body.study-planner-open {
       <header class="planner-dashboard-header"><div><p class="planner-eyebrow">EKA AI · Planner</p><h1 id="plannerDashboardTitle">Your goals</h1></div><div class="planner-header-actions"><button class="planner-action" type="button" id="plannerDashboardClose">Back to chat</button><button class="planner-action primary" type="button" id="plannerCreateGoal">Create goal</button></div></header>
       <div class="planner-metrics" id="plannerMetrics"></div>
       <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Goals</h2><div class="planner-goal-list" id="plannerGoals"></div></section><section class="planner-card"><h2 class="planner-section-title">Today’s focus</h2><div id="plannerFocus"></div></section></div>
-      <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Daily task tracker</h2><div class="planner-task-list" id="plannerTasks"></div><div class="planner-add-row"><input class="planner-input" id="plannerTaskInput" maxlength="120" placeholder="Add a daily task" /><button class="planner-action primary" type="button" id="plannerAddTask">Add</button></div></section><section class="planner-card"><h2 class="planner-section-title">Roadmap</h2><div class="planner-timeline" id="plannerRoadmapView"></div></section></div>
+      <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Today’s study plan</h2><div class="planner-task-list" id="plannerTasks"></div></section><section class="planner-card"><h2 class="planner-section-title">Roadmap</h2><div class="planner-timeline" id="plannerRoadmapView"></div></section></div>
       <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Study momentum</h2><div class="planner-chart" id="plannerChart"></div></section><section class="planner-card"><h2 class="planner-section-title">Weekly review</h2><div id="plannerReview"></div><hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:18px 0"><h2 class="planner-section-title">Daily reflection</h2><p class="planner-quote">“You have a right to your work alone, but never to its fruits.” Progress is built by showing up for today’s work.</p></section></div>
     </div>
   </section>
@@ -2643,6 +2656,11 @@ function keepStudyPlannerFocus(event) {
       }
       timerIndicator.classList.toggle("running", timerState === "running");
       timerIndicator.classList.toggle("paused", timerState === "paused");
+      const running = timerState === "running";
+      const paused = timerState === "paused";
+      timerStartButton.hidden = running || paused;
+      timerPauseButton.hidden = timerState === "stopped";
+      timerPauseButton.textContent = paused ? "Resume" : "Pause";
     }
 
     function startTimer() {
@@ -2662,6 +2680,10 @@ function keepStudyPlannerFocus(event) {
     }
 
     function pauseTimer() {
+      if (timerState === "paused") {
+        startTimer();
+        return;
+      }
       if (timerInterval) {
         window.clearInterval(timerInterval);
         timerInterval = null;
@@ -3624,7 +3646,7 @@ if(plannerDate){
       [ui.metrics, ui.goals, ui.focus, ui.tasks, ui.roadmap, ui.review].forEach((node) => { node.replaceChildren(); });
       if (!goal) { ui.goals.append(el("p", "planner-empty", "Create your first goal to begin a focused learning system.")); return; }
       const stats = taskStats(goal), progress = Math.min(100, Math.round(goal.xp / Math.max(100, goal.tasks.length * 25 || 100) * 100));
-      [["Current goal", goal.name], ["Level", "Level " + level(goal)], ["XP progress", goal.xp + " XP"], ["Study streak", streak(goal) + " days"], ["Today", stats.done + "/" + stats.total + " tasks"], ["Target", daysLeft(goal)]].forEach(([label, value]) => { const card = el("div", "planner-card"); card.append(el("div", "planner-metric-label", label), el("div", "planner-metric-value", value)); ui.metrics.append(card); });
+      [["Current goal", goal.name], ["Level", "Level " + level(goal)], ["XP progress", goal.xp + " XP"], ["Study streak", streak(goal) + " days"], ["Today", stats.done + "/" + stats.total + " tasks"], ["Target", daysLeft(goal)], ["Monthly goal", stats.progress + "% complete"]].forEach(([label, value]) => { const card = el("div", "planner-card"); card.append(el("div", "planner-metric-label", label), el("div", "planner-metric-value", value)); if (label === "Monthly goal") { const bar = el("div", "planner-progress"); const fill = el("span"); fill.style.width = stats.progress + "%"; bar.append(fill); card.append(bar, el("div", "planner-metric-label", "Deadline · " + (goal.targetDate || "Not set"))); } ui.metrics.append(card); });
       state.goals.filter((item) => !item.archived).forEach((item) => { const row = button("", "planner-goal-item" + (item.id === goal.id ? " is-active" : ""), () => { state.activeId = item.id; save(true); render(); }); row.append(el("span", "", item.name), el("span", "planner-goal-meta", level(item) + " · " + item.xp + " XP")); ui.goals.append(row); });
       const focus = el("div", ""); focus.append(el("strong", "", stats.items.find((task) => !task.done)?.text || "Plan your next focused task"), el("p", "planner-empty", goal.weakSubjects.length ? "Smart suggestion: review " + goal.weakSubjects[0] + " before moving forward." : "Add a weak subject in Edit goal for a personalised suggestion.")); const actions = el("div", "planner-inline-actions"); actions.append(button("Edit goal", "planner-action", () => openWizard(goal)), button(goal.archived ? "Unarchive" : "Archive", "planner-action", () => { goal.archived = !goal.archived; if (goal.archived) state.activeId = state.goals.find((item) => !item.archived)?.id || null; save(true); render(); }), button("Delete", "planner-action danger", () => { if (confirm("Delete this goal and its independent planner data?")) { state.goals = state.goals.filter((item) => item.id !== goal.id); state.activeId = state.goals.find((item) => !item.archived)?.id || null; save(Boolean(active())); render(); } })); focus.append(actions); ui.focus.append(focus);
       if (!stats.items.length) ui.tasks.append(el("p", "planner-empty", "No daily tasks yet. They reset automatically tomorrow without affecting long-term progress."));
@@ -3637,8 +3659,9 @@ if(plannerDate){
     function resetWizard(goal) { const data = goal || { goal:"", targetDate:"", dailyTime:"", subjects:[], weakSubjects:[], roadmap:"" }; $("plannerGoal").value = data.name || data.goal || ""; $("plannerTargetDate").value = data.targetDate || ""; document.querySelectorAll("#plannerDailyTime [data-value], #plannerSubjects [data-value], #plannerWeakSubjects [data-value], #plannerRoadmap [data-value]").forEach((node) => { const selected = node.closest("#plannerDailyTime") ? data.dailyTime === node.dataset.value : node.closest("#plannerSubjects") ? (data.subjects || []).includes(node.dataset.value) : node.closest("#plannerWeakSubjects") ? (data.weakSubjects || []).includes(node.dataset.value) : data.roadmap === node.dataset.value; node.classList.toggle("is-selected", selected); }); modal.dataset.editId = goal ? goal.id : ""; }
     function openWizard(goal) { dashboard.classList.remove("is-open"); dashboard.dataset.open = ""; resetWizard(goal); currentPlannerStep = 1; showPlannerStep(1); modal.classList.add("is-open"); document.body.classList.add("study-planner-open"); setTimeout(() => $("plannerGoal").focus(), 0); }
     function wizardData() { return { goal: cleanText($("plannerGoal").value), targetDate: $("plannerTargetDate").value, dailyTime: document.querySelector("#plannerDailyTime .is-selected")?.dataset.value || "", subjects: Array.from(document.querySelectorAll("#plannerSubjects .is-selected"), (node) => node.dataset.value), weakSubjects: Array.from(document.querySelectorAll("#plannerWeakSubjects .is-selected"), (node) => node.dataset.value), roadmap: document.querySelector("#plannerRoadmap .is-selected")?.dataset.value || "Balanced" }; }
-    function submitGoal(event) { event.preventDefault(); event.stopImmediatePropagation(); const data = wizardData(); if (!data.goal) { $("plannerGoal").focus(); return; } if (!data.targetDate || data.targetDate <= today()) { $("plannerTargetDate").focus(); return; } let goal = state.goals.find((item) => item.id === modal.dataset.editId); if (goal) Object.assign(goal, makeGoal(Object.assign({}, goal, data))); else { goal = makeGoal(data); state.goals.push(goal); } state.activeId = goal.id; save(true); modal.classList.remove("is-open", "is-closing"); document.body.classList.remove("study-planner-open"); dashboard.dataset.open = "true"; render(); }
-    $("plannerCreateGoal").addEventListener("click", () => openWizard(null)); $("plannerDashboardClose").addEventListener("click", () => { dashboard.classList.remove("is-open"); dashboard.dataset.open = ""; }); $("plannerAddTask").addEventListener("click", () => { const goal = active(), input = $("plannerTaskInput"), text = cleanText(input.value); if (!goal || !text) return; goal.tasks.push({ id: uid(), text, date: today(), done: false }); input.value = ""; save(true); render(); }); $("plannerTaskInput").addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); $("plannerAddTask").click(); } });
+    function templateTasks(data) { const subject = data.subjects[0] || data.weakSubjects[0] || "Core subject"; const revision = data.weakSubjects[0] || subject; const depth = data.roadmap === "Fast Track" ? "Complete a focused practice set" : data.roadmap === "Deep Mastery" ? "Study concepts and write clear notes" : "Study one focused concept block"; return [depth + " for " + subject, "Practice questions for " + subject, "Revise " + revision + " and record key takeaways"]; }
+    function submitGoal(event) { event.preventDefault(); event.stopImmediatePropagation(); const data = wizardData(); if (!data.goal) { $("plannerGoal").focus(); return; } if (!data.targetDate || data.targetDate <= today()) { $("plannerTargetDate").focus(); return; } let goal = state.goals.find((item) => item.id === modal.dataset.editId); if (goal) Object.assign(goal, makeGoal(Object.assign({}, goal, data))); else { goal = makeGoal(data); goal.tasks = templateTasks(data).map((text) => ({ id: uid(), text, date: today(), done: false })); state.goals.push(goal); } state.activeId = goal.id; save(true); modal.classList.remove("is-open", "is-closing"); document.body.classList.remove("study-planner-open"); dashboard.dataset.open = "true"; render(); }
+    $("plannerCreateGoal").addEventListener("click", () => openWizard(null)); $("plannerDashboardClose").addEventListener("click", () => { dashboard.classList.remove("is-open"); dashboard.dataset.open = ""; });
     $("studyPlannerButton").addEventListener("click", (event) => { event.stopImmediatePropagation(); closeSidebar(); dashboard.dataset.open = "true"; render(); }, true); $("createPlannerButton").addEventListener("click", submitGoal, true);
     document.addEventListener("keydown", (event) => { if (event.key === "Escape" && dashboard.classList.contains("is-open")) $("plannerDashboardClose").click(); });
     const apex = document.createElement("script"); apex.src = "https://cdn.jsdelivr.net/npm/apexcharts"; apex.onload = () => { if (dashboard.classList.contains("is-open")) render(); }; document.head.append(apex);
