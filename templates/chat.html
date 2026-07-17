@@ -1522,7 +1522,7 @@ body.study-planner-open {
     /* Planner dashboard: isolated from the chat layout to protect existing UI. */
     .sidebar { position: sticky; top: 0; overflow: hidden; background: rgba(13,13,18,.78); backdrop-filter: blur(22px); }
     .sidebar-top, .sidebar-tools, .chat-list { scrollbar-width: thin; }
-    .sidebar [data-nav-item="home"], .sidebar [data-nav-item="timer"], .sidebar [data-nav-item="settings"], .sidebar-collapse-toggle { display: none !important; }
+    .sidebar [data-nav-item="home"], .sidebar [data-nav-item="chats"], .sidebar [data-nav-item="timer"], .sidebar [data-nav-item="settings"], .sidebar-collapse-toggle { display: none !important; }
     .sidebar-nav::after { content: "✦ Notes"; min-height:44px; display:flex; align-items:center; gap:10px; padding:0 13px; border:1px solid rgba(168,85,247,.18); border-radius:16px; color:var(--text); background:rgba(255,255,255,.035); font-size:14px; font-weight:700; }
     .sidebar-nav::after { transition:transform 180ms ease, background 180ms ease, border-color 180ms ease; }
     .sidebar-nav::after:hover { transform:translateY(-1px); background:rgba(123,44,255,.14); border-color:rgba(168,85,247,.55); }
@@ -1551,6 +1551,14 @@ body.study-planner-open {
     .planner-metric-value { margin-top:8px; font-size:22px; font-weight:850; letter-spacing:-.04em; }
     .planner-layout { display:grid; grid-template-columns: 1.15fr .85fr; gap:18px; margin-bottom:18px; }
     .planner-section-title { margin:0 0 14px; font-size:15px; }
+    .planner-section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .planner-section-heading .planner-action { min-height:34px; font-size:12px; white-space:nowrap; }
+    .full-roadmap-page { position:fixed; inset:0; z-index:90; display:none; overflow:auto; padding:28px; background:#07070b; color:var(--text); }
+    .full-roadmap-page.is-open { display:block; animation:plannerDashboardIn .28s ease both; }
+    .full-roadmap-content { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .roadmap-detail-card { min-height:140px; }
+    .roadmap-detail-card.wide { grid-column:1/-1; }
+    .roadmap-detail-card ul { margin:10px 0 0; padding-left:18px; color:var(--muted); line-height:1.7; }
     .planner-progress { height:9px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.09); }
     .planner-progress > span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#7b2cff,#c084fc); transition:width .35s ease; }
     .planner-goal-list,.planner-task-list,.planner-note-list { display:grid; gap:10px; }
@@ -1574,7 +1582,8 @@ body.study-planner-open {
     .planner-empty { color:var(--muted); padding:18px 0; }
     @keyframes plannerDashboardIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
     @media (max-width:1050px) { .planner-metrics { grid-template-columns:repeat(3,1fr) } .planner-layout { grid-template-columns:1fr } }
-    @media (max-width:640px) { .planner-dashboard { padding:16px; } .planner-dashboard-header { align-items:flex-start; flex-direction:column; } .planner-metrics { grid-template-columns:repeat(2,1fr); gap:9px; } .planner-card { padding:14px; } }
+    @media (max-width:640px) { .planner-dashboard, .full-roadmap-page { padding:16px; } .planner-dashboard-header { align-items:flex-start; flex-direction:column; } .planner-metrics { grid-template-columns:repeat(2,1fr); gap:9px; } .planner-card { padding:14px; } .full-roadmap-content { grid-template-columns:1fr; } .roadmap-detail-card.wide { grid-column:auto; } }
+    @media (max-width:820px) and (orientation:portrait) { .app-shell { display:flex !important; width:100%; min-width:0; } .chat-area { display:flex !important; flex:1 1 auto !important; width:100% !important; min-width:0 !important; opacity:1 !important; transform:none !important; } .sidebar { position:fixed; height:100dvh; } .sidebar:not(.is-open) { transform:translateX(-100%) !important; } }
   </style>
 </head>
 
@@ -1861,10 +1870,11 @@ body.study-planner-open {
       <header class="planner-dashboard-header"><div><p class="planner-eyebrow">EKA AI · Planner</p><h1 id="plannerDashboardTitle">Your goals</h1></div><div class="planner-header-actions"><button class="planner-action" type="button" id="plannerDashboardClose">Back to chat</button><button class="planner-action primary" type="button" id="plannerCreateGoal">Create goal</button></div></header>
       <div class="planner-metrics" id="plannerMetrics"></div>
       <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Goals</h2><div class="planner-goal-list" id="plannerGoals"></div></section><section class="planner-card"><h2 class="planner-section-title">Today’s focus</h2><div id="plannerFocus"></div></section></div>
-      <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Today’s study plan</h2><div class="planner-task-list" id="plannerTasks"></div></section><section class="planner-card"><h2 class="planner-section-title">Roadmap</h2><div class="planner-timeline" id="plannerRoadmapView"></div></section></div>
+      <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Today’s study plan</h2><div class="planner-task-list" id="plannerTasks"></div></section><section class="planner-card"><div class="planner-section-heading"><h2 class="planner-section-title">Roadmap</h2><button class="planner-action" type="button" id="viewFullRoadmap">View Full Roadmap</button></div><div class="planner-timeline" id="plannerRoadmapView"></div></section></div>
       <div class="planner-layout"><section class="planner-card"><h2 class="planner-section-title">Study momentum</h2><div class="planner-chart" id="plannerChart"></div></section><section class="planner-card"><h2 class="planner-section-title">Weekly review</h2><div id="plannerReview"></div><hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:18px 0"><h2 class="planner-section-title">Daily reflection</h2><p class="planner-quote">“You have a right to your work alone, but never to its fruits.” Progress is built by showing up for today’s work.</p></section></div>
     </div>
   </section>
+  <section class="full-roadmap-page" id="fullRoadmapPage" aria-hidden="true" aria-label="Full roadmap"><div class="planner-dashboard-inner"><header class="planner-dashboard-header"><div><p class="planner-eyebrow">EKA AI · Roadmap</p><h1 id="fullRoadmapTitle">Full Roadmap</h1></div><button class="planner-action" type="button" id="fullRoadmapBack">Back to Dashboard</button></header><div class="full-roadmap-content" id="fullRoadmapContent"></div></div></section>
    <div class="modal-backdrop study-planner-backdrop" id="studyPlannerModal" role="dialog" aria-modal="true" aria-labelledby="studyPlannerTitle">
   <div class="modal study-planner-modal" tabindex="-1">
     <img class="study-planner-logo" src="/static/logo.png" alt="EKA AI" />
@@ -2308,7 +2318,26 @@ function keepStudyPlannerFocus(event) {
       }
     }
 
-        function appendMessage(role, text) {
+    function renderAssistantMarkdown(container, source) {
+      container.replaceChildren();
+      String(source).split("\n").forEach(function (line, index) {
+        if (index) container.appendChild(document.createElement("br"));
+        const fragment = document.createDocumentFragment();
+        const parts = line.split(/(`[^`]*`|\*\*[^*]+\*\*|\*[^*]+\*)/g);
+        parts.forEach(function (part) {
+          if (!part) return;
+          const code = part.startsWith("`") && part.endsWith("`");
+          const strong = part.startsWith("**") && part.endsWith("**");
+          const emphasis = !strong && part.startsWith("*") && part.endsWith("*");
+          const node = document.createElement(code ? "code" : strong ? "strong" : emphasis ? "em" : "span");
+          node.textContent = code ? part.slice(1, -1) : strong ? part.slice(2, -2) : emphasis ? part.slice(1, -1) : part;
+          fragment.appendChild(node);
+        });
+        container.appendChild(fragment);
+      });
+    }
+
+    function appendMessage(role, text) {
       removeEmptyState();
 
       const row = document.createElement("div");
@@ -2324,24 +2353,22 @@ function keepStudyPlannerFocus(event) {
 
       const bubble = document.createElement("div");
       bubble.className = "message-bubble";
-      bubble.textContent = text;
+      bubble.textContent = role === "assistant" ? "" : text;
 
       row.appendChild(bubble);
       messagesInner.appendChild(row);
 
-      if (role === "assistant" && window.renderMathInElement) {
-        renderMathInElement(bubble, {
-          delimiters: [
-            { left: "$$", right: "$$", display: true },
-            { left: "$", right: "$", display: false },
-            { left: "\\(", right: "\\)", display: false },
-            { left: "\\[", right: "\\]", display: true }
-          ],
-          throwOnError: false
-        });
-      }
-
-      scrollToBottom();
+      if (role === "assistant") {
+        const message = String(text || ""); let index = 0;
+        const stream = function () {
+          index = Math.min(message.length, index + Math.max(1, Math.ceil(message.length / 80)));
+          renderAssistantMarkdown(bubble, message.slice(0, index));
+          scrollToBottom();
+          if (index < message.length) { window.requestAnimationFrame(stream); return; }
+          if (window.renderMathInElement) renderMathInElement(bubble, { delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }, { left: "\\(", right: "\\)", display: false }, { left: "\\[", right: "\\]", display: true }], throwOnError: false });
+        };
+        window.requestAnimationFrame(stream);
+      } else { scrollToBottom(); }
 
       return row;
     }
@@ -3624,7 +3651,8 @@ if(plannerDate){
       return { activeId: null, goals: [] };
     }
     function makeGoal(data) {
-      return { id: data.id || uid(), name: cleanText(data.goal || data.name), targetDate: data.targetDate || data.target_date || "", dailyTime: data.dailyTime || data.daily_hours || "", subjects: Array.isArray(data.subjects) ? data.subjects.map(cleanText) : [], weakSubjects: Array.isArray(data.weakSubjects || data.weak_subjects) ? (data.weakSubjects || data.weak_subjects).map(cleanText) : [], roadmap: cleanText(data.roadmap), createdAt: data.createdAt || new Date().toISOString(), archived: Boolean(data.archived), xp: Number(data.xp) || 0, tasks: Array.isArray(data.tasks) ? data.tasks : [], history: Array.isArray(data.history) ? data.history : [], notes: Array.isArray(data.notes) ? data.notes : [] };
+      const roadmapData = data.roadmapData || data.fullRoadmap || data.roadmap_data || (data.roadmap && typeof data.roadmap === "object" ? data.roadmap : null);
+      return { id: data.id || uid(), name: cleanText(data.goal || data.name), targetDate: data.targetDate || data.target_date || "", dailyTime: data.dailyTime || data.daily_hours || "", subjects: Array.isArray(data.subjects) ? data.subjects.map(cleanText) : [], weakSubjects: Array.isArray(data.weakSubjects || data.weak_subjects) ? (data.weakSubjects || data.weak_subjects).map(cleanText) : [], roadmap: cleanText(typeof data.roadmap === "string" ? data.roadmap : data.roadmap?.template), roadmapData: roadmapData || null, createdAt: data.createdAt || new Date().toISOString(), archived: Boolean(data.archived), xp: Number(data.xp) || 0, tasks: Array.isArray(data.tasks) ? data.tasks : [], history: Array.isArray(data.history) ? data.history : [], notes: Array.isArray(data.notes) ? data.notes : [] };
     }
     function active() { return state.goals.find((goal) => goal.id === state.activeId) || null; }
     function save(sync) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); if (sync && active()) syncActiveGoal(); }
@@ -3666,6 +3694,23 @@ if(plannerDate){
     document.addEventListener("keydown", (event) => { if (event.key === "Escape" && dashboard.classList.contains("is-open")) $("plannerDashboardClose").click(); });
     const apex = document.createElement("script"); apex.src = "https://cdn.jsdelivr.net/npm/apexcharts"; apex.onload = () => { if (dashboard.classList.contains("is-open")) render(); }; document.head.append(apex);
     render();
+  }());
+  </script>
+  <script>
+  (function () {
+    "use strict";
+    const page = document.getElementById("fullRoadmapPage");
+    const content = document.getElementById("fullRoadmapContent");
+    const title = document.getElementById("fullRoadmapTitle");
+    const storeKey = "ekaPlannerGoalsV2";
+    const readState = () => { try { return JSON.parse(localStorage.getItem(storeKey)) || { goals: [] }; } catch (_) { return { goals: [] }; } };
+    const toItems = (value) => Array.isArray(value) ? value : value == null || value === "" ? [] : [typeof value === "string" ? value : JSON.stringify(value)];
+    const getValue = (data, keys) => { if (!data || typeof data !== "object") return []; for (const key of keys) if (data[key] != null) return toItems(data[key]); return []; };
+    function addCard(label, values, wide) { const card = document.createElement("article"); card.className = "planner-card roadmap-detail-card" + (wide ? " wide" : ""); const heading = document.createElement("h2"); heading.className = "planner-section-title"; heading.textContent = label; card.appendChild(heading); const list = document.createElement("ul"); const items = values.length ? values : ["No saved " + label.toLowerCase() + " data for this goal."]; items.forEach((item) => { const entry = document.createElement("li"); entry.textContent = item; list.appendChild(entry); }); card.appendChild(list); content.appendChild(card); }
+    function openRoadmap() { const state = readState(); const goal = state.goals.find((item) => item.id === state.activeId); if (!goal) return; const data = goal.roadmapData || goal.fullRoadmap || goal.roadmap_data || {}; content.replaceChildren(); title.textContent = goal.name + " · Full Roadmap"; const phases = Array.isArray(data.phases) ? data.phases : []; for (let number = 1; number <= 4; number += 1) { const phase = phases[number - 1]; addCard("Phase " + number, phase ? toItems(phase.tasks || phase.goals || phase) : getValue(data, ["phase" + number, "phase_" + number, "Phase " + number])); } addCard("Monthly Goals", getValue(data, ["monthlyGoals", "monthly_goals", "months"]), true); addCard("Weekly Goals", getValue(data, ["weeklyGoals", "weekly_goals", "weeks"]), true); addCard("Daily Breakdown", getValue(data, ["dailyBreakdown", "daily_breakdown", "daily"]), true); page.classList.add("is-open"); page.setAttribute("aria-hidden", "false"); }
+    document.getElementById("viewFullRoadmap").addEventListener("click", openRoadmap);
+    document.getElementById("fullRoadmapBack").addEventListener("click", () => { page.classList.remove("is-open"); page.setAttribute("aria-hidden", "true"); });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && page.classList.contains("is-open")) document.getElementById("fullRoadmapBack").click(); });
   }());
   </script>
 </body>
