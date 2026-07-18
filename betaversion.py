@@ -1295,21 +1295,7 @@ oauth.register(
 )
 
 init_db()
-@app.route("/api/dashboard/<int:goal_id>", methods=["GET"])
-def api_dashboard(goal_id):
 
-    dashboard = get_dashboard_stats(goal_id)
-
-    if not dashboard:
-        return jsonify({
-            "success": False,
-            "message": "Dashboard data not found"
-        }), 404
-
-    return jsonify({
-        "success": True,
-        "data": dashboard
-    })
 @app.route("/api/goals/<user_email>", methods=["GET"])
 def api_get_goals(user_email):
 
