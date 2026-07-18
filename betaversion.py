@@ -1547,7 +1547,7 @@ def logout():
 
 @app.route("/")
 def home():
-    if "user " in session:
+    if "user" in session:
         return redirect("/last_chat")
     return render_template("index.html")
 
