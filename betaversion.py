@@ -324,6 +324,119 @@ CREATE TABLE IF NOT EXISTS study_planner(
     planner_status TEXT DEFAULT 'setup'
 )
 """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS goals(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_email TEXT NOT NULL,
+
+    goal_name TEXT NOT NULL,
+
+    description TEXT DEFAULT '',
+
+    category TEXT DEFAULT 'Study',
+
+    priority TEXT DEFAULT 'Medium',
+
+    target_date TEXT,
+
+    daily_hours INTEGER DEFAULT 2,
+
+    roadmap TEXT,
+
+    subjects TEXT,
+
+    weak_subjects TEXT,
+
+    xp INTEGER DEFAULT 0,
+
+    level INTEGER DEFAULT 1,
+
+    streak INTEGER DEFAULT 0,
+
+    status TEXT DEFAULT 'active',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS tasks(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    goal_id INTEGER,
+
+    title TEXT,
+
+    description TEXT,
+
+    estimated_minutes INTEGER DEFAULT 30,
+    
+    priority TEXT DEFAULT 'Medium',
+
+    xp_reward INTEGER DEFAULT 10,
+
+    status TEXT DEFAULT 'pending',
+
+    due_date TEXT,
+    
+    completed_at TIMESTAMP,
+
+    task_order INTEGER DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS study_sessions(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    goal_id INTEGER,
+
+    study_date TEXT,
+
+    minutes INTEGER,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS notes(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    goal_id INTEGER,
+
+    title TEXT,
+
+    content TEXT,
+
+    note_type TEXT DEFAULT 'full',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS goal_stats(
+
+    goal_id INTEGER PRIMARY KEY,
+
+    completed_tasks INTEGER DEFAULT 0,
+
+    pending_tasks INTEGER DEFAULT 0,
+
+    study_hours INTEGER DEFAULT 0,
+
+    total_xp INTEGER DEFAULT 0,
+
+    current_level INTEGER DEFAULT 1,
+
+    streak INTEGER DEFAULT 0
+)
+""")
     try:
      cur.execute("""
     ALTER TABLE lesson_memory
@@ -333,7 +446,842 @@ CREATE TABLE IF NOT EXISTS study_planner(
      pass
     conn.commit()
     conn.close()
+def create_goal(
+     user_email,
+     goal_name,
+     description="",
+     category="Study",
+     priority="Medium",
+     target_date=None,
+     daily_hours=2,
+     roadmap="",
+     subjects="",
+     weak_subjects=""        
+):
+    conn = get_db()
+    cur = conn.cursor()
 
+    try:
+        cur.execute("""
+        INSERT INTO goals(
+            user_email,
+            goal_name,
+            description,
+            category,
+            priority,
+            target_date,
+            daily_hours,
+            roadmap,
+            subjects,
+            weak_subjects
+        )
+        VALUES(?,?,?,?,?,?,?,?,?,?)
+        """, (
+            user_email,
+            goal_name,
+            description,
+            category,
+            priority,
+            target_date,
+            daily_hours,
+            roadmap,
+            subjects,
+            weak_subjects
+        ))
+        goal_id = cur.lastrowid
+
+        cur.execute("""
+INSERT INTO goal_stats(goal_id)
+VALUES(?)
+""", (goal_id,))
+
+        conn.commit()
+        return goal_id
+    except Exception as e:
+        print(f"Create Goal Error: {e}")
+        return None
+    finally:
+        conn.close()
+def get_all_goals(user_email):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        SELECT *
+        FROM goals
+        WHERE user_email = ?
+        AND status = 'active'
+        ORDER BY created_at DESC
+        """, (user_email,))
+        goals = cur.fetchall()
+        return goals
+    except Exception as e:
+        print(f"Get Goals Error: {e}")
+        return []
+    finally:
+        conn.close()
+def get_goal(goal_id):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        SELECT *
+        FROM goals
+        WHERE id = ?
+        """, (goal_id,))
+        goal = cur.fetchone()
+        return goal
+    except Exception as e:
+        print(f"Get Goal Error: {e}")
+        return None
+    finally:
+        conn.close()
+def update_goal(
+    goal_id,
+    goal_name,
+    description,
+    category,
+    priority,
+    target_date,
+    daily_hours,
+    roadmap,
+    subjects,
+    weak_subjects
+):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        cur.execute("""
+        UPDATE goals
+        SET
+            goal_name = ?,
+            description = ?,
+            category = ?,
+            priority = ?,
+            target_date = ?,
+            daily_hours = ?,
+            roadmap = ?,
+            subjects = ?,
+            weak_subjects = ?
+        WHERE id = ?
+        """, (
+            goal_name,
+            description,
+            category,
+            priority,
+            target_date,
+            daily_hours,
+            roadmap,
+            subjects,
+            weak_subjects,
+            goal_id
+        ))
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+        print(f"Update Goal Error: {e}")
+        return False
+
+    finally:
+        conn.close()
+def archive_goal(goal_id):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        UPDATE goals
+        SET status = 'archived'
+        WHERE id = ?
+        """, (goal_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Archive Goal Error: {e}")
+        return False
+    finally:
+        conn.close()
+def delete_goal(goal_id):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        # Delete study sessions
+        cur.execute("""
+        DELETE FROM study_sessions
+        WHERE goal_id = ?
+        """, (goal_id,))
+
+        # Delete notes
+        cur.execute("""
+        DELETE FROM notes
+        WHERE goal_id = ?
+        """, (goal_id,))
+
+        # Delete tasks
+        cur.execute("""
+        DELETE FROM tasks
+        WHERE goal_id = ?
+        """, (goal_id,))
+
+        # Delete goal stats
+        cur.execute("""
+        DELETE FROM goal_stats
+        WHERE goal_id = ?
+        """, (goal_id,))
+
+        # Finally delete goal
+        cur.execute("""
+        DELETE FROM goals
+        WHERE id = ?
+        """, (goal_id,))
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        print(f"Delete Goal Error: {e}")
+        return False
+
+    finally:
+
+        conn.close()
+
+def create_task(
+    goal_id,
+    title,
+    description="",
+    estimated_minutes=30,
+    due_date=None
+):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        cur.execute("""
+        INSERT INTO tasks(
+            goal_id,
+            title,
+            description,
+            estimated_minutes,
+            due_date
+        )
+        VALUES(?,?,?,?,?)
+        """, (
+            goal_id,
+            title,
+            description,
+            estimated_minutes,
+            due_date
+        ))
+
+        conn.commit()
+
+        return cur.lastrowid
+
+    except Exception as e:
+
+        print(f"Create Task Error: {e}")
+        return None
+
+    finally:
+
+        conn.close()
+def get_tasks(goal_id):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        SELECT *
+        FROM tasks
+        WHERE goal_id = ?
+        ORDER BY task_order ASC, due_date ASC
+        """, (goal_id,))
+        tasks = cur.fetchall()
+        return tasks
+    except Exception as e:
+        print(f"Get Tasks Error: {e}")
+        return []
+    finally:
+        conn.close()
+def get_task(task_id):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        SELECT *
+        FROM tasks
+        WHERE id = ?
+        """, (task_id,))
+        task = cur.fetchone()
+        return task
+    except Exception as e:
+        print(f"Get Task Error: {e}")
+        return None
+    finally:
+        conn.close()
+def update_task(
+    task_id,
+    title,
+    description,
+    estimated_minutes,
+    due_date
+):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        cur.execute("""
+        UPDATE tasks
+        SET
+            title = ?,
+            description = ?,
+            estimated_minutes = ?,
+            due_date = ?
+        WHERE id = ?
+        """, (
+            title,
+            description,
+            estimated_minutes,
+            due_date,
+            task_id
+        ))
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        print(f"Update Task Error: {e}")
+
+        return False
+
+    finally:
+
+        conn.close()
+from datetime import datetime
+
+def complete_task(task_id):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        # Task ki details lo
+        cur.execute("""
+        SELECT goal_id, xp_reward
+        FROM tasks
+        WHERE id = ?
+        """, (task_id,))
+
+        task = cur.fetchone()
+
+        if not task:
+            return False
+
+        goal_id = task["goal_id"]
+        xp_reward = task["xp_reward"]
+
+        # Task complete karo
+        cur.execute("""
+        UPDATE tasks
+        SET
+            status = 'completed',
+            completed_at = ?
+        WHERE id = ?
+        """, (
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            task_id
+        ))
+
+        # Goal XP update
+        cur.execute("""
+        UPDATE goals
+        SET xp = xp + ?
+        WHERE id = ?
+        """, (
+            xp_reward,
+            goal_id
+        ))
+
+        # Goal stats update
+        cur.execute("""
+        UPDATE goal_stats
+        SET
+            completed_tasks = completed_tasks + 1,
+            pending_tasks = pending_tasks - 1,
+            total_xp = total_xp + ?
+        WHERE goal_id = ?
+        """, (
+            xp_reward,
+            goal_id
+        ))
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        print(f"Complete Task Error: {e}")
+        return False
+
+    finally:
+
+        conn.close()
+def delete_task(task_id):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        # Goal ID aur status nikaalo
+        cur.execute("""
+        SELECT goal_id, status
+        FROM tasks
+        WHERE id = ?
+        """, (task_id,))
+
+        task = cur.fetchone()
+
+        if not task:
+            return False
+
+        goal_id = task["goal_id"]
+        status = task["status"]
+
+        # Task delete karo
+        cur.execute("""
+        DELETE FROM tasks
+        WHERE id = ?
+        """, (task_id,))
+
+        # Agar task pending tha to pending count ghatao
+        if status == "pending":
+            cur.execute("""
+            UPDATE goal_stats
+            SET pending_tasks = pending_tasks - 1
+            WHERE goal_id = ?
+            """, (goal_id,))
+
+        # Agar task completed tha to completed count ghatao
+        elif status == "completed":
+            cur.execute("""
+            UPDATE goal_stats
+            SET completed_tasks = completed_tasks - 1
+            WHERE goal_id = ?
+            """, (goal_id,))
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        print(f"Delete Task Error: {e}")
+        return False
+
+    finally:
+
+        conn.close()
+def save_study_session(goal_id, minutes):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        cur.execute("""
+        INSERT INTO study_sessions(
+            goal_id,
+            study_date,
+            minutes
+        )
+        VALUES(?,?,?)
+        """, (
+            goal_id,
+            today,
+            minutes
+        ))
+
+        # Goal Stats Update
+        cur.execute("""
+        UPDATE goal_stats
+        SET study_hours = study_hours + ?
+        WHERE goal_id = ?
+        """, (
+            minutes / 60,
+            goal_id
+        ))
+
+        conn.commit()
+
+        return True
+
+    except Exception as e:
+
+        print(f"Save Session Error: {e}")
+        return False
+
+    finally:
+
+        conn.close()
+from datetime import datetime
+
+def get_today_study_time(goal_id):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        cur.execute("""
+        SELECT COALESCE(SUM(minutes), 0) AS total_minutes
+        FROM study_sessions
+        WHERE goal_id = ?
+        AND study_date = ?
+        """, (
+            goal_id,
+            today
+        ))
+
+        result = cur.fetchone()
+
+        return result["total_minutes"]
+
+    except Exception as e:
+
+        print(f"Get Today Study Time Error: {e}")
+        return 0
+
+    finally:
+
+        conn.close()
+def get_study_history(goal_id):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        SELECT *
+        FROM study_sessions
+        WHERE goal_id = ?
+        ORDER BY study_date DESC, created_at DESC
+        """, (goal_id,))
+
+        sessions = cur.fetchall()
+
+        return sessions
+
+    except Exception as e:
+
+        print(f"Study History Error: {e}")
+        return []
+
+    finally:
+
+        conn.close()
+from datetime import datetime, timedelta
+
+def get_weekly_study_data(goal_id):
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=6)
+
+        cur.execute("""
+        SELECT
+            study_date,
+            SUM(minutes) as total_minutes
+        FROM study_sessions
+        WHERE goal_id = ?
+        AND study_date BETWEEN ? AND ?
+        GROUP BY study_date
+        ORDER BY study_date ASC
+        """, (
+            goal_id,
+            start_date.strftime("%Y-%m-%d"),
+            end_date.strftime("%Y-%m-%d")
+        ))
+
+        return cur.fetchall()
+
+    except Exception as e:
+
+        print(f"Weekly Study Data Error: {e}")
+        return []
+
+    finally:
+
+        conn.close()
+def get_dashboard_stats(goal_id):
+
+    try:
+
+        goal = get_goal(goal_id)
+
+        tasks = get_tasks(goal_id)
+
+        today_minutes = get_today_study_time(goal_id)
+
+        weekly_data = get_weekly_study_data(goal_id)
+
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+        SELECT *
+        FROM goal_stats
+        WHERE goal_id = ?
+        """, (goal_id,))
+
+        stats = cur.fetchone()
+
+        conn.close()
+
+        return {
+            "goal": goal,
+            "tasks": tasks,
+            "today_minutes": today_minutes,
+            "weekly_data": weekly_data,
+            "completed_tasks": stats["completed_tasks"] if stats else 0,
+            "pending_tasks": stats["pending_tasks"] if stats else 0,
+            "study_hours": stats["study_hours"] if stats else 0,
+            "total_xp": stats["total_xp"] if stats else 0,
+            "current_level": stats["current_level"] if stats else 1,
+            "streak": stats["streak"] if stats else 0
+        }
+
+    except Exception as e:
+
+        print(f"Dashboard Stats Error: {e}")
+
+        return None
+def update_progress(goal_id):
+
+    conn = sqlite3.connect("eka_ai.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # Completed Tasks
+    cursor.execute("""
+        SELECT COUNT(*) as total
+        FROM tasks
+        WHERE goal_id=? AND status='Completed'
+    """, (goal_id,))
+    completed_tasks = cursor.fetchone()["total"]
+
+    # Pending Tasks
+    cursor.execute("""
+        SELECT COUNT(*) as total
+        FROM tasks
+        WHERE goal_id=? AND status!='Completed'
+    """, (goal_id,))
+    pending_tasks = cursor.fetchone()["total"]
+
+    # Study Time
+    cursor.execute("""
+        SELECT COALESCE(SUM(minutes),0) as total
+        FROM study_sessions
+        WHERE goal_id=?
+    """, (goal_id,))
+    study_minutes = cursor.fetchone()["total"]
+
+    study_hours = round(study_minutes / 60, 1)
+
+    # XP Formula
+    total_xp = completed_tasks * 20 + int(study_hours * 10)
+
+    # Level Formula
+    level = (total_xp // 100) + 1
+
+    cursor.execute("""
+        UPDATE goals
+        SET xp=?,
+            level=?
+        WHERE id=?
+    """, (total_xp, level, goal_id))
+
+    cursor.execute("""
+        INSERT OR REPLACE INTO goal_stats(
+            goal_id,
+            completed_tasks,
+            pending_tasks,
+            study_hours,
+            total_xp,
+            current_level
+        )
+        VALUES (?,?,?,?,?,?)
+    """, (
+        goal_id,
+        completed_tasks,
+        pending_tasks,
+        study_hours,
+        total_xp,
+        level
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return True
+def generate_ai_roadmap(
+    goal_name,
+    target_date,
+    daily_hours,
+    subjects,
+    weak_subjects
+):
+
+    prompt = f"""
+You are EKA AI.
+
+Create a detailed study roadmap.
+
+Goal:
+{goal_name}
+
+Target Date:
+{target_date}
+
+Daily Study Hours:
+{daily_hours}
+
+Subjects:
+{subjects}
+
+Weak Subjects:
+{weak_subjects}
+
+Return ONLY JSON.
+
+Structure:
+
+{{
+  "months":[
+      {{
+          "month":1,
+          "weeks":[
+              {{
+                  "week":1,
+                  "tasks":[
+                      {{
+                          "title":"",
+                          "description":"",
+                          "minutes":60
+                      }}
+                  ]
+              }}
+          ]
+      }}
+  ]
+}}
+"""
+
+    response = generate_ai_response(prompt)
+    return response
+import json
+
+def parse_ai_roadmap(ai_response):
+    """
+    Convert Gemini JSON response into Python dictionary
+    """
+
+    try:
+        # Agar AI ```json ... ``` me response de
+        cleaned = ai_response.replace("```json", "").replace("```", "").strip()
+
+        roadmap = json.loads(cleaned)
+
+        return roadmap
+
+    except json.JSONDecodeError as e:
+        print("Roadmap Parse Error:", e)
+        return None
+def save_ai_roadmap(goal_id, roadmap):
+
+    if roadmap is None:
+        return False
+
+    try:
+
+        for month in roadmap.get("months", []):
+
+            for week in month.get("weeks", []):
+
+                for task in week.get("tasks", []):
+
+                    create_task(
+                        goal_id=goal_id,
+                        title=task.get("title", ""),
+                        description=task.get("description", ""),
+                        estimated_minutes=task.get("minutes", 60)
+                    )
+
+        return True
+
+    except Exception as e:
+        print("Save Roadmap Error:", e)
+        return False
+@app.route("/api/generate-roadmap", methods=["POST"])
+def api_generate_roadmap():
+    data = request.json
+
+    goal_id = data["goal_id"]
+
+    goal = get_goal(goal_id)
+
+    if not goal:
+        return jsonify({
+            "success": False,
+            "message": "Goal not found"
+        }), 404
+
+    ai_text = generate_ai_roadmap(
+        goal["goal_name"],
+        goal["target_date"],
+        goal["daily_hours"],
+        goal["subjects"],
+        goal["weak_subjects"]
+    )
+
+    roadmap = parse_ai_roadmap(ai_text)
+
+    if roadmap is None:
+        return jsonify({
+            "success": False,
+            "message": "AI failed to generate roadmap"
+        }), 500
+
+    save_ai_roadmap(goal_id, roadmap)
+
+    return jsonify({
+        "success": True,
+        "message": "Roadmap generated successfully"
+    })
 
 oauth = OAuth(app)
 oauth.register(
@@ -347,7 +1295,214 @@ oauth.register(
 )
 
 init_db()
+@app.route("/api/dashboard/<int:goal_id>", methods=["GET"])
+def api_dashboard(goal_id):
 
+    dashboard = get_dashboard_stats(goal_id)
+
+    if not dashboard:
+        return jsonify({
+            "success": False,
+            "message": "Dashboard data not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "data": dashboard
+    })
+@app.route("/api/goals/<user_email>", methods=["GET"])
+def api_get_goals(user_email):
+
+    goals = get_all_goals(user_email)
+
+    return jsonify({
+        "success": True,
+        "count": len(goals),
+        "goals": goals
+    })
+@app.route("/api/goal/<int:goal_id>", methods=["GET"])
+def api_get_goal(goal_id):
+
+    goal = get_goal(goal_id)
+
+    if not goal:
+        return jsonify({
+            "success": False,
+            "message": "Goal not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "goal": goal
+    })
+@app.route("/api/goals", methods=["POST"])
+def api_create_goal():
+
+    data = request.json
+
+    goal_id = create_goal(
+        user_email=data["user_email"],
+        goal_name=data["goal_name"],
+        description=data.get("description", ""),
+        category=data.get("category", "Study"),
+        priority=data.get("priority", "Medium"),
+        target_date=data.get("target_date"),
+        daily_hours=data.get("daily_hours", 2),
+        roadmap=data.get("roadmap", ""),
+        subjects=data.get("subjects", ""),
+        weak_subjects=data.get("weak_subjects", "")
+    )
+
+    if goal_id:
+        return jsonify({
+            "success": True,
+            "goal_id": goal_id
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "Goal creation failed"
+    }), 400
+@app.route("/api/goal/<int:goal_id>", methods=["PUT"])
+def api_update_goal(goal_id):
+
+    data = request.json
+
+    success = update_goal(
+        goal_id,
+        data["goal_name"],
+        data.get("description", ""),
+        data.get("category", "Study"),
+        data.get("priority", "Medium"),
+        data.get("target_date"),
+        data.get("daily_hours", 2),
+        data.get("roadmap", ""),
+        data.get("subjects", ""),
+        data.get("weak_subjects", "")
+    )
+
+    return jsonify({
+        "success": success
+    })
+@app.route("/api/goal/<int:goal_id>", methods=["DELETE"])
+def api_delete_goal(goal_id):
+
+    success = delete_goal(goal_id)
+
+    return jsonify({
+        "success": success
+    })
+@app.route("/api/tasks/<int:goal_id>", methods=["GET"])
+def api_get_tasks(goal_id):
+
+    tasks = get_tasks(goal_id)
+
+    return jsonify({
+        "success": True,
+        "count": len(tasks),
+        "tasks": tasks
+    })
+@app.route("/api/tasks", methods=["POST"])
+def api_create_task():
+
+    data = request.json
+
+    task_id = create_task(
+        goal_id=data["goal_id"],
+        title=data["title"],
+        description=data.get("description", ""),
+        estimated_minutes=data.get("estimated_minutes", 30),
+        due_date=data.get("due_date")
+    )
+
+    if task_id:
+        return jsonify({
+            "success": True,
+            "task_id": task_id
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "Task creation failed"
+    }), 400
+@app.route("/api/task/<int:task_id>", methods=["PUT"])
+def api_update_task(task_id):
+
+    data = request.json
+
+    success = update_task(
+        task_id,
+        data["title"],
+        data.get("description", ""),
+        data.get("estimated_minutes", 30),
+        data.get("due_date")
+    )
+
+    return jsonify({
+        "success": success
+    })
+@app.route("/api/study-session", methods=["POST"])
+def api_save_study_session():
+
+    data = request.json
+
+    success = save_study_session(
+        goal_id=data["goal_id"],
+        minutes=data["minutes"]
+    )
+
+    if success:
+        return jsonify({
+            "success": True,
+            "message": "Study session saved successfully"
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "Failed to save study session"
+    }), 400
+@app.route("/api/study/today/<int:goal_id>", methods=["GET"])
+def api_today_study(goal_id):
+
+    minutes = get_today_study_time(goal_id)
+
+    return jsonify({
+        "success": True,
+        "today_minutes": minutes
+    })
+@app.route("/api/study/history/<int:goal_id>", methods=["GET"])
+def api_study_history(goal_id):
+
+    history = get_study_history(goal_id)
+
+    return jsonify({
+        "success": True,
+        "history": history
+    })
+@app.route("/api/study/weekly/<int:goal_id>", methods=["GET"])
+def api_weekly_study(goal_id):
+
+    weekly_data = get_weekly_study_data(goal_id)
+
+    return jsonify({
+        "success": True,
+        "weekly_data": weekly_data
+    })
+@app.route("/api/dashboard/<int:goal_id>", methods=["GET"])
+def api_dashboard(goal_id):
+
+    dashboard = get_dashboard_stats(goal_id)
+
+    if dashboard is None:
+        return jsonify({
+            "success": False,
+            "message": "Dashboard data not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "dashboard": dashboard
+    })
 
 @app.route("/login")
 def login():
