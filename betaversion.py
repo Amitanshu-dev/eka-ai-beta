@@ -42,7 +42,7 @@ def generate_ai_response(prompt, json_mode=False):
     for model in models:
         try:
             config = {
-                "max_output_tokens": 9000,
+                "max_output_tokens": 4500,
                 "temperature": 0.6
             }
             if json_mode:
