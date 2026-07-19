@@ -1483,6 +1483,10 @@ def normalize_roadmap(roadmap):
 
 def parse_ai_roadmap(ai_response):
     """Parse a root months object directly, with safe extraction for extra text."""
+    print(
+        "Roadmap parser executing: file=%s line=%s" %
+        (os.path.abspath(parse_ai_roadmap.__code__.co_filename), parse_ai_roadmap.__code__.co_firstlineno)
+    )
     if not isinstance(ai_response, str):
         return None
 
@@ -1612,6 +1616,10 @@ def api_generate_roadmap():
     print("===== RAW GEMINI ROADMAP RESPONSE (attempt 1) =====")
     print(ai_text)
     print("===== END RAW GEMINI ROADMAP RESPONSE =====")
+    print(
+        "Roadmap route using parser: file=%s line=%s" %
+        (os.path.abspath(parse_ai_roadmap.__code__.co_filename), parse_ai_roadmap.__code__.co_firstlineno)
+    )
     roadmap = parse_ai_roadmap(ai_text)
 
     if roadmap is None:
