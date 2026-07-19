@@ -3638,29 +3638,24 @@ if(plannerDate){
     function uid() { return "goal_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
     function today() { return new Date().toISOString().slice(0, 10); }
     function cleanText(value) { return String(value || "").trim().slice(0, 240); }
-    function load() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (saved && Array.isArray(saved.goals)) return saved;
-        const legacy = JSON.parse(localStorage.getItem("ekaStudyPlanner") || "null");
-        if (legacy && legacy.goal) {
-          const goal = makeGoal(legacy);
-          return { activeId: goal.id, goals: [goal] };
-        }
-      } catch (_) { /* Invalid old browser data is safely ignored. */ }
-      return { activeId: null, goals: [] };
-    }
+    function load() { return { activeId: null, goals: [] }; }
     function makeGoal(data) {
       const roadmapData = data.roadmapData || data.fullRoadmap || data.roadmap_data || (data.roadmap && typeof data.roadmap === "object" ? data.roadmap : null);
-      return { id: data.id || uid(), name: cleanText(data.goal || data.name), targetDate: data.targetDate || data.target_date || "", dailyTime: data.dailyTime || data.daily_hours || "", subjects: Array.isArray(data.subjects) ? data.subjects.map(cleanText) : [], weakSubjects: Array.isArray(data.weakSubjects || data.weak_subjects) ? (data.weakSubjects || data.weak_subjects).map(cleanText) : [], roadmap: cleanText(typeof data.roadmap === "string" ? data.roadmap : data.roadmap?.template), roadmapData: roadmapData || null, createdAt: data.createdAt || new Date().toISOString(), archived: Boolean(data.archived), xp: Number(data.xp) || 0, tasks: Array.isArray(data.tasks) ? data.tasks : [], history: Array.isArray(data.history) ? data.history : [], notes: Array.isArray(data.notes) ? data.notes : [] };
+      return { id: data.id || uid(), name: cleanText(data.goal || data.name), targetDate: data.targetDate || data.target_date || "", dailyTime: data.dailyTime || data.daily_hours || "", subjects: Array.isArray(data.subjects) ? data.subjects.map(cleanText) : [], weakSubjects: Array.isArray(data.weakSubjects || data.weak_subjects) ? (data.weakSubjects || data.weak_subjects).map(cleanText) : [], roadmap: cleanText(typeof data.roadmap === "string" ? data.roadmap : (data.roadmap?.template || (data.roadmap?.months ? "Saved generated roadmap" : ""))), roadmapData: roadmapData || null, createdAt: data.createdAt || new Date().toISOString(), archived: Boolean(data.archived), xp: Number(data.xp) || 0, tasks: Array.isArray(data.tasks) ? data.tasks : [], history: Array.isArray(data.history) ? data.history : [], notes: Array.isArray(data.notes) ? data.notes : [] };
     }
     function active() { return state.goals.find((goal) => goal.id === state.activeId) || null; }
     function save(sync) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); if (sync && active()) syncActiveGoal(); }
     function syncActiveGoal() {
       const goal = active(); if (!goal) return;
-      fetch("/save_study_planner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal: goal.name, target_date: goal.targetDate, daily_hours: goal.dailyTime, subjects: goal.subjects, weak_subjects: goal.weakSubjects, roadmap: goal.roadmap }) }).catch(() => {});
+      const completedTask = goal.serverId && goal.tasks.find((task) => task.serverId && task.done && !task.synced);
+      if (completedTask) {
+        completedTask.synced = true;
+        fetch("/api/task/" + completedTask.serverId + "/complete", { method: "POST" }).then(() => loadBackendPlanner()).catch(() => {});
+        return;
+      }
+      if (!goal.serverId) fetch("/save_study_planner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal: goal.name, target_date: goal.targetDate, daily_hours: goal.dailyTime, subjects: goal.subjects, weak_subjects: goal.weakSubjects, roadmap: goal.roadmap }) }).catch(() => {});
     }
-    function taskStats(goal) { const items = goal ? goal.tasks.filter((task) => task.date === today()) : []; const done = items.filter((task) => task.done).length; return { items, done, total: items.length, progress: items.length ? Math.round(done / items.length * 100) : 0 }; }
+    function taskStats(goal) { const items = goal ? goal.tasks.filter((task) => task.isToday) : []; const done = items.filter((task) => task.done).length; const total = goal ? goal.tasks.length : 0; const completed = goal ? Number(goal.completedTasks) || 0 : 0; return { items, done, total: items.length, progress: total ? Math.round(completed / total * 100) : 0 }; }
     function daysLeft(goal) { if (!goal || !goal.targetDate) return "—"; const delta = Math.ceil((new Date(goal.targetDate + "T00:00:00") - new Date(today() + "T00:00:00")) / 86400000); return delta < 0 ? "Past due" : delta + " days"; }
     function level(goal) { return Math.floor((goal ? goal.xp : 0) / 100) + 1; }
     function streak(goal) { if (!goal) return 0; const studied = new Set(goal.history.filter((entry) => entry.completed > 0).map((entry) => entry.date)); let date = new Date(); let count = 0; while (studied.has(date.toISOString().slice(0,10))) { count++; date.setDate(date.getDate() - 1); } return count; }
@@ -3687,13 +3682,30 @@ if(plannerDate){
     function resetWizard(goal) { const data = goal || { goal:"", targetDate:"", dailyTime:"", subjects:[], weakSubjects:[], roadmap:"" }; $("plannerGoal").value = data.name || data.goal || ""; $("plannerTargetDate").value = data.targetDate || ""; document.querySelectorAll("#plannerDailyTime [data-value], #plannerSubjects [data-value], #plannerWeakSubjects [data-value], #plannerRoadmap [data-value]").forEach((node) => { const selected = node.closest("#plannerDailyTime") ? data.dailyTime === node.dataset.value : node.closest("#plannerSubjects") ? (data.subjects || []).includes(node.dataset.value) : node.closest("#plannerWeakSubjects") ? (data.weakSubjects || []).includes(node.dataset.value) : data.roadmap === node.dataset.value; node.classList.toggle("is-selected", selected); }); modal.dataset.editId = goal ? goal.id : ""; }
     function openWizard(goal) { dashboard.classList.remove("is-open"); dashboard.dataset.open = ""; resetWizard(goal); currentPlannerStep = 1; showPlannerStep(1); modal.classList.add("is-open"); document.body.classList.add("study-planner-open"); setTimeout(() => $("plannerGoal").focus(), 0); }
     function wizardData() { return { goal: cleanText($("plannerGoal").value), targetDate: $("plannerTargetDate").value, dailyTime: document.querySelector("#plannerDailyTime .is-selected")?.dataset.value || "", subjects: Array.from(document.querySelectorAll("#plannerSubjects .is-selected"), (node) => node.dataset.value), weakSubjects: Array.from(document.querySelectorAll("#plannerWeakSubjects .is-selected"), (node) => node.dataset.value), roadmap: document.querySelector("#plannerRoadmap .is-selected")?.dataset.value || "Balanced" }; }
-    function templateTasks(data) { const subject = data.subjects[0] || data.weakSubjects[0] || "Core subject"; const revision = data.weakSubjects[0] || subject; const depth = data.roadmap === "Fast Track" ? "Complete a focused practice set" : data.roadmap === "Deep Mastery" ? "Study concepts and write clear notes" : "Study one focused concept block"; return [depth + " for " + subject, "Practice questions for " + subject, "Revise " + revision + " and record key takeaways"]; }
-    function submitGoal(event) { event.preventDefault(); event.stopImmediatePropagation(); const data = wizardData(); if (!data.goal) { $("plannerGoal").focus(); return; } if (!data.targetDate || data.targetDate <= today()) { $("plannerTargetDate").focus(); return; } let goal = state.goals.find((item) => item.id === modal.dataset.editId); if (goal) Object.assign(goal, makeGoal(Object.assign({}, goal, data))); else { goal = makeGoal(data); goal.tasks = templateTasks(data).map((text) => ({ id: uid(), text, date: today(), done: false })); state.goals.push(goal); } state.activeId = goal.id; save(true); modal.classList.remove("is-open", "is-closing"); document.body.classList.remove("study-planner-open"); dashboard.dataset.open = "true"; render(); }
+    async function submitGoal(event) { event.preventDefault(); event.stopImmediatePropagation(); const data = wizardData(); if (!data.goal) { $("plannerGoal").focus(); return; } if (!data.targetDate || data.targetDate <= today()) { $("plannerTargetDate").focus(); return; } const existing = active(); if (existing && existing.serverId && modal.dataset.editId) { await fetch("/api/goal/" + existing.serverId, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal_name: data.goal, target_date: data.targetDate, daily_hours: data.dailyTime, subjects: data.subjects.join(","), weak_subjects: data.weakSubjects.join(","), roadmap: existing.roadmapData ? JSON.stringify(existing.roadmapData) : "" }) }); } else { const created = await fetch("/api/goals", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal_name: data.goal, target_date: data.targetDate, daily_hours: data.dailyTime, subjects: data.subjects.join(","), weak_subjects: data.weakSubjects.join(","), roadmap: "" }) }); const createdData = await created.json(); if (!createdData.success) return; await fetch("/api/generate-roadmap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal_id: createdData.goal_id }) }); } await loadBackendPlanner(); modal.classList.remove("is-open", "is-closing"); document.body.classList.remove("study-planner-open"); dashboard.dataset.open = "true"; render(); }
     $("plannerCreateGoal").addEventListener("click", () => openWizard(null)); $("plannerDashboardClose").addEventListener("click", () => { dashboard.classList.remove("is-open"); dashboard.dataset.open = ""; });
-    $("studyPlannerButton").addEventListener("click", (event) => { event.stopImmediatePropagation(); closeSidebar(); dashboard.dataset.open = "true"; render(); }, true); $("createPlannerButton").addEventListener("click", submitGoal, true);
+    $("studyPlannerButton").addEventListener("click", (event) => { event.stopImmediatePropagation(); closeSidebar(); dashboard.dataset.open = "true"; loadBackendPlanner(); render(); }, true); $("createPlannerButton").addEventListener("click", submitGoal, true);
     document.addEventListener("keydown", (event) => { if (event.key === "Escape" && dashboard.classList.contains("is-open")) $("plannerDashboardClose").click(); });
     const apex = document.createElement("script"); apex.src = "https://cdn.jsdelivr.net/npm/apexcharts"; apex.onload = () => { if (dashboard.classList.contains("is-open")) render(); }; document.head.append(apex);
+    async function loadBackendPlanner() {
+      try {
+        const response = await fetch("/load_study_planner");
+        const data = await response.json();
+        const planner = data.planner;
+        if (!data.success || !planner || !planner.goal_id) return;
+        const currentId = planner.today_task && planner.today_task.id;
+        const goal = makeGoal({ id: String(planner.goal_id), name: planner.goal, targetDate: planner.targetDate, dailyTime: planner.dailyTime, subjects: planner.subjects, weakSubjects: planner.weakSubjects, roadmap: planner.roadmap, roadmapData: planner.roadmap, xp: planner.xp });
+        goal.serverId = planner.goal_id;
+        goal.completedTasks = Number(planner.completed_tasks) || 0;
+        goal.tasks = (planner.tasks || []).map((task) => ({ id: String(task.id), serverId: task.id, text: task.title, date: task.due_date, done: task.status === "completed", isToday: task.id === currentId }));
+        goal.history = (planner.weekly_data || []).map((entry) => ({ date: entry.study_date, completed: Number(entry.completed) || 0 }));
+        state = { activeId: goal.id, goals: [goal] };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        render();
+      } catch (_) { /* Keep the existing screen if the planner is unavailable. */ }
+    }
     render();
+    loadBackendPlanner();
   }());
   </script>
   <script>
@@ -3708,7 +3720,9 @@ if(plannerDate){
     const getValue = (data, keys) => { if (!data || typeof data !== "object") return []; for (const key of keys) if (data[key] != null) return toItems(data[key]); return []; };
     function addCard(label, values, wide) { const card = document.createElement("article"); card.className = "planner-card roadmap-detail-card" + (wide ? " wide" : ""); const heading = document.createElement("h2"); heading.className = "planner-section-title"; heading.textContent = label; card.appendChild(heading); const list = document.createElement("ul"); const items = values.length ? values : ["No saved " + label.toLowerCase() + " data for this goal."]; items.forEach((item) => { const entry = document.createElement("li"); entry.textContent = item; list.appendChild(entry); }); card.appendChild(list); content.appendChild(card); }
     function openRoadmap() { const state = readState(); const goal = state.goals.find((item) => item.id === state.activeId); if (!goal) return; const data = goal.roadmapData || goal.fullRoadmap || goal.roadmap_data || {}; content.replaceChildren(); title.textContent = goal.name + " · Full Roadmap"; const phases = Array.isArray(data.phases) ? data.phases : []; for (let number = 1; number <= 4; number += 1) { const phase = phases[number - 1]; addCard("Phase " + number, phase ? toItems(phase.tasks || phase.goals || phase) : getValue(data, ["phase" + number, "phase_" + number, "Phase " + number])); } addCard("Monthly Goals", getValue(data, ["monthlyGoals", "monthly_goals", "months"]), true); addCard("Weekly Goals", getValue(data, ["weeklyGoals", "weekly_goals", "weeks"]), true); addCard("Daily Breakdown", getValue(data, ["dailyBreakdown", "daily_breakdown", "daily"]), true); page.classList.add("is-open"); page.setAttribute("aria-hidden", "false"); }
-    document.getElementById("viewFullRoadmap").addEventListener("click", openRoadmap);
+    function openSavedRoadmap() { const state = readState(); const goal = state.goals.find((item) => item.id === state.activeId); if (!goal) return; const data = goal.roadmapData || {}; const months = Array.isArray(data.months) ? data.months : []; content.replaceChildren(); title.textContent = goal.name + " · Full Roadmap"; months.forEach((month, monthIndex) => { const tasks = (month.weeks || []).flatMap((week) => (week.tasks || []).map((task) => "Week " + (week.week || "") + ": " + (task.title || task))); addCard("Month " + (month.month || monthIndex + 1), tasks, true); }); const weeklyTasks = months.flatMap((month) => (month.weeks || []).flatMap((week) => (week.tasks || []).map((task) => "Month " + (month.month || "") + ", Week " + (week.week || "") + ": " + (task.title || task)))); addCard("Weekly Goals", weeklyTasks, true); addCard("Daily Breakdown", (goal.tasks || []).map((task) => task.text), true); if (!months.length) addCard("Roadmap", [], true); page.classList.add("is-open"); page.setAttribute("aria-hidden", "false"); }
+    async function openPersistedRoadmap() { const response = await fetch("/load_study_planner"); const result = await response.json(); const planner = result.planner; if (!result.success || !planner || !planner.goal_id) return; const data = planner.roadmap || {}; const months = Array.isArray(data.months) ? data.months : []; content.replaceChildren(); title.textContent = planner.goal + " · Full Roadmap"; months.forEach((month, monthIndex) => { const tasks = (month.weeks || []).flatMap((week) => (week.tasks || []).map((task) => "Week " + (week.week || "") + ": " + (task.title || task))); addCard("Month " + (month.month || monthIndex + 1), tasks, true); }); const weeklyTasks = months.flatMap((month) => (month.weeks || []).flatMap((week) => (week.tasks || []).map((task) => "Month " + (month.month || "") + ", Week " + (week.week || "") + ": " + (task.title || task)))); addCard("Weekly Goals", weeklyTasks, true); addCard("Daily Breakdown", (planner.tasks || []).map((task) => task.title), true); if (!months.length) addCard("Roadmap", [], true); page.classList.add("is-open"); page.setAttribute("aria-hidden", "false"); }
+    document.getElementById("viewFullRoadmap").addEventListener("click", openPersistedRoadmap);
     document.getElementById("fullRoadmapBack").addEventListener("click", () => { page.classList.remove("is-open"); page.setAttribute("aria-hidden", "true"); });
     document.addEventListener("keydown", (event) => { if (event.key === "Escape" && page.classList.contains("is-open")) document.getElementById("fullRoadmapBack").click(); });
   }());
