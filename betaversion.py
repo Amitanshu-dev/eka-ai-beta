@@ -1425,27 +1425,88 @@ Structure:
     return response
 import json
 
+def normalize_roadmap(roadmap):
+    """Accept current and legacy roadmap JSON and store one stable task schema."""
+    if isinstance(roadmap, str):
+        try:
+            roadmap = json.loads(roadmap)
+        except json.JSONDecodeError:
+            return None
+    if not isinstance(roadmap, dict):
+        return None
+
+    # Older clients may wrap the current schema in a roadmap key.
+    if "months" not in roadmap and isinstance(roadmap.get("roadmap"), dict):
+        roadmap = roadmap["roadmap"]
+    if "months" not in roadmap:
+        return None
+
+    months = roadmap.get("months")
+    if isinstance(months, dict):
+        months = list(months.values())
+    if not isinstance(months, list):
+        return None
+
+    normalized_months = []
+    for month_index, month in enumerate(months, start=1):
+        month = month if isinstance(month, dict) else {"tasks": [month]}
+        weeks = month.get("weeks")
+        if isinstance(weeks, dict):
+            weeks = list(weeks.values())
+        if not isinstance(weeks, list):
+            weeks = [{"week": 1, "tasks": month.get("tasks") or month.get("topics") or month.get("chapters") or []}]
+
+        normalized_weeks = []
+        for week_index, week in enumerate(weeks, start=1):
+            week = week if isinstance(week, dict) else {"tasks": [week]}
+            tasks = week.get("tasks") or week.get("topics") or week.get("chapters") or []
+            if isinstance(tasks, dict):
+                tasks = list(tasks.values())
+            if not isinstance(tasks, list):
+                tasks = [tasks]
+
+            normalized_tasks = []
+            for task in tasks:
+                task = task if isinstance(task, dict) else {"title": str(task)}
+                title = task.get("title") or task.get("name") or task.get("topic") or task.get("chapter")
+                if not title:
+                    continue
+                normalized_tasks.append({
+                    "title": str(title).strip(),
+                    "description": str(task.get("description") or task.get("details") or "").strip(),
+                    "minutes": task.get("minutes") or task.get("estimated_minutes") or 60
+                })
+            normalized_weeks.append({"week": week.get("week", week_index), "tasks": normalized_tasks})
+        normalized_months.append({"month": month.get("month", month_index), "weeks": normalized_weeks})
+
+    return {"months": normalized_months}
+
 def parse_ai_roadmap(ai_response):
-    """Accept the JSON object even when the model adds a fence or short preface."""
+    """Parse a root months object directly, with safe extraction for extra text."""
     if not isinstance(ai_response, str):
         return None
 
     cleaned = re.sub(r"```(?:json)?", "", ai_response, flags=re.IGNORECASE).replace("```", "").strip()
+    candidates = [cleaned]
     decoder = json.JSONDecoder()
-
     for match in re.finditer(r"\{", cleaned):
         try:
-            roadmap, _ = decoder.raw_decode(cleaned[match.start():])
+            candidate, _ = decoder.raw_decode(cleaned[match.start():])
+            candidates.append(candidate)
         except json.JSONDecodeError:
             continue
-        if isinstance(roadmap, dict) and isinstance(roadmap.get("months"), list):
-            return roadmap
+
+    for candidate in candidates:
+        parsed = normalize_roadmap(candidate)
+        if parsed is not None:
+            return parsed
 
     print("Roadmap Parse Error: response did not contain a roadmap JSON object")
     return None
 def save_ai_roadmap(goal_id, roadmap):
     """Persist both the complete roadmap and its ordered daily tasks atomically."""
-    if not isinstance(roadmap, dict) or not roadmap.get("months"):
+    roadmap = normalize_roadmap(roadmap)
+    if not roadmap or not roadmap.get("months"):
         return False
 
     conn = get_db()
