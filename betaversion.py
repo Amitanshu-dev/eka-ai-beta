@@ -586,7 +586,8 @@ def update_goal(
             daily_hours = ?,
             roadmap = ?,
             subjects = ?,
-            weak_subjects = ?
+            weak_subjects = ?,
+            updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """, (
             goal_name,
@@ -1315,6 +1316,29 @@ def update_progress(goal_id):
     conn.close()
 
     return True
+EXAM_SYLLABI = {
+    "UPSC": "Prelims: history, geography, polity, economy, environment, science, current affairs. Mains: essay, GS I-IV, optional subject, ethics, answer writing.",
+    "SSC CGL": "General intelligence, general awareness, quantitative aptitude, English comprehension, tier-wise practice.",
+    "SSC CHSL": "General intelligence, general awareness, quantitative aptitude, English language, tier-wise practice.",
+    "NEET": "Physics, Chemistry, Botany, Zoology using the current prescribed syllabus.",
+    "JEE": "Physics, Chemistry, Mathematics using the current prescribed syllabus.",
+    "CAT": "VARC, DILR, quantitative aptitude, mock analysis.",
+    "GATE": "Engineering mathematics, general aptitude, and the selected paper's prescribed core subjects.",
+    "BANK PO": "English, quantitative aptitude, reasoning, general and banking awareness, mock analysis.",
+    "RAILWAY": "Mathematics, reasoning, general science, general awareness, exam practice.",
+    "STATE PSC": "State-specific general studies, history, geography, polity, economy, current affairs, answer writing.",
+    "CUET": "Language, general test, and selected domain subjects using the current prescribed syllabus.",
+    "NDA": "Mathematics, general ability, English, science, social studies, SSB preparation.",
+    "CDS": "English, general knowledge, elementary mathematics, service-specific preparation."
+}
+
+def get_exam_syllabus(goal_name):
+    goal_text = (goal_name or "").upper()
+    for exam_name, syllabus in EXAM_SYLLABI.items():
+        if exam_name in goal_text:
+            return exam_name, syllabus
+    return None, ""
+
 def generate_ai_roadmap(
     goal_name,
     target_date,
@@ -1322,6 +1346,15 @@ def generate_ai_roadmap(
     subjects,
     weak_subjects
 ):
+
+    exam_name, exam_syllabus = get_exam_syllabus(goal_name)
+    exam_context = ""
+    if exam_name:
+        exam_context = f"""
+This is a {exam_name} exam goal. Follow this prescribed syllabus and topic order:
+{exam_syllabus}
+Do not treat it as a generic custom course. Cover the syllabus completely before revision and mocks.
+"""
 
     prompt = f"""
 You are EKA AI.
@@ -1342,6 +1375,8 @@ Subjects:
 
 Weak Subjects:
 {weak_subjects}
+
+{exam_context}
 
 Return ONLY JSON.
 
@@ -1423,8 +1458,11 @@ def save_ai_roadmap(goal_id, roadmap):
         except (TypeError, ValueError):
             days_available = len(tasks)
 
+        total_tasks = len(tasks)
         for index, (month_number, week_number, task) in enumerate(tasks, start=1):
-            day_offset = min(index - 1, days_available - 1)
+            # Spread a long plan across its deadline; compress it when the
+            # deadline is close so multiple ordered tasks can share a day.
+            day_offset = round((index - 1) * (days_available - 1) / max(total_tasks - 1, 1))
             due_date = (today + timedelta(days=day_offset)).strftime("%Y-%m-%d")
             description = (task.get("description") or "").strip()
             label = "Roadmap: Month %s, Week %s" % (month_number, week_number)
@@ -1587,18 +1625,22 @@ def api_create_goal():
 def api_update_goal(goal_id):
 
     data = request.json
+    existing_goal = get_goal(goal_id)
+
+    if not existing_goal:
+        return jsonify({"success": False, "message": "Goal not found"}), 404
 
     success = update_goal(
         goal_id,
-        data["goal_name"],
+        data.get("goal_name", existing_goal["goal_name"]),
         data.get("description", ""),
         data.get("category", "Study"),
         data.get("priority", "Medium"),
-        data.get("target_date"),
-        data.get("daily_hours", 2),
-        data.get("roadmap", ""),
-        data.get("subjects", ""),
-        data.get("weak_subjects", "")
+        data.get("target_date", existing_goal["target_date"]),
+        data.get("daily_hours", existing_goal["daily_hours"]),
+        data.get("roadmap", existing_goal["roadmap"]),
+        data.get("subjects", existing_goal["subjects"]),
+        data.get("weak_subjects", existing_goal["weak_subjects"])
     )
 
     return jsonify({
