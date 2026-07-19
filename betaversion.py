@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import sqlite3
 from datetime import timedelta, datetime
 
@@ -1408,21 +1409,23 @@ Structure:
 import json
 
 def parse_ai_roadmap(ai_response):
-    """
-    Convert Gemini JSON response into Python dictionary
-    """
-
-    try:
-        # Agar AI ```json ... ``` me response de
-        cleaned = ai_response.replace("```json", "").replace("```", "").strip()
-
-        roadmap = json.loads(cleaned)
-
-        return roadmap
-
-    except json.JSONDecodeError as e:
-        print("Roadmap Parse Error:", e)
+    """Accept the JSON object even when the model adds a fence or short preface."""
+    if not isinstance(ai_response, str):
         return None
+
+    cleaned = re.sub(r"```(?:json)?", "", ai_response, flags=re.IGNORECASE).replace("```", "").strip()
+    decoder = json.JSONDecoder()
+
+    for match in re.finditer(r"\{", cleaned):
+        try:
+            roadmap, _ = decoder.raw_decode(cleaned[match.start():])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(roadmap, dict) and isinstance(roadmap.get("months"), list):
+            return roadmap
+
+    print("Roadmap Parse Error: response did not contain a roadmap JSON object")
+    return None
 def save_ai_roadmap(goal_id, roadmap):
     """Persist both the complete roadmap and its ordered daily tasks atomically."""
     if not isinstance(roadmap, dict) or not roadmap.get("months"):
@@ -1488,9 +1491,11 @@ def save_ai_roadmap(goal_id, roadmap):
         conn.close()
 @app.route("/api/generate-roadmap", methods=["POST"])
 def api_generate_roadmap():
-    data = request.json
+    data = request.json or {}
+    goal_id = data.get("goal_id")
 
-    goal_id = data["goal_id"]
+    if not goal_id:
+        return jsonify({"success": False, "message": "goal_id is required"}), 400
 
     goal = get_goal(goal_id)
 
@@ -1514,13 +1519,17 @@ def api_generate_roadmap():
                 "today_task": get_current_task(goal_id)
             })
 
-    ai_text = generate_ai_roadmap(
-        goal["goal_name"],
-        goal["target_date"],
-        goal["daily_hours"],
-        goal["subjects"],
-        goal["weak_subjects"]
-    )
+    try:
+        ai_text = generate_ai_roadmap(
+            goal["goal_name"],
+            goal["target_date"],
+            goal["daily_hours"],
+            goal["subjects"],
+            goal["weak_subjects"]
+        )
+    except Exception as e:
+        print("Roadmap Generation Error:", e)
+        return jsonify({"success": False, "message": "Roadmap generation failed"}), 502
 
     roadmap = parse_ai_roadmap(ai_text)
 
@@ -1528,7 +1537,7 @@ def api_generate_roadmap():
         return jsonify({
             "success": False,
             "message": "AI failed to generate roadmap"
-        }), 500
+        }), 422
 
     if not save_ai_roadmap(goal_id, roadmap):
         return jsonify({"success": False, "message": "Roadmap could not be saved"}), 500
