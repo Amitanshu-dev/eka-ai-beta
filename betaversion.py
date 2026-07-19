@@ -28,7 +28,7 @@ def sitemap():
 @app.route("/googlec11108631eacbc28.html")
 def google_verify():
     return send_from_directory("static", "googlec11108631eacbc28.html")
-def generate_ai_response(prompt):
+def generate_ai_response(prompt, json_mode=False):
 
     models = [
         "gemini-2.5-flash",
@@ -41,13 +41,17 @@ def generate_ai_response(prompt):
 
     for model in models:
         try:
+            config = {
+                "max_output_tokens": 1200,
+                "temperature": 0.6
+            }
+            if json_mode:
+                config["response_mime_type"] = "application/json"
+
             response = client.models.generate_content(
                 model=model,
                 contents=prompt,
-                config={
-                    "max_output_tokens": 1200,
-                    "temperature": 0.6
-                }
+                config=config
             )
 
             return response.text.strip()
@@ -1345,7 +1349,8 @@ def generate_ai_roadmap(
     target_date,
     daily_hours,
     subjects,
-    weak_subjects
+    weak_subjects,
+    strict_json=False
 ):
 
     exam_name, exam_syllabus = get_exam_syllabus(goal_name)
@@ -1355,6 +1360,16 @@ def generate_ai_roadmap(
 This is a {exam_name} exam goal. Follow this prescribed syllabus and topic order:
 {exam_syllabus}
 Do not treat it as a generic custom course. Cover the syllabus completely before revision and mocks.
+"""
+
+    strict_instruction = ""
+    if strict_json:
+        strict_instruction = """
+CRITICAL OUTPUT CONTRACT:
+Return exactly one valid JSON object and nothing else.
+Do not use Markdown fences, explanations, headings, apologies, or comments.
+The first character must be { and the final character must be }.
+Include a non-empty months array, each month with weeks, and each week with at least one task containing title, description, and minutes.
 """
 
     prompt = f"""
@@ -1378,6 +1393,8 @@ Weak Subjects:
 {weak_subjects}
 
 {exam_context}
+
+{strict_instruction}
 
 Return ONLY JSON.
 
@@ -1404,7 +1421,7 @@ Structure:
 }}
 """
 
-    response = generate_ai_response(prompt)
+    response = generate_ai_response(prompt, json_mode=True)
     return response
 import json
 
@@ -1531,12 +1548,34 @@ def api_generate_roadmap():
         print("Roadmap Generation Error:", e)
         return jsonify({"success": False, "message": "Roadmap generation failed"}), 502
 
+    print("===== RAW GEMINI ROADMAP RESPONSE (attempt 1) =====")
+    print(ai_text)
+    print("===== END RAW GEMINI ROADMAP RESPONSE =====")
     roadmap = parse_ai_roadmap(ai_text)
+
+    if roadmap is None:
+        try:
+            retry_text = generate_ai_roadmap(
+                goal["goal_name"],
+                goal["target_date"],
+                goal["daily_hours"],
+                goal["subjects"],
+                goal["weak_subjects"],
+                strict_json=True
+            )
+        except Exception as e:
+            print("Roadmap Strict Retry Error:", e)
+            return jsonify({"success": False, "message": "Roadmap generation failed"}), 502
+
+        print("===== RAW GEMINI ROADMAP RESPONSE (strict retry) =====")
+        print(retry_text)
+        print("===== END RAW GEMINI ROADMAP RESPONSE =====")
+        roadmap = parse_ai_roadmap(retry_text)
 
     if roadmap is None:
         return jsonify({
             "success": False,
-            "message": "AI failed to generate roadmap"
+            "message": "AI returned an invalid roadmap format after retry"
         }), 422
 
     if not save_ai_roadmap(goal_id, roadmap):
