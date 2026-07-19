@@ -1,6 +1,7 @@
 import os
+import json
 import sqlite3
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
@@ -126,7 +127,7 @@ def save_study_planner(
     cur = conn.cursor()
 
     cur.execute("""
-    INSERT OR REPLACE INTO study_planner(
+    INSERT INTO study_planner(
         user_email,
         goal,
         target_date,
@@ -140,6 +141,14 @@ def save_study_planner(
         planner_status
     )
     VALUES(?,?,?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(user_email) DO UPDATE SET
+        goal=excluded.goal,
+        target_date=excluded.target_date,
+        daily_hours=excluded.daily_hours,
+        subjects=excluded.subjects,
+        weak_subjects=excluded.weak_subjects,
+        roadmap=excluded.roadmap,
+        planner_status='active'
     """, (
         user_email,
         goal,
@@ -147,7 +156,7 @@ def save_study_planner(
         daily_hours,
         ",".join(subjects) if subjects else "",
         ",".join(weak_subjects) if weak_subjects else "",
-        roadmap,
+        json.dumps(roadmap) if isinstance(roadmap, dict) else (roadmap or ""),
         1,
         1,
         0,
@@ -444,6 +453,18 @@ CREATE TABLE IF NOT EXISTS study_planner(
     """)
     except:
      pass
+    for column, definition in [
+        ("current_task_id", "INTEGER"),
+        ("last_completed_task", "TEXT"),
+        ("weak_topics", "TEXT DEFAULT ''"),
+        ("strong_topics", "TEXT DEFAULT ''"),
+        ("revision_history", "TEXT DEFAULT ''"),
+        ("last_study_date", "TEXT")
+    ]:
+        try:
+            cur.execute("ALTER TABLE lesson_memory ADD COLUMN %s %s" % (column, definition))
+        except sqlite3.OperationalError:
+            pass
     conn.commit()
     conn.close()
 def create_goal(
@@ -715,6 +736,126 @@ def get_tasks(goal_id):
         return []
     finally:
         conn.close()
+
+def get_current_task(goal_id):
+    """The first unfinished roadmap task is always the active daily task."""
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        SELECT * FROM tasks
+        WHERE goal_id=? AND status='pending'
+        ORDER BY task_order ASC, id ASC
+        LIMIT 1
+        """, (goal_id,))
+        return cur.fetchone()
+    finally:
+        conn.close()
+
+def get_active_goal(user_email):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+        SELECT * FROM goals
+        WHERE user_email=? AND status='active' AND roadmap IS NOT NULL AND roadmap!=''
+        ORDER BY updated_at DESC, id DESC
+        LIMIT 1
+        """, (user_email,))
+        return cur.fetchone()
+    finally:
+        conn.close()
+
+def sync_planner_position(user_email, goal_id):
+    task = get_current_task(goal_id)
+    if not task:
+        return None
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        # Roadmap task descriptions retain their generated month/week label.
+        week = 1
+        marker = "Week "
+        description = task["description"] or ""
+        if marker in description:
+            try:
+                week = int(description.split(marker, 1)[1].split()[0].strip(" :,-"))
+            except (ValueError, IndexError):
+                pass
+        cur.execute("""
+        UPDATE study_planner
+        SET current_week=?, current_day=?
+        WHERE user_email=?
+        """, (week, task["task_order"] or 1, user_email))
+        conn.commit()
+    finally:
+        conn.close()
+    return task
+
+def skip_current_task(goal_id):
+    """Move forward without awarding completion XP when the learner skips."""
+    task = get_current_task(goal_id)
+    if not task:
+        return None
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("UPDATE tasks SET status='skipped' WHERE id=?", (task["id"],))
+        conn.commit()
+    finally:
+        conn.close()
+    return get_current_task(goal_id)
+
+def sync_learning_memory(user_email, goal, task, last_completed_task=None, user_message=""):
+    """Keep cross-chat learning state in the existing per-user memory record."""
+    if not goal:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        current_title = task["title"] if task else ""
+        cur.execute("""
+        INSERT INTO lesson_memory(
+            user_email, subject, chapter, current_concept, current_task_id,
+            last_completed_task, last_study_date
+        ) VALUES(?,?,?,?,?,?,?)
+        ON CONFLICT(user_email) DO UPDATE SET
+            subject=excluded.subject,
+            chapter=excluded.chapter,
+            current_concept=excluded.current_concept,
+            current_task_id=excluded.current_task_id,
+            last_completed_task=COALESCE(excluded.last_completed_task, lesson_memory.last_completed_task),
+            last_study_date=excluded.last_study_date,
+            updated_at=CURRENT_TIMESTAMP
+        """, (
+            user_email, goal["goal_name"], current_title, current_title,
+            task["id"] if task else None, last_completed_task,
+            datetime.now().strftime("%Y-%m-%d")
+        ))
+        message = (user_message or "").lower()
+        if current_title and any(word in message for word in ("confused", "don't understand", "dont understand", "difficult", "wrong")):
+            cur.execute("""
+            UPDATE lesson_memory SET weak_topics=CASE
+                WHEN instr(weak_topics, ?) > 0 THEN weak_topics
+                WHEN weak_topics='' THEN ? ELSE weak_topics || ', ' || ? END
+            WHERE user_email=?
+            """, (current_title, current_title, current_title, user_email))
+        elif current_title and any(word in message for word in ("understood", "easy", "got it", "correct")):
+            cur.execute("""
+            UPDATE lesson_memory SET strong_topics=CASE
+                WHEN instr(strong_topics, ?) > 0 THEN strong_topics
+                WHEN strong_topics='' THEN ? ELSE strong_topics || ', ' || ? END
+            WHERE user_email=?
+            """, (current_title, current_title, current_title, user_email))
+        if current_title and ("revision" in message or "revise" in message):
+            cur.execute("""
+            UPDATE lesson_memory SET revision_history=CASE
+                WHEN revision_history='' THEN ? ELSE revision_history || ', ' || ? END
+            WHERE user_email=?
+            """, (current_title, current_title, user_email))
+        conn.commit()
+    finally:
+        conn.close()
 def get_task(task_id):
     conn = get_db()
     cur = conn.cursor()
@@ -784,7 +925,7 @@ def complete_task(task_id):
 
         # Task ki details lo
         cur.execute("""
-        SELECT goal_id, xp_reward
+        SELECT goal_id, xp_reward, status
         FROM tasks
         WHERE id = ?
         """, (task_id,))
@@ -793,6 +934,9 @@ def complete_task(task_id):
 
         if not task:
             return False
+
+        if task["status"] == "completed":
+            return True
 
         goal_id = task["goal_id"]
         xp_reward = task["xp_reward"]
@@ -1044,6 +1188,7 @@ def get_dashboard_stats(goal_id):
         goal = get_goal(goal_id)
 
         tasks = get_tasks(goal_id)
+        today_task = get_current_task(goal_id)
 
         today_minutes = get_today_study_time(goal_id)
 
@@ -1065,6 +1210,7 @@ def get_dashboard_stats(goal_id):
         return {
             "goal": goal,
             "tasks": tasks,
+            "today_task": today_task,
             "today_minutes": today_minutes,
             "weekly_data": weekly_data,
             "completed_tasks": stats["completed_tasks"] if stats else 0,
@@ -1090,7 +1236,7 @@ def update_progress(goal_id):
     cursor.execute("""
         SELECT COUNT(*) as total
         FROM tasks
-        WHERE goal_id=? AND status='Completed'
+    WHERE goal_id=? AND status='completed'
     """, (goal_id,))
     completed_tasks = cursor.fetchone()["total"]
 
@@ -1098,7 +1244,7 @@ def update_progress(goal_id):
     cursor.execute("""
         SELECT COUNT(*) as total
         FROM tasks
-        WHERE goal_id=? AND status!='Completed'
+    WHERE goal_id=? AND status='pending'
     """, (goal_id,))
     pending_tasks = cursor.fetchone()["total"]
 
@@ -1222,30 +1368,65 @@ def parse_ai_roadmap(ai_response):
         print("Roadmap Parse Error:", e)
         return None
 def save_ai_roadmap(goal_id, roadmap):
-
-    if roadmap is None:
+    """Persist both the complete roadmap and its ordered daily tasks atomically."""
+    if not isinstance(roadmap, dict) or not roadmap.get("months"):
         return False
 
+    conn = get_db()
+    cur = conn.cursor()
     try:
+        cur.execute("SELECT target_date FROM goals WHERE id=?", (goal_id,))
+        goal = cur.fetchone()
+        if not goal:
+            return False
 
+        tasks = []
         for month in roadmap.get("months", []):
-
             for week in month.get("weeks", []):
-
                 for task in week.get("tasks", []):
+                    title = (task.get("title") or "").strip()
+                    if title:
+                        tasks.append((month.get("month", 1), week.get("week", 1), task))
+        if not tasks:
+            return False
 
-                    create_task(
-                        goal_id=goal_id,
-                        title=task.get("title", ""),
-                        description=task.get("description", ""),
-                        estimated_minutes=task.get("minutes", 60)
-                    )
+        # A generated roadmap is immutable after it is saved; this prevents duplicates.
+        cur.execute("SELECT COUNT(*) AS count FROM tasks WHERE goal_id=?", (goal_id,))
+        if cur.fetchone()["count"]:
+            return True
 
+        today = datetime.now().date()
+        try:
+            target = datetime.strptime(goal["target_date"], "%Y-%m-%d").date()
+            days_available = max((target - today).days + 1, 1)
+        except (TypeError, ValueError):
+            days_available = len(tasks)
+
+        for index, (month_number, week_number, task) in enumerate(tasks, start=1):
+            day_offset = min(index - 1, days_available - 1)
+            due_date = (today + timedelta(days=day_offset)).strftime("%Y-%m-%d")
+            description = (task.get("description") or "").strip()
+            label = "Roadmap: Month %s, Week %s" % (month_number, week_number)
+            description = label + ("\n" + description if description else "")
+            cur.execute("""
+            INSERT INTO tasks(goal_id, title, description, estimated_minutes, due_date, task_order)
+            VALUES(?,?,?,?,?,?)
+            """, (
+                goal_id, task["title"].strip(), description,
+                int(task.get("minutes", 60) or 60), due_date, index
+            ))
+
+        cur.execute("UPDATE goals SET roadmap=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
+                    (json.dumps(roadmap), goal_id))
+        conn.commit()
+        update_progress(goal_id)
         return True
-
     except Exception as e:
+        conn.rollback()
         print("Save Roadmap Error:", e)
         return False
+    finally:
+        conn.close()
 @app.route("/api/generate-roadmap", methods=["POST"])
 def api_generate_roadmap():
     data = request.json
@@ -1259,6 +1440,20 @@ def api_generate_roadmap():
             "success": False,
             "message": "Goal not found"
         }), 404
+
+    # Return the saved roadmap on refresh/retry instead of asking the model again.
+    if goal["roadmap"]:
+        try:
+            saved_roadmap = json.loads(goal["roadmap"])
+        except (TypeError, json.JSONDecodeError):
+            saved_roadmap = None
+        if saved_roadmap:
+            return jsonify({
+                "success": True,
+                "message": "Roadmap already generated",
+                "roadmap": saved_roadmap,
+                "today_task": get_current_task(goal_id)
+            })
 
     ai_text = generate_ai_roadmap(
         goal["goal_name"],
@@ -1276,11 +1471,22 @@ def api_generate_roadmap():
             "message": "AI failed to generate roadmap"
         }), 500
 
-    save_ai_roadmap(goal_id, roadmap)
+    if not save_ai_roadmap(goal_id, roadmap):
+        return jsonify({"success": False, "message": "Roadmap could not be saved"}), 500
+
+    user_email = goal["user_email"]
+    save_study_planner(
+        user_email, goal["goal_name"], goal["target_date"], goal["daily_hours"],
+        (goal["subjects"] or "").split(","),
+        (goal["weak_subjects"] or "").split(","), roadmap
+    )
+    today_task = sync_planner_position(user_email, goal_id)
 
     return jsonify({
         "success": True,
-        "message": "Roadmap generated successfully"
+        "message": "Roadmap generated successfully",
+        "roadmap": roadmap,
+        "today_task": today_task
     })
 
 oauth = OAuth(app)
@@ -1427,6 +1633,24 @@ def api_update_task(task_id):
     return jsonify({
         "success": success
     })
+@app.route("/api/task/<int:task_id>/complete", methods=["POST"])
+def api_complete_task(task_id):
+
+    task = get_task(task_id)
+    if not task:
+        return jsonify({"success": False, "message": "Task not found"}), 404
+
+    success = complete_task(task_id)
+    if success:
+        update_progress(task["goal_id"])
+        goal = get_goal(task["goal_id"])
+        if goal:
+            next_task = sync_planner_position(goal["user_email"], task["goal_id"])
+            sync_learning_memory(goal["user_email"], goal, next_task, task["title"])
+    return jsonify({
+        "success": success,
+        "today_task": get_current_task(task["goal_id"]) if success else None
+    })
 @app.route("/api/study-session", methods=["POST"])
 def api_save_study_session():
 
@@ -1451,10 +1675,12 @@ def api_save_study_session():
 def api_today_study(goal_id):
 
     minutes = get_today_study_time(goal_id)
+    task = get_current_task(goal_id)
 
     return jsonify({
         "success": True,
-        "today_minutes": minutes
+        "today_minutes": minutes,
+        "today_task": task
     })
 @app.route("/api/study/history/<int:goal_id>", methods=["GET"])
 def api_study_history(goal_id):
@@ -1879,6 +2105,16 @@ def ask_ai(prompt, chat_id, user_id="default"):
     try:
         memory=load_memory(user_id)
         planner = load_study_planner(user_id)
+        active_goal = get_active_goal(user_id)
+        active_task = None
+        if active_goal:
+            command = (prompt or "").strip().lower()
+            if command in ("next topic", "skip", "change topic"):
+                active_task = skip_current_task(active_goal["id"])
+            else:
+                active_task = get_current_task(active_goal["id"])
+            sync_planner_position(user_id, active_goal["id"])
+            sync_learning_memory(user_id, active_goal, active_task, user_message=prompt)
         planner_data = planner_summary(planner)
         planner_context = ""
         if planner_data:
@@ -1906,6 +2142,22 @@ Weak Subjects: {planner_data['weak_subjects']}
 
 ================================
 
+"""
+        daily_task_context = ""
+        if active_goal and active_task:
+            daily_task_context = f"""
+
+===== TODAY'S ASSIGNED ROADMAP TASK =====
+Goal: {active_goal['goal_name']}
+Task: {active_task['title']}
+Task details: {active_task['description']}
+Estimated minutes: {active_task['estimated_minutes']}
+Task order: {active_task['task_order']}
+
+Teach only this assigned task and continue it across chats until completion.
+Never switch chapters or choose a random topic. Only a user request to next topic,
+skip, or change topic may advance to the next roadmap task.
+=========================================
 """
         print("Planner Exists:", planner is not None)
         saved_subject=""
@@ -2226,7 +2478,7 @@ Never invent planner data.
 Only use the planner information provided in the Active Study Planner section.
 
 """
-        SYSTEM_PROMPT += "\n\n" + planner_context
+        SYSTEM_PROMPT += "\n\n" + planner_context + daily_task_context
         conn = get_db()
         cur = conn.cursor()
         cur.execute("""
@@ -2345,6 +2597,15 @@ VALUES(?, ?, ?)
     old["difficulty"] if old else "Beginner",
     old["mentor_personality"] if old else "Kai Sensei"
 )
+
+    # Roadmap state is authoritative over conversational extraction.
+    active_goal = get_active_goal(user_id)
+    if active_goal:
+      sync_learning_memory(
+          user_id,
+          active_goal,
+          get_current_task(active_goal["id"])
+      )
 
 
 
