@@ -1181,6 +1181,25 @@ def get_weekly_study_data(goal_id):
     finally:
 
         conn.close()
+
+def get_weekly_completed_tasks(goal_id):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=6)
+        cur.execute("""
+        SELECT substr(completed_at, 1, 10) AS study_date, COUNT(*) AS completed
+        FROM tasks
+        WHERE goal_id=? AND status='completed'
+        AND substr(completed_at, 1, 10) BETWEEN ? AND ?
+        GROUP BY substr(completed_at, 1, 10)
+        ORDER BY study_date ASC
+        """, (goal_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")))
+        return cur.fetchall()
+    finally:
+        conn.close()
+
 def get_dashboard_stats(goal_id):
 
     try:
@@ -1193,6 +1212,7 @@ def get_dashboard_stats(goal_id):
         today_minutes = get_today_study_time(goal_id)
 
         weekly_data = get_weekly_study_data(goal_id)
+        weekly_completed_tasks = get_weekly_completed_tasks(goal_id)
 
         conn = get_db()
         cur = conn.cursor()
@@ -1213,6 +1233,7 @@ def get_dashboard_stats(goal_id):
             "today_task": today_task,
             "today_minutes": today_minutes,
             "weekly_data": weekly_data,
+            "weekly_completed_tasks": weekly_completed_tasks,
             "completed_tasks": stats["completed_tasks"] if stats else 0,
             "pending_tasks": stats["pending_tasks"] if stats else 0,
             "study_hours": stats["study_hours"] if stats else 0,
@@ -1531,9 +1552,16 @@ def api_get_goal(goal_id):
 def api_create_goal():
 
     data = request.json
+    user_email = data.get("user_email") or session.get("user", {}).get("email")
+
+    if not user_email:
+        return jsonify({
+            "success": False,
+            "message": "Login required"
+        }), 401
 
     goal_id = create_goal(
-        user_email=data["user_email"],
+        user_email=user_email,
         goal_name=data["goal_name"],
         description=data.get("description", ""),
         category=data.get("category", "Study"),
@@ -2708,7 +2736,39 @@ def load_study_planner_route():
             "success": False
         })
 
-    planner = load_study_planner(session["user"]["email"])
+    user_email = session["user"]["email"]
+    goal = get_active_goal(user_email)
+
+    # A generated goal is the planner source of truth.  The older planner row is
+    # retained only as a fallback for accounts that have not generated a roadmap.
+    if goal:
+        try:
+            roadmap = json.loads(goal["roadmap"])
+        except (TypeError, json.JSONDecodeError):
+            roadmap = None
+        dashboard = get_dashboard_stats(goal["id"])
+        return jsonify({
+            "success": True,
+            "planner": {
+                "goal_id": goal["id"],
+                "goal": goal["goal_name"],
+                "targetDate": goal["target_date"],
+                "dailyTime": goal["daily_hours"],
+                "subjects": (goal["subjects"] or "").split(",") if goal["subjects"] else [],
+                "weakSubjects": (goal["weak_subjects"] or "").split(",") if goal["weak_subjects"] else [],
+                "roadmap": roadmap,
+                "tasks": [dict(task) for task in get_tasks(goal["id"])],
+                "today_task": dict(get_current_task(goal["id"])) if get_current_task(goal["id"]) else None,
+                "completed_tasks": dashboard["completed_tasks"] if dashboard else 0,
+                "pending_tasks": dashboard["pending_tasks"] if dashboard else 0,
+                "xp": goal["xp"],
+                "level": goal["level"],
+                "streak": goal["streak"],
+                "weekly_data": [dict(item) for item in dashboard["weekly_completed_tasks"]] if dashboard else []
+            }
+        })
+
+    planner = load_study_planner(user_email)
 
     if not planner:
         return jsonify({
