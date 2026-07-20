@@ -1375,7 +1375,8 @@ Include a non-empty months array, each month with weeks, and each week with at l
     prompt = f"""
 You are EKA AI.
 
-Create a detailed study roadmap.
+Create a roadmap for ONLY ONE MONTH.
+Do NOT generate multiple months.
 
 Goal:
 {goal_name}
@@ -1397,6 +1398,16 @@ Weak Subjects:
 {strict_instruction}
 
 Return ONLY JSON.
+IMPORTANT RULES:
+
+- Generate ONLY Month 1.
+- Month number must be 1.
+- Maximum 4 weeks.
+- Maximum 3 tasks per week.
+- Return ONLY valid JSON.
+- Do not use markdown.
+- Do not include ```json.
+- Do not generate Month 2 or later.
 
 Structure:
 
